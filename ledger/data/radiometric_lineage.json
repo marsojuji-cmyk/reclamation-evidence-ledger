@@ -1,0 +1,452 @@
+{
+  "audit_date": "2026-09-27",
+  "stac_api": "https://earth-search.aws.element84.com/v1",
+  "collection": "sentinel-2-l2a",
+  "n_unique_scenes": 62,
+  "n_audited": 62,
+  "processing_baselines_observed": [
+    "05.09",
+    "05.10",
+    "05.11",
+    "05.12"
+  ],
+  "boa_offset_applied_uniform_true": true,
+  "scale_justification": "DN/10000. Per-scene STAC records show earthsearch:boa_offset_applied=True for every audited scene: the data provider removed the +1000 DN radiometric offset introduced at processing baseline 04.00 when generating these COGs, so stored DN = reflectance * 10000 directly. Independently confirmed at chip level: raw red-band DN minima reach ~1, which is inconsistent with a residual +1000 offset (minima would sit near 1000). If a future scene arrives with boa_offset_applied != True, this justification does not cover it \u2014 re-audit.",
+  "anomalies": [],
+  "scenes": [
+    {
+      "scene_id": "S2A_11UQS_20230811_0_L2A",
+      "date": "2023-08-11",
+      "processing_baseline": "05.09",
+      "boa_offset_applied": true,
+      "stac_item": "https://earth-search.aws.element84.com/v1/collections/sentinel-2-l2a/items/S2A_11UQS_20230811_0_L2A"
+    },
+    {
+      "scene_id": "S2A_11UQS_20230814_0_L2A",
+      "date": "2023-08-14",
+      "processing_baseline": "05.09",
+      "boa_offset_applied": true,
+      "stac_item": "https://earth-search.aws.element84.com/v1/collections/sentinel-2-l2a/items/S2A_11UQS_20230814_0_L2A"
+    },
+    {
+      "scene_id": "S2A_11UQS_20240606_0_L2A",
+      "date": "2024-06-06",
+      "processing_baseline": "05.10",
+      "boa_offset_applied": true,
+      "stac_item": "https://earth-search.aws.element84.com/v1/collections/sentinel-2-l2a/items/S2A_11UQS_20240606_0_L2A"
+    },
+    {
+      "scene_id": "S2A_11UQS_20240629_0_L2A",
+      "date": "2024-06-29",
+      "processing_baseline": "05.10",
+      "boa_offset_applied": true,
+      "stac_item": "https://earth-search.aws.element84.com/v1/collections/sentinel-2-l2a/items/S2A_11UQS_20240629_0_L2A"
+    },
+    {
+      "scene_id": "S2A_11UQS_20240716_0_L2A",
+      "date": "2024-07-16",
+      "processing_baseline": "05.10",
+      "boa_offset_applied": true,
+      "stac_item": "https://earth-search.aws.element84.com/v1/collections/sentinel-2-l2a/items/S2A_11UQS_20240716_0_L2A"
+    },
+    {
+      "scene_id": "S2A_11UQS_20240726_0_L2A",
+      "date": "2024-07-26",
+      "processing_baseline": "05.11",
+      "boa_offset_applied": true,
+      "stac_item": "https://earth-search.aws.element84.com/v1/collections/sentinel-2-l2a/items/S2A_11UQS_20240726_0_L2A"
+    },
+    {
+      "scene_id": "S2A_11UQS_20240815_0_L2A",
+      "date": "2024-08-15",
+      "processing_baseline": "05.11",
+      "boa_offset_applied": true,
+      "stac_item": "https://earth-search.aws.element84.com/v1/collections/sentinel-2-l2a/items/S2A_11UQS_20240815_0_L2A"
+    },
+    {
+      "scene_id": "S2A_12UUA_20230722_0_L2A",
+      "date": "2023-07-22",
+      "processing_baseline": "05.09",
+      "boa_offset_applied": true,
+      "stac_item": "https://earth-search.aws.element84.com/v1/collections/sentinel-2-l2a/items/S2A_12UUA_20230722_0_L2A"
+    },
+    {
+      "scene_id": "S2A_12UUA_20230814_0_L2A",
+      "date": "2023-08-14",
+      "processing_baseline": "05.09",
+      "boa_offset_applied": true,
+      "stac_item": "https://earth-search.aws.element84.com/v1/collections/sentinel-2-l2a/items/S2A_12UUA_20230814_0_L2A"
+    },
+    {
+      "scene_id": "S2A_12UUB_20230625_0_L2A",
+      "date": "2023-06-25",
+      "processing_baseline": "05.09",
+      "boa_offset_applied": true,
+      "stac_item": "https://earth-search.aws.element84.com/v1/collections/sentinel-2-l2a/items/S2A_12UUB_20230625_0_L2A"
+    },
+    {
+      "scene_id": "S2A_12UUB_20230910_0_L2A",
+      "date": "2023-09-10",
+      "processing_baseline": "05.09",
+      "boa_offset_applied": true,
+      "stac_item": "https://earth-search.aws.element84.com/v1/collections/sentinel-2-l2a/items/S2A_12UUB_20230910_0_L2A"
+    },
+    {
+      "scene_id": "S2A_12UUB_20230913_0_L2A",
+      "date": "2023-09-13",
+      "processing_baseline": "05.09",
+      "boa_offset_applied": true,
+      "stac_item": "https://earth-search.aws.element84.com/v1/collections/sentinel-2-l2a/items/S2A_12UUB_20230913_0_L2A"
+    },
+    {
+      "scene_id": "S2A_12UUB_20240510_0_L2A",
+      "date": "2024-05-10",
+      "processing_baseline": "05.10",
+      "boa_offset_applied": true,
+      "stac_item": "https://earth-search.aws.element84.com/v1/collections/sentinel-2-l2a/items/S2A_12UUB_20240510_0_L2A"
+    },
+    {
+      "scene_id": "S2A_12UUB_20240609_0_L2A",
+      "date": "2024-06-09",
+      "processing_baseline": "05.10",
+      "boa_offset_applied": true,
+      "stac_item": "https://earth-search.aws.element84.com/v1/collections/sentinel-2-l2a/items/S2A_12UUB_20240609_0_L2A"
+    },
+    {
+      "scene_id": "S2A_12UUB_20240626_0_L2A",
+      "date": "2024-06-26",
+      "processing_baseline": "05.10",
+      "boa_offset_applied": true,
+      "stac_item": "https://earth-search.aws.element84.com/v1/collections/sentinel-2-l2a/items/S2A_12UUB_20240626_0_L2A"
+    },
+    {
+      "scene_id": "S2A_12UUB_20240706_0_L2A",
+      "date": "2024-07-06",
+      "processing_baseline": "05.10",
+      "boa_offset_applied": true,
+      "stac_item": "https://earth-search.aws.element84.com/v1/collections/sentinel-2-l2a/items/S2A_12UUB_20240706_0_L2A"
+    },
+    {
+      "scene_id": "S2A_12UUB_20240709_0_L2A",
+      "date": "2024-07-09",
+      "processing_baseline": "05.10",
+      "boa_offset_applied": true,
+      "stac_item": "https://earth-search.aws.element84.com/v1/collections/sentinel-2-l2a/items/S2A_12UUB_20240709_0_L2A"
+    },
+    {
+      "scene_id": "S2A_12UUB_20240825_0_L2A",
+      "date": "2024-08-25",
+      "processing_baseline": "05.11",
+      "boa_offset_applied": true,
+      "stac_item": "https://earth-search.aws.element84.com/v1/collections/sentinel-2-l2a/items/S2A_12UUB_20240825_0_L2A"
+    },
+    {
+      "scene_id": "S2A_12UUB_20240907_0_L2A",
+      "date": "2024-09-07",
+      "processing_baseline": "05.11",
+      "boa_offset_applied": true,
+      "stac_item": "https://earth-search.aws.element84.com/v1/collections/sentinel-2-l2a/items/S2A_12UUB_20240907_0_L2A"
+    },
+    {
+      "scene_id": "S2A_12UUB_20240927_0_L2A",
+      "date": "2024-09-27",
+      "processing_baseline": "05.11",
+      "boa_offset_applied": true,
+      "stac_item": "https://earth-search.aws.element84.com/v1/collections/sentinel-2-l2a/items/S2A_12UUB_20240927_0_L2A"
+    },
+    {
+      "scene_id": "S2B_11UQR_20230816_0_L2A",
+      "date": "2023-08-16",
+      "processing_baseline": "05.09",
+      "boa_offset_applied": true,
+      "stac_item": "https://earth-search.aws.element84.com/v1/collections/sentinel-2-l2a/items/S2B_11UQR_20230816_0_L2A"
+    },
+    {
+      "scene_id": "S2B_11UQS_20230528_0_L2A",
+      "date": "2023-05-28",
+      "processing_baseline": "05.09",
+      "boa_offset_applied": true,
+      "stac_item": "https://earth-search.aws.element84.com/v1/collections/sentinel-2-l2a/items/S2B_11UQS_20230528_0_L2A"
+    },
+    {
+      "scene_id": "S2B_11UQS_20230627_0_L2A",
+      "date": "2023-06-27",
+      "processing_baseline": "05.09",
+      "boa_offset_applied": true,
+      "stac_item": "https://earth-search.aws.element84.com/v1/collections/sentinel-2-l2a/items/S2B_11UQS_20230627_0_L2A"
+    },
+    {
+      "scene_id": "S2B_11UQS_20230630_0_L2A",
+      "date": "2023-06-30",
+      "processing_baseline": "05.09",
+      "boa_offset_applied": true,
+      "stac_item": "https://earth-search.aws.element84.com/v1/collections/sentinel-2-l2a/items/S2B_11UQS_20230630_0_L2A"
+    },
+    {
+      "scene_id": "S2B_11UQS_20230915_0_L2A",
+      "date": "2023-09-15",
+      "processing_baseline": "05.09",
+      "boa_offset_applied": true,
+      "stac_item": "https://earth-search.aws.element84.com/v1/collections/sentinel-2-l2a/items/S2B_11UQS_20230915_0_L2A"
+    },
+    {
+      "scene_id": "S2B_11UQS_20240604_0_L2A",
+      "date": "2024-06-04",
+      "processing_baseline": "05.10",
+      "boa_offset_applied": true,
+      "stac_item": "https://earth-search.aws.element84.com/v1/collections/sentinel-2-l2a/items/S2B_11UQS_20240604_0_L2A"
+    },
+    {
+      "scene_id": "S2B_11UQS_20240611_0_L2A",
+      "date": "2024-06-11",
+      "processing_baseline": "05.10",
+      "boa_offset_applied": true,
+      "stac_item": "https://earth-search.aws.element84.com/v1/collections/sentinel-2-l2a/items/S2B_11UQS_20240611_0_L2A"
+    },
+    {
+      "scene_id": "S2B_11UQS_20240724_0_L2A",
+      "date": "2024-07-24",
+      "processing_baseline": "05.11",
+      "boa_offset_applied": true,
+      "stac_item": "https://earth-search.aws.element84.com/v1/collections/sentinel-2-l2a/items/S2B_11UQS_20240724_0_L2A"
+    },
+    {
+      "scene_id": "S2B_11UQS_20240731_0_L2A",
+      "date": "2024-07-31",
+      "processing_baseline": "05.11",
+      "boa_offset_applied": true,
+      "stac_item": "https://earth-search.aws.element84.com/v1/collections/sentinel-2-l2a/items/S2B_11UQS_20240731_0_L2A"
+    },
+    {
+      "scene_id": "S2B_11UQS_20250629_1_L2A",
+      "date": "2025-06-29",
+      "processing_baseline": "05.11",
+      "boa_offset_applied": true,
+      "stac_item": "https://earth-search.aws.element84.com/v1/collections/sentinel-2-l2a/items/S2B_11UQS_20250629_1_L2A"
+    },
+    {
+      "scene_id": "S2B_11UQS_20250729_0_L2A",
+      "date": "2025-07-29",
+      "processing_baseline": "05.11",
+      "boa_offset_applied": true,
+      "stac_item": "https://earth-search.aws.element84.com/v1/collections/sentinel-2-l2a/items/S2B_11UQS_20250729_0_L2A"
+    },
+    {
+      "scene_id": "S2B_11UQS_20250805_0_L2A",
+      "date": "2025-08-05",
+      "processing_baseline": "05.11",
+      "boa_offset_applied": true,
+      "stac_item": "https://earth-search.aws.element84.com/v1/collections/sentinel-2-l2a/items/S2B_11UQS_20250805_0_L2A"
+    },
+    {
+      "scene_id": "S2B_11UQS_20260711_0_L2A",
+      "date": "2026-07-11",
+      "processing_baseline": "05.12",
+      "boa_offset_applied": true,
+      "stac_item": "https://earth-search.aws.element84.com/v1/collections/sentinel-2-l2a/items/S2B_11UQS_20260711_0_L2A"
+    },
+    {
+      "scene_id": "S2B_12UUA_20230501_1_L2A",
+      "date": "2023-05-01",
+      "processing_baseline": "05.09",
+      "boa_offset_applied": true,
+      "stac_item": "https://earth-search.aws.element84.com/v1/collections/sentinel-2-l2a/items/S2B_12UUA_20230501_1_L2A"
+    },
+    {
+      "scene_id": "S2B_12UUA_20230627_0_L2A",
+      "date": "2023-06-27",
+      "processing_baseline": "05.09",
+      "boa_offset_applied": true,
+      "stac_item": "https://earth-search.aws.element84.com/v1/collections/sentinel-2-l2a/items/S2B_12UUA_20230627_0_L2A"
+    },
+    {
+      "scene_id": "S2B_12UUA_20240624_0_L2A",
+      "date": "2024-06-24",
+      "processing_baseline": "05.10",
+      "boa_offset_applied": true,
+      "stac_item": "https://earth-search.aws.element84.com/v1/collections/sentinel-2-l2a/items/S2B_12UUA_20240624_0_L2A"
+    },
+    {
+      "scene_id": "S2B_12UUA_20250716_0_L2A",
+      "date": "2025-07-16",
+      "processing_baseline": "05.11",
+      "boa_offset_applied": true,
+      "stac_item": "https://earth-search.aws.element84.com/v1/collections/sentinel-2-l2a/items/S2B_12UUA_20250716_0_L2A"
+    },
+    {
+      "scene_id": "S2B_12UUA_20250917_0_L2A",
+      "date": "2025-09-17",
+      "processing_baseline": "05.11",
+      "boa_offset_applied": true,
+      "stac_item": "https://earth-search.aws.element84.com/v1/collections/sentinel-2-l2a/items/S2B_12UUA_20250917_0_L2A"
+    },
+    {
+      "scene_id": "S2B_12UUA_20260711_0_L2A",
+      "date": "2026-07-11",
+      "processing_baseline": "05.12",
+      "boa_offset_applied": true,
+      "stac_item": "https://earth-search.aws.element84.com/v1/collections/sentinel-2-l2a/items/S2B_12UUA_20260711_0_L2A"
+    },
+    {
+      "scene_id": "S2B_12UUB_20230501_0_L2A",
+      "date": "2023-05-01",
+      "processing_baseline": "05.09",
+      "boa_offset_applied": true,
+      "stac_item": "https://earth-search.aws.element84.com/v1/collections/sentinel-2-l2a/items/S2B_12UUB_20230501_0_L2A"
+    },
+    {
+      "scene_id": "S2B_12UUB_20230720_0_L2A",
+      "date": "2023-07-20",
+      "processing_baseline": "05.09",
+      "boa_offset_applied": true,
+      "stac_item": "https://earth-search.aws.element84.com/v1/collections/sentinel-2-l2a/items/S2B_12UUB_20230720_0_L2A"
+    },
+    {
+      "scene_id": "S2B_12UUB_20240621_0_L2A",
+      "date": "2024-06-21",
+      "processing_baseline": "05.10",
+      "boa_offset_applied": true,
+      "stac_item": "https://earth-search.aws.element84.com/v1/collections/sentinel-2-l2a/items/S2B_12UUB_20240621_0_L2A"
+    },
+    {
+      "scene_id": "S2B_12UUB_20240624_0_L2A",
+      "date": "2024-06-24",
+      "processing_baseline": "05.10",
+      "boa_offset_applied": true,
+      "stac_item": "https://earth-search.aws.element84.com/v1/collections/sentinel-2-l2a/items/S2B_12UUB_20240624_0_L2A"
+    },
+    {
+      "scene_id": "S2B_12UUB_20240704_0_L2A",
+      "date": "2024-07-04",
+      "processing_baseline": "05.10",
+      "boa_offset_applied": true,
+      "stac_item": "https://earth-search.aws.element84.com/v1/collections/sentinel-2-l2a/items/S2B_12UUB_20240704_0_L2A"
+    },
+    {
+      "scene_id": "S2B_12UUB_20240823_0_L2A",
+      "date": "2024-08-23",
+      "processing_baseline": "05.11",
+      "boa_offset_applied": true,
+      "stac_item": "https://earth-search.aws.element84.com/v1/collections/sentinel-2-l2a/items/S2B_12UUB_20240823_0_L2A"
+    },
+    {
+      "scene_id": "S2B_12UUB_20250520_0_L2A",
+      "date": "2025-05-20",
+      "processing_baseline": "05.11",
+      "boa_offset_applied": true,
+      "stac_item": "https://earth-search.aws.element84.com/v1/collections/sentinel-2-l2a/items/S2B_12UUB_20250520_0_L2A"
+    },
+    {
+      "scene_id": "S2B_12UUB_20260614_1_L2A",
+      "date": "2026-06-14",
+      "processing_baseline": "05.12",
+      "boa_offset_applied": true,
+      "stac_item": "https://earth-search.aws.element84.com/v1/collections/sentinel-2-l2a/items/S2B_12UUB_20260614_1_L2A"
+    },
+    {
+      "scene_id": "S2C_11UQR_20260828_0_L2A",
+      "date": "2026-08-28",
+      "processing_baseline": "05.12",
+      "boa_offset_applied": true,
+      "stac_item": "https://earth-search.aws.element84.com/v1/collections/sentinel-2-l2a/items/S2C_11UQR_20260828_0_L2A"
+    },
+    {
+      "scene_id": "S2C_11UQS_20250505_0_L2A",
+      "date": "2025-05-05",
+      "processing_baseline": "05.11",
+      "boa_offset_applied": true,
+      "stac_item": "https://earth-search.aws.element84.com/v1/collections/sentinel-2-l2a/items/S2C_11UQS_20250505_0_L2A"
+    },
+    {
+      "scene_id": "S2C_11UQS_20250604_0_L2A",
+      "date": "2025-06-04",
+      "processing_baseline": "05.11",
+      "boa_offset_applied": true,
+      "stac_item": "https://earth-search.aws.element84.com/v1/collections/sentinel-2-l2a/items/S2C_11UQS_20250604_0_L2A"
+    },
+    {
+      "scene_id": "S2C_11UQS_20250701_0_L2A",
+      "date": "2025-07-01",
+      "processing_baseline": "05.11",
+      "boa_offset_applied": true,
+      "stac_item": "https://earth-search.aws.element84.com/v1/collections/sentinel-2-l2a/items/S2C_11UQS_20250701_0_L2A"
+    },
+    {
+      "scene_id": "S2C_11UQS_20250731_0_L2A",
+      "date": "2025-07-31",
+      "processing_baseline": "05.11",
+      "boa_offset_applied": true,
+      "stac_item": "https://earth-search.aws.element84.com/v1/collections/sentinel-2-l2a/items/S2C_11UQS_20250731_0_L2A"
+    },
+    {
+      "scene_id": "S2C_11UQS_20250919_0_L2A",
+      "date": "2025-09-19",
+      "processing_baseline": "05.11",
+      "boa_offset_applied": true,
+      "stac_item": "https://earth-search.aws.element84.com/v1/collections/sentinel-2-l2a/items/S2C_11UQS_20250919_0_L2A"
+    },
+    {
+      "scene_id": "S2C_11UQS_20250922_0_L2A",
+      "date": "2025-09-22",
+      "processing_baseline": "05.11",
+      "boa_offset_applied": true,
+      "stac_item": "https://earth-search.aws.element84.com/v1/collections/sentinel-2-l2a/items/S2C_11UQS_20250922_0_L2A"
+    },
+    {
+      "scene_id": "S2C_11UQS_20260808_0_L2A",
+      "date": "2026-08-08",
+      "processing_baseline": "05.12",
+      "boa_offset_applied": true,
+      "stac_item": "https://earth-search.aws.element84.com/v1/collections/sentinel-2-l2a/items/S2C_11UQS_20260808_0_L2A"
+    },
+    {
+      "scene_id": "S2C_12UUA_20250604_0_L2A",
+      "date": "2025-06-04",
+      "processing_baseline": "05.11",
+      "boa_offset_applied": true,
+      "stac_item": "https://earth-search.aws.element84.com/v1/collections/sentinel-2-l2a/items/S2C_12UUA_20250604_0_L2A"
+    },
+    {
+      "scene_id": "S2C_12UUA_20250830_0_L2A",
+      "date": "2025-08-30",
+      "processing_baseline": "05.11",
+      "boa_offset_applied": true,
+      "stac_item": "https://earth-search.aws.element84.com/v1/collections/sentinel-2-l2a/items/S2C_12UUA_20250830_0_L2A"
+    },
+    {
+      "scene_id": "S2C_12UUA_20260716_0_L2A",
+      "date": "2026-07-16",
+      "processing_baseline": "05.12",
+      "boa_offset_applied": true,
+      "stac_item": "https://earth-search.aws.element84.com/v1/collections/sentinel-2-l2a/items/S2C_12UUA_20260716_0_L2A"
+    },
+    {
+      "scene_id": "S2C_12UUB_20250502_0_L2A",
+      "date": "2025-05-02",
+      "processing_baseline": "05.11",
+      "boa_offset_applied": true,
+      "stac_item": "https://earth-search.aws.element84.com/v1/collections/sentinel-2-l2a/items/S2C_12UUB_20250502_0_L2A"
+    },
+    {
+      "scene_id": "S2C_12UUB_20260716_0_L2A",
+      "date": "2026-07-16",
+      "processing_baseline": "05.12",
+      "boa_offset_applied": true,
+      "stac_item": "https://earth-search.aws.element84.com/v1/collections/sentinel-2-l2a/items/S2C_12UUB_20260716_0_L2A"
+    },
+    {
+      "scene_id": "S2C_12UUB_20260805_0_L2A",
+      "date": "2026-08-05",
+      "processing_baseline": "05.12",
+      "boa_offset_applied": true,
+      "stac_item": "https://earth-search.aws.element84.com/v1/collections/sentinel-2-l2a/items/S2C_12UUB_20260805_0_L2A"
+    },
+    {
+      "scene_id": "S2C_12UUB_20260825_0_L2A",
+      "date": "2026-08-25",
+      "processing_baseline": "05.12",
+      "boa_offset_applied": true,
+      "stac_item": "https://earth-search.aws.element84.com/v1/collections/sentinel-2-l2a/items/S2C_12UUB_20260825_0_L2A"
+    }
+  ]
+}

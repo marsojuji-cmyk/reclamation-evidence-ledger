@@ -3,8 +3,10 @@
 __pycache__/
 *.pyc
 
-# Raw inputs: re-downloadable, never committed
-data/
+# Raw inputs at repo root: re-downloadable, never committed.
+# (Anchored: ledger/data/ holds small tracked interpretation artifacts like
+# the radiometric lineage record and provisional footprints.)
+/data/
 # Generated render workdir (docs/ holds the published snapshot)
 out/
 # Legacy generated static site dir
