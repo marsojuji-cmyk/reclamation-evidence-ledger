@@ -1,0 +1,19 @@
+# Core stack — everything here is free and runs on a Mac.
+pystac-client>=0.8
+rasterio>=1.3
+geopandas>=1.0
+xarray>=2024.1
+numpy>=1.26
+pandas>=2.2
+duckdb>=0.10
+shapely>=2.0
+pyproj>=3.6
+matplotlib>=3.8
+jsonschema>=4.20
+python-dateutil>=2.8
+openpyxl>=3.1        # OWA inventory ships as Excel
+pyarrow>=15.0        # parquet site registry
+
+# Optional: nicer STAC ergonomics (Planetary Computer signing)
+# planetary-computer>=1.0
+# odc-stac>=0.3

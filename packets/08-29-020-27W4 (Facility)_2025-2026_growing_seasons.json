@@ -1,0 +1,515 @@
+{
+  "packet_id": "08-29-020-27W4 (Facility)_2025-2026_growing_seasons",
+  "schema_version": "1.0.0",
+  "site": {
+    "site_id": "08-29-020-27W4 (Facility)",
+    "name": "08-29-020-27W4 (Facility)",
+    "latitude": 50.71558,
+    "longitude": -113.65602,
+    "owa_stage": "reclamation",
+    "owa_inventory_date": "2026-09-01"
+  },
+  "assessment_date": "2026-09-27",
+  "claim": {
+    "tier": "identified",
+    "statement": "vegetation recovering",
+    "rationale": "Current-season NDVI 0.68 exceeds the 2-season baseline 0.37 by +0.31.",
+    "confidence": "low",
+    "caveats": [
+      "10 m pixels cannot resolve wellheads; this is a vegetation screen, not a compliance verdict.",
+      "Drought years depress NDVI independent of reclamation progress.",
+      "Site coordinates are DLS LSD centroids (~\u00b1300 m; DLS LSD centroid (~+/-300 m; road allowances ignored)). The 500 m analysis buffer absorbs this uncertainty; this is not a survey of the wellhead.",
+      "Sentinel-2's 10 m pixels cannot resolve individual wellheads.",
+      "Chip download used GDAL_HTTP_UNSAFESSL on a TLS-intercepting egress proxy; payload integrity rests on S3-hosted COGs, not TLS pinning."
+    ]
+  },
+  "observations": [
+    {
+      "date": "2023-05-01",
+      "scene_id": "S2B_12UUB_20230501_0_L2A",
+      "ndvi_mean": 0.16529323287758022,
+      "ndmi_mean": -0.2978787816653307,
+      "bare_soil_mean": 0.2832089273362503,
+      "clear_pixel_fraction": 1.0
+    },
+    {
+      "date": "2023-06-27",
+      "scene_id": "S2B_11UQS_20230627_0_L2A",
+      "ndvi_mean": 0.6067714110558147,
+      "ndmi_mean": 0.0790591579173849,
+      "bare_soil_mean": -0.05096432753142697,
+      "clear_pixel_fraction": 1.0
+    },
+    {
+      "date": "2023-08-14",
+      "scene_id": "S2A_11UQS_20230814_0_L2A",
+      "ndvi_mean": 0.2564595339718636,
+      "ndmi_mean": -0.1509828790966926,
+      "bare_soil_mean": 0.22961213400253946,
+      "clear_pixel_fraction": 1.0
+    },
+    {
+      "date": "2024-06-21",
+      "scene_id": "S2B_12UUB_20240621_0_L2A",
+      "ndvi_mean": 0.49073206627034216,
+      "ndmi_mean": -0.035856513667383114,
+      "bare_soil_mean": 0.05617467467890947,
+      "clear_pixel_fraction": 0.9752
+    },
+    {
+      "date": "2025-07-29",
+      "scene_id": "S2B_11UQS_20250729_0_L2A",
+      "ndvi_mean": 0.8300338383058457,
+      "ndmi_mean": 0.5230261896288824,
+      "bare_soil_mean": -0.46657634589978314,
+      "clear_pixel_fraction": 0.7225
+    },
+    {
+      "date": "2025-09-19",
+      "scene_id": "S2C_11UQS_20250919_0_L2A",
+      "ndvi_mean": 0.29566565605085954,
+      "ndmi_mean": 0.02143096704210875,
+      "bare_soil_mean": 0.09906327127131197,
+      "clear_pixel_fraction": 1.0
+    },
+    {
+      "date": "2026-07-11",
+      "scene_id": "S2B_11UQS_20260711_0_L2A",
+      "ndvi_mean": 0.8029720951086114,
+      "ndmi_mean": 0.49261263781702946,
+      "bare_soil_mean": -0.42686336522366836,
+      "clear_pixel_fraction": 1.0
+    }
+  ],
+  "transforms": [
+    {
+      "step": "stac_scene_query",
+      "tool": "pystac-client",
+      "parameters": {
+        "stac_url": "https://earth-search.aws.element84.com/v1",
+        "collection": "sentinel-2-l2a",
+        "start": "2023-05-01",
+        "end": "2026-08-31",
+        "cloud_cover_lt": 40,
+        "growing_months": [
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "candidates_found": 439,
+        "scenes_selected": 10,
+        "buffer_m": 500.0
+      },
+      "at": "2026-09-27T06:58:57.447949+00:00"
+    },
+    {
+      "step": "chip_download_windowed",
+      "tool": "rasterio windowed read over HTTPS (/vsicurl)",
+      "parameters": {
+        "buffer_m": 500.0,
+        "bands": [
+          "B04",
+          "B08",
+          "B11",
+          "B02",
+          "SCL"
+        ],
+        "resampling": {
+          "10m": "bilinear",
+          "SCL": "nearest"
+        },
+        "reference_grid": "red band (10 m)",
+        "note": "chips stored as written; DN = reflectance*10000"
+      },
+      "at": "2026-09-27T06:58:57.447962+00:00"
+    },
+    {
+      "step": "cloud_mask",
+      "tool": "Sentinel-2 SCL classification",
+      "parameters": {
+        "masked_classes": [
+          3,
+          8,
+          9,
+          10
+        ],
+        "min_clear_fraction": 0.6,
+        "rejected_scenes": [
+          {
+            "scene_id": "S2B_12UUB_20240810_0_L2A",
+            "date": "2024-08-10",
+            "reason": "cloud/shadow: clear fraction 0% < 60%"
+          },
+          {
+            "scene_id": "S2B_12UUB_20250520_0_L2A",
+            "date": "2025-05-20",
+            "reason": "cloud/shadow: clear fraction 0% < 60%"
+          },
+          {
+            "scene_id": "S2C_12UUB_20260825_0_L2A",
+            "date": "2026-08-25",
+            "reason": "download/read failed: RasterioIOError: Read failed. See previous exception for details."
+          }
+        ]
+      },
+      "at": "2026-09-27T06:58:57.447966+00:00"
+    },
+    {
+      "step": "index_computation",
+      "tool": "ledger.indices (numpy)",
+      "parameters": {
+        "ndvi": "(nir-red)/(nir+red)",
+        "ndmi": "(nir-swir)/(nir+swir)",
+        "bare_soil": "((swir+red)-(nir+blue))/((swir+red)+(nir+blue))",
+        "scale": "DN/10000",
+        "mask": "clear pixels only"
+      },
+      "at": "2026-09-27T06:58:57.447969+00:00"
+    },
+    {
+      "step": "baseline_assessment",
+      "tool": "ledger.change.assess",
+      "parameters": {
+        "baseline_years": [
+          2023,
+          2024
+        ],
+        "assessment_years": [
+          2025,
+          2026
+        ],
+        "seasonal_aggregation": "median of scene means",
+        "recover_delta": 0.08,
+        "stall_delta": -0.08
+      },
+      "at": "2026-09-27T06:58:57.447972+00:00"
+    },
+    {
+      "step": "packet_build",
+      "tool": "ledger.packet.build_packet",
+      "parameters": {
+        "schema_version": "1.0.0"
+      },
+      "at": "2026-09-27T06:58:57.447975+00:00"
+    }
+  ],
+  "chips": [
+    {
+      "date": "2023-05-01",
+      "path": "data/chips/08-29-020-27W4__Facility_/20230501_red.tif",
+      "sha256": "f2d02ac225dceecf06f4ccbcbf8bbe37d21656a9f0bf2a55695cd353b3600893",
+      "bands": [
+        "red"
+      ]
+    },
+    {
+      "date": "2023-05-01",
+      "path": "data/chips/08-29-020-27W4__Facility_/20230501_nir.tif",
+      "sha256": "c4e908e83427ddbe3b348852f361f81ad42cc447c65cd10b23f81bd16c0641f1",
+      "bands": [
+        "nir"
+      ]
+    },
+    {
+      "date": "2023-05-01",
+      "path": "data/chips/08-29-020-27W4__Facility_/20230501_swir.tif",
+      "sha256": "db736dd27b7bf42b788d9e18e2e08f1159d30596bed97968cb2f09e890cb16bd",
+      "bands": [
+        "swir"
+      ]
+    },
+    {
+      "date": "2023-05-01",
+      "path": "data/chips/08-29-020-27W4__Facility_/20230501_blue.tif",
+      "sha256": "dedc5cd4e6369e05b8af4beb19ec20b6089c49378e4dda370dd1d48111b1e6fd",
+      "bands": [
+        "blue"
+      ]
+    },
+    {
+      "date": "2023-05-01",
+      "path": "data/chips/08-29-020-27W4__Facility_/20230501_scl.tif",
+      "sha256": "90ec95f7f7877e7afee6fe2309f3d86f27ac7ff5ac3f25bead787b3cb9ec0d85",
+      "bands": [
+        "scl"
+      ]
+    },
+    {
+      "date": "2023-06-27",
+      "path": "data/chips/08-29-020-27W4__Facility_/20230627_red.tif",
+      "sha256": "2dce29a507b30c6536cd8cb933e059383846c5eeaa3102795cbec7d6bfe8ef85",
+      "bands": [
+        "red"
+      ]
+    },
+    {
+      "date": "2023-06-27",
+      "path": "data/chips/08-29-020-27W4__Facility_/20230627_nir.tif",
+      "sha256": "0d25cfd016d64c9d53075417e333db1cf6415647fcac12fec27069964e956e73",
+      "bands": [
+        "nir"
+      ]
+    },
+    {
+      "date": "2023-06-27",
+      "path": "data/chips/08-29-020-27W4__Facility_/20230627_swir.tif",
+      "sha256": "a4de286bc4ae9b09a3047f127bbe1eb6f3f7f61387ab85ed8b34659872e771e0",
+      "bands": [
+        "swir"
+      ]
+    },
+    {
+      "date": "2023-06-27",
+      "path": "data/chips/08-29-020-27W4__Facility_/20230627_blue.tif",
+      "sha256": "935c3ff0201b23c24cc57e05f236089a97e5ef402603cdf9da2c7a3852ac372d",
+      "bands": [
+        "blue"
+      ]
+    },
+    {
+      "date": "2023-06-27",
+      "path": "data/chips/08-29-020-27W4__Facility_/20230627_scl.tif",
+      "sha256": "061a9086833225c77ebe16b693523676e73ff0ffadf3361862f363bd0939de69",
+      "bands": [
+        "scl"
+      ]
+    },
+    {
+      "date": "2023-08-14",
+      "path": "data/chips/08-29-020-27W4__Facility_/20230814_red.tif",
+      "sha256": "d70eff9b8a203bb2de6c65f963a0098d26f1a2048aa3db28335065a1a9a458db",
+      "bands": [
+        "red"
+      ]
+    },
+    {
+      "date": "2023-08-14",
+      "path": "data/chips/08-29-020-27W4__Facility_/20230814_nir.tif",
+      "sha256": "aaa95cde832c69061ca02b1d00f2594a3072cc7fece84ac9fd69e856f50e00f0",
+      "bands": [
+        "nir"
+      ]
+    },
+    {
+      "date": "2023-08-14",
+      "path": "data/chips/08-29-020-27W4__Facility_/20230814_swir.tif",
+      "sha256": "d2fe03d0dff5fb0a9508c79e4ec565e24c72a0e713bf7b169341bc0d04c4a6e2",
+      "bands": [
+        "swir"
+      ]
+    },
+    {
+      "date": "2023-08-14",
+      "path": "data/chips/08-29-020-27W4__Facility_/20230814_blue.tif",
+      "sha256": "6c1ed153755c163c7b0a5c8ab789f5c29e183584cbb0c488b13c5cead031b023",
+      "bands": [
+        "blue"
+      ]
+    },
+    {
+      "date": "2023-08-14",
+      "path": "data/chips/08-29-020-27W4__Facility_/20230814_scl.tif",
+      "sha256": "b0bcb29fac67c0bf214875253bf2962a5a2effd883efa2fd216ba1136a4229a2",
+      "bands": [
+        "scl"
+      ]
+    },
+    {
+      "date": "2024-06-21",
+      "path": "data/chips/08-29-020-27W4__Facility_/20240621_red.tif",
+      "sha256": "7cdf0b502849b9adde14afb725e75829b9d5a3edb15a6b921d5b391cdf4c0c66",
+      "bands": [
+        "red"
+      ]
+    },
+    {
+      "date": "2024-06-21",
+      "path": "data/chips/08-29-020-27W4__Facility_/20240621_nir.tif",
+      "sha256": "e377c702b0fb2b848981c2771296061bb6fbc680668d7035305ef78c1f69c8fa",
+      "bands": [
+        "nir"
+      ]
+    },
+    {
+      "date": "2024-06-21",
+      "path": "data/chips/08-29-020-27W4__Facility_/20240621_swir.tif",
+      "sha256": "0a06e3cf59dfddc27de841dfccc5022323c204e727eab2303d1f7b91c3799bec",
+      "bands": [
+        "swir"
+      ]
+    },
+    {
+      "date": "2024-06-21",
+      "path": "data/chips/08-29-020-27W4__Facility_/20240621_blue.tif",
+      "sha256": "89fcf7f4445816632b30c02bbb5f56ec76cafba7963a1301d8cb3eaa35581c15",
+      "bands": [
+        "blue"
+      ]
+    },
+    {
+      "date": "2024-06-21",
+      "path": "data/chips/08-29-020-27W4__Facility_/20240621_scl.tif",
+      "sha256": "a22f4d362ab2d2a93c50a724456c455ad1f831ad579eaae0dc142df0f1b3e203",
+      "bands": [
+        "scl"
+      ]
+    },
+    {
+      "date": "2025-07-29",
+      "path": "data/chips/08-29-020-27W4__Facility_/20250729_red.tif",
+      "sha256": "4c116e854843318c5d3697ace470b4d93e2d68da53d7821282702c3ee4974013",
+      "bands": [
+        "red"
+      ]
+    },
+    {
+      "date": "2025-07-29",
+      "path": "data/chips/08-29-020-27W4__Facility_/20250729_nir.tif",
+      "sha256": "0143240eae581c254f01b46174be45a95a44d810a3b6066939042c2a8dcb04a8",
+      "bands": [
+        "nir"
+      ]
+    },
+    {
+      "date": "2025-07-29",
+      "path": "data/chips/08-29-020-27W4__Facility_/20250729_swir.tif",
+      "sha256": "37f4a6ac90b2694247c31acd15b890f124d6ab94c4488f7faff614d943058e34",
+      "bands": [
+        "swir"
+      ]
+    },
+    {
+      "date": "2025-07-29",
+      "path": "data/chips/08-29-020-27W4__Facility_/20250729_blue.tif",
+      "sha256": "39784a0f242a090ff3008c8eb56750c05a5744bf90ad349d83076e9c82416ce9",
+      "bands": [
+        "blue"
+      ]
+    },
+    {
+      "date": "2025-07-29",
+      "path": "data/chips/08-29-020-27W4__Facility_/20250729_scl.tif",
+      "sha256": "23aef420b8329929ecc1040b660b6aadc7547964b61b15472e78c234a150baab",
+      "bands": [
+        "scl"
+      ]
+    },
+    {
+      "date": "2025-09-19",
+      "path": "data/chips/08-29-020-27W4__Facility_/20250919_red.tif",
+      "sha256": "3a48d4d3419e05fa3db788824ccf8e1aae2afca4ba571c44cf09afa24d3e14db",
+      "bands": [
+        "red"
+      ]
+    },
+    {
+      "date": "2025-09-19",
+      "path": "data/chips/08-29-020-27W4__Facility_/20250919_nir.tif",
+      "sha256": "adfe9bece494ab0b256907744f3e5002af508e1973c826067f016b9598c9d8d4",
+      "bands": [
+        "nir"
+      ]
+    },
+    {
+      "date": "2025-09-19",
+      "path": "data/chips/08-29-020-27W4__Facility_/20250919_swir.tif",
+      "sha256": "fb11207a64f74a3734c40ae81a290ccf36c91a4f63fba5d67ed546e31f3f4ca2",
+      "bands": [
+        "swir"
+      ]
+    },
+    {
+      "date": "2025-09-19",
+      "path": "data/chips/08-29-020-27W4__Facility_/20250919_blue.tif",
+      "sha256": "8cb4c688fad696627bfd3b02ffcd23ed46cba6fbf63ff2c22436df241191214a",
+      "bands": [
+        "blue"
+      ]
+    },
+    {
+      "date": "2025-09-19",
+      "path": "data/chips/08-29-020-27W4__Facility_/20250919_scl.tif",
+      "sha256": "17416b8251fb147ea03e41d4901af2cd72bd9d04108844d6e882cb7f6e6837c2",
+      "bands": [
+        "scl"
+      ]
+    },
+    {
+      "date": "2026-07-11",
+      "path": "data/chips/08-29-020-27W4__Facility_/20260711_red.tif",
+      "sha256": "b4529552e0581bd496f399260ff088b7e0bb52320ac38637b4ed7ae4937ad405",
+      "bands": [
+        "red"
+      ]
+    },
+    {
+      "date": "2026-07-11",
+      "path": "data/chips/08-29-020-27W4__Facility_/20260711_nir.tif",
+      "sha256": "e02b5f27b4c883280e2d0ef11909ef6aaf878f40a9c568e70f0f4725bce6c4f1",
+      "bands": [
+        "nir"
+      ]
+    },
+    {
+      "date": "2026-07-11",
+      "path": "data/chips/08-29-020-27W4__Facility_/20260711_swir.tif",
+      "sha256": "6dd175f9f9a55c2d5bfa0e55d3fc129cad6f9cba75404228455b4dc1e790505e",
+      "bands": [
+        "swir"
+      ]
+    },
+    {
+      "date": "2026-07-11",
+      "path": "data/chips/08-29-020-27W4__Facility_/20260711_blue.tif",
+      "sha256": "73a1ed3e4f5c400c6903fc081940c927ede2b173ca11b5adc37ca327f0755a5d",
+      "bands": [
+        "blue"
+      ]
+    },
+    {
+      "date": "2026-07-11",
+      "path": "data/chips/08-29-020-27W4__Facility_/20260711_scl.tif",
+      "sha256": "e9045aadeb7896db7acbaed91c9b50d25737567af105f05fe373e1180162e40f",
+      "bands": [
+        "scl"
+      ]
+    }
+  ],
+  "provenance": {
+    "sources": [
+      {
+        "name": "OWA site-specific inventory (Excel)",
+        "url": "https://www.orphanwell.ca/inventory/site-specific-inventory",
+        "accessed": "2026-09-27",
+        "license_note": "public data; inventory file month 2026-09-01, recheck live"
+      },
+      {
+        "name": "Element 84 Earth Search STAC (Sentinel-2 L2A)",
+        "url": "https://earth-search.aws.element84.com/v1",
+        "accessed": "2026-09-27"
+      },
+      {
+        "name": "Copernicus Sentinel-2 (ESA)",
+        "url": "https://sentiwiki.copernicus.eu/",
+        "accessed": "2026-09-27",
+        "license_note": "Contains modified Copernicus Sentinel data."
+      }
+    ],
+    "generated_at": "2026-09-27T06:58:57.447977+00:00",
+    "generated_by": "reclamation-ledger pipeline (human-reviewed before publish)"
+  },
+  "baseline": {
+    "period": "2023-2024",
+    "ndvi_median": 0.3736,
+    "ndvi_std": 0.0,
+    "n_observations": 2
+  },
+  "assessment_detail": {
+    "period": "2025-2026 growing seasons",
+    "ndvi_median": 0.6829,
+    "n_observations": 2,
+    "delta_vs_baseline": 0.3093
+  }
+}

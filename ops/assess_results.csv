@@ -1,0 +1,17 @@
+site,status,packet,tier,classification,n_observations,baseline_ndvi,current_ndvi,delta,confidence
+01-28-020-27W4 (Facility),assessed,01-28-020-27W4 (Facility)_2025-2026_growing_seasons.json,identified,vegetation recovering,2,0.2682,0.3666,0.0983,low
+05-13-020-27W4 (100),assessed,05-13-020-27W4 (100)_2025-2026_growing_seasons.json,identified,vegetation recovering,2,0.2083,0.4199,0.2116,low
+12-23-020-27W4 (Multi) - MIXED,assessed,12-23-020-27W4 (Multi) - MIXED_2025-2026_growing_seasons.json,identified,vegetation recovering,2,0.2698,0.3587,0.0889,low
+02-07-019-27W4 (100),assessed,02-07-019-27W4 (100)_2025-2026_growing_seasons.json,identified,vegetation recovering,5,0.2982,0.4111,0.0836,medium
+05-08-019-27W4 (100),assessed,05-08-019-27W4 (100)_2025-2026_growing_seasons.json,detected,no significant change vs baseline,4,0.2262,0.2728,0.0661,medium
+05-17-019-27W4 (100),assessed,05-17-019-27W4 (100)_2025-2026_growing_seasons.json,detected,no significant change vs baseline,3,0.5637,0.6435,0.0798,low
+08-04-019-27W4 (100),assessed,08-04-019-27W4 (100)_2025-2026_growing_seasons.json,identified,vegetation recovering,3,0.5027,0.5931,0.0903,low
+08-21-019-27W4 (100),assessed,08-21-019-27W4 (100)_2025-2026_growing_seasons.json,detected,no significant change vs baseline,3,0.5697,0.5828,0.0131,low
+03-08-018-26W4 (100),assessed,03-08-018-26W4 (100)_2025-2026_growing_seasons.json,detected,no significant change vs baseline,10,0.266,0.3423,0.0773,medium
+06-11-018-26W4 (100),assessed,06-11-018-26W4 (100)_2025-2026_growing_seasons.json,identified,vegetation recovering,12,0.2889,0.4766,0.1369,high
+06-36-018-26W4 (Multi) - MIXED,assessed,06-36-018-26W4 (Multi) - MIXED_2025-2026_growing_seasons.json,identified,vegetation recovering,2,0.4035,0.502,0.0985,low
+07-30-018-26W4 (100),assessed,07-30-018-26W4 (100)_2025-2026_growing_seasons.json,detected,no significant change vs baseline,2,0.5,0.4547,-0.0453,low
+10-02-018-26W4 (100),assessed,10-02-018-26W4 (100)_2025-2026_growing_seasons.json,identified,vegetation recovering,11,0.4137,0.4581,0.0837,medium
+14-14-018-26W4 (100),assessed,14-14-018-26W4 (100)_2025-2026_growing_seasons.json,identified,vegetation recovering,12,0.2466,0.4086,0.1375,high
+16-04-018-26W4 (100),assessed,16-04-018-26W4 (100)_2025-2026_growing_seasons.json,identified,vegetation recovering,11,0.3661,0.5324,0.1436,medium
+16-14-018-26W4 (100),assessed,16-14-018-26W4 (100)_2025-2026_growing_seasons.json,identified,vegetation recovering,13,0.2976,0.4539,0.1454,high

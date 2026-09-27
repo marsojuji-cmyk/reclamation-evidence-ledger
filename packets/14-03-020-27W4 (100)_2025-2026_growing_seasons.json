@@ -1,0 +1,558 @@
+{
+  "packet_id": "14-03-020-27W4 (100)_2025-2026_growing_seasons",
+  "schema_version": "1.0.0",
+  "site": {
+    "site_id": "14-03-020-27W4 (100)",
+    "name": "14-03-020-27W4 (100)",
+    "latitude": 50.66486,
+    "longitude": -113.61785,
+    "owa_stage": "reclamation",
+    "owa_inventory_date": "2026-09-01"
+  },
+  "assessment_date": "2026-09-27",
+  "claim": {
+    "tier": "identified",
+    "statement": "vegetation recovering",
+    "rationale": "Current-season NDVI 0.66 exceeds the 2-season baseline 0.45 by +0.21.",
+    "confidence": "low",
+    "caveats": [
+      "10 m pixels cannot resolve wellheads; this is a vegetation screen, not a compliance verdict.",
+      "Drought years depress NDVI independent of reclamation progress.",
+      "Site coordinates are DLS LSD centroids (~\u00b1300 m; DLS LSD centroid (~+/-300 m; road allowances ignored)). The 500 m analysis buffer absorbs this uncertainty; this is not a survey of the wellhead.",
+      "Sentinel-2's 10 m pixels cannot resolve individual wellheads.",
+      "Chip download used GDAL_HTTP_UNSAFESSL on a TLS-intercepting egress proxy; payload integrity rests on S3-hosted COGs, not TLS pinning."
+    ]
+  },
+  "observations": [
+    {
+      "date": "2023-05-01",
+      "scene_id": "S2B_12UUB_20230501_0_L2A",
+      "ndvi_mean": 0.1645173256686445,
+      "ndmi_mean": -0.24337926878848992,
+      "bare_soil_mean": 0.2566320418598264,
+      "clear_pixel_fraction": 1.0
+    },
+    {
+      "date": "2023-06-27",
+      "scene_id": "S2B_11UQS_20230627_0_L2A",
+      "ndvi_mean": 0.47819373290158457,
+      "ndmi_mean": 0.02364914039403832,
+      "bare_soil_mean": 0.003890469819281057,
+      "clear_pixel_fraction": 1.0
+    },
+    {
+      "date": "2023-08-14",
+      "scene_id": "S2A_11UQS_20230814_0_L2A",
+      "ndvi_mean": 0.4326427459381732,
+      "ndmi_mean": 0.01298562527166485,
+      "bare_soil_mean": 0.058216012608530196,
+      "clear_pixel_fraction": 1.0
+    },
+    {
+      "date": "2024-06-21",
+      "scene_id": "S2B_12UUB_20240621_0_L2A",
+      "ndvi_mean": 0.47181744165479966,
+      "ndmi_mean": -0.05811826977615286,
+      "bare_soil_mean": 0.06131291355241558,
+      "clear_pixel_fraction": 0.8708
+    },
+    {
+      "date": "2025-07-29",
+      "scene_id": "S2B_11UQS_20250729_0_L2A",
+      "ndvi_mean": 0.8492104888411683,
+      "ndmi_mean": 0.6086470171339973,
+      "bare_soil_mean": -0.5431621247612654,
+      "clear_pixel_fraction": 0.7176
+    },
+    {
+      "date": "2025-09-19",
+      "scene_id": "S2C_11UQS_20250919_0_L2A",
+      "ndvi_mean": 0.36078567100014247,
+      "ndmi_mean": 0.009858824814038311,
+      "bare_soil_mean": 0.0890322602759285,
+      "clear_pixel_fraction": 1.0
+    },
+    {
+      "date": "2026-07-11",
+      "scene_id": "S2B_11UQS_20260711_0_L2A",
+      "ndvi_mean": 0.7979764191312774,
+      "ndmi_mean": 0.4009799240118162,
+      "bare_soil_mean": -0.3519378467202318,
+      "clear_pixel_fraction": 1.0
+    },
+    {
+      "date": "2026-08-25",
+      "scene_id": "S2C_12UUB_20260825_0_L2A",
+      "ndvi_mean": 0.6349259270718982,
+      "ndmi_mean": 0.2673861098885121,
+      "bare_soil_mean": -0.16628209854881898,
+      "clear_pixel_fraction": 1.0
+    }
+  ],
+  "transforms": [
+    {
+      "step": "stac_scene_query",
+      "tool": "pystac-client",
+      "parameters": {
+        "stac_url": "https://earth-search.aws.element84.com/v1",
+        "collection": "sentinel-2-l2a",
+        "start": "2023-05-01",
+        "end": "2026-08-31",
+        "cloud_cover_lt": 40,
+        "growing_months": [
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "candidates_found": 441,
+        "scenes_selected": 10,
+        "buffer_m": 500.0
+      },
+      "at": "2026-09-27T06:58:59.890268+00:00"
+    },
+    {
+      "step": "chip_download_windowed",
+      "tool": "rasterio windowed read over HTTPS (/vsicurl)",
+      "parameters": {
+        "buffer_m": 500.0,
+        "bands": [
+          "B04",
+          "B08",
+          "B11",
+          "B02",
+          "SCL"
+        ],
+        "resampling": {
+          "10m": "bilinear",
+          "SCL": "nearest"
+        },
+        "reference_grid": "red band (10 m)",
+        "note": "chips stored as written; DN = reflectance*10000"
+      },
+      "at": "2026-09-27T06:58:59.890279+00:00"
+    },
+    {
+      "step": "cloud_mask",
+      "tool": "Sentinel-2 SCL classification",
+      "parameters": {
+        "masked_classes": [
+          3,
+          8,
+          9,
+          10
+        ],
+        "min_clear_fraction": 0.6,
+        "rejected_scenes": [
+          {
+            "scene_id": "S2B_12UUB_20240810_0_L2A",
+            "date": "2024-08-10",
+            "reason": "cloud/shadow: clear fraction 0% < 60%"
+          },
+          {
+            "scene_id": "S2B_12UUB_20250520_0_L2A",
+            "date": "2025-05-20",
+            "reason": "cloud/shadow: clear fraction 0% < 60%"
+          }
+        ]
+      },
+      "at": "2026-09-27T06:58:59.890284+00:00"
+    },
+    {
+      "step": "index_computation",
+      "tool": "ledger.indices (numpy)",
+      "parameters": {
+        "ndvi": "(nir-red)/(nir+red)",
+        "ndmi": "(nir-swir)/(nir+swir)",
+        "bare_soil": "((swir+red)-(nir+blue))/((swir+red)+(nir+blue))",
+        "scale": "DN/10000",
+        "mask": "clear pixels only"
+      },
+      "at": "2026-09-27T06:58:59.890471+00:00"
+    },
+    {
+      "step": "baseline_assessment",
+      "tool": "ledger.change.assess",
+      "parameters": {
+        "baseline_years": [
+          2023,
+          2024
+        ],
+        "assessment_years": [
+          2025,
+          2026
+        ],
+        "seasonal_aggregation": "median of scene means",
+        "recover_delta": 0.08,
+        "stall_delta": -0.08
+      },
+      "at": "2026-09-27T06:58:59.890474+00:00"
+    },
+    {
+      "step": "packet_build",
+      "tool": "ledger.packet.build_packet",
+      "parameters": {
+        "schema_version": "1.0.0"
+      },
+      "at": "2026-09-27T06:58:59.890477+00:00"
+    }
+  ],
+  "chips": [
+    {
+      "date": "2023-05-01",
+      "path": "data/chips/14-03-020-27W4__100_/20230501_red.tif",
+      "sha256": "48a8ea4f76c5aaac063e84afec23c1b671a38476e39a91f0974709c4dc30b5c1",
+      "bands": [
+        "red"
+      ]
+    },
+    {
+      "date": "2023-05-01",
+      "path": "data/chips/14-03-020-27W4__100_/20230501_nir.tif",
+      "sha256": "f5b34da74cbf28ef7377fa9d662b5c5b686dff5c745840de0555a1cab68406fe",
+      "bands": [
+        "nir"
+      ]
+    },
+    {
+      "date": "2023-05-01",
+      "path": "data/chips/14-03-020-27W4__100_/20230501_swir.tif",
+      "sha256": "8007782e538426b857c14d0a6b83a68e14b5099446bb77af139ae17a9d1e0595",
+      "bands": [
+        "swir"
+      ]
+    },
+    {
+      "date": "2023-05-01",
+      "path": "data/chips/14-03-020-27W4__100_/20230501_blue.tif",
+      "sha256": "13585a4df58cbd6014221c565c10f8211b81b9c7479ed25f88f17b6d68aa14a4",
+      "bands": [
+        "blue"
+      ]
+    },
+    {
+      "date": "2023-05-01",
+      "path": "data/chips/14-03-020-27W4__100_/20230501_scl.tif",
+      "sha256": "550fbe120f3ec7a6887f0116a755ca93be8595610a92e16cee2e0d5f0d605dc6",
+      "bands": [
+        "scl"
+      ]
+    },
+    {
+      "date": "2023-06-27",
+      "path": "data/chips/14-03-020-27W4__100_/20230627_red.tif",
+      "sha256": "4bbe44cf468b9a768dadcc2e0b6769a9dae4b04083ca653d0af506625c1ee7fe",
+      "bands": [
+        "red"
+      ]
+    },
+    {
+      "date": "2023-06-27",
+      "path": "data/chips/14-03-020-27W4__100_/20230627_nir.tif",
+      "sha256": "3ccb0685fcb470bf72f03340e1bcfc6f1d0ed2a5d56f10fe252855a2c347bb71",
+      "bands": [
+        "nir"
+      ]
+    },
+    {
+      "date": "2023-06-27",
+      "path": "data/chips/14-03-020-27W4__100_/20230627_swir.tif",
+      "sha256": "a96ad0642735709c588c48588cbe1c6771a7f815298b771435ba301f40751848",
+      "bands": [
+        "swir"
+      ]
+    },
+    {
+      "date": "2023-06-27",
+      "path": "data/chips/14-03-020-27W4__100_/20230627_blue.tif",
+      "sha256": "825a2e78bc25c299881dd4acf422ab3582b28b0858634dad225657a6a63b2378",
+      "bands": [
+        "blue"
+      ]
+    },
+    {
+      "date": "2023-06-27",
+      "path": "data/chips/14-03-020-27W4__100_/20230627_scl.tif",
+      "sha256": "926153067381810eecc57cae16901797f4b3449b7bd37750cf9ed1c9f1cd5899",
+      "bands": [
+        "scl"
+      ]
+    },
+    {
+      "date": "2023-08-14",
+      "path": "data/chips/14-03-020-27W4__100_/20230814_red.tif",
+      "sha256": "439215744e6b3ce25f47ed41f275b00aac97d9b77ac40f168aec347361f01f2a",
+      "bands": [
+        "red"
+      ]
+    },
+    {
+      "date": "2023-08-14",
+      "path": "data/chips/14-03-020-27W4__100_/20230814_nir.tif",
+      "sha256": "6486836ad6de5221c17b0e197816f001e86a10bb0494d1578d987f5fabeb0358",
+      "bands": [
+        "nir"
+      ]
+    },
+    {
+      "date": "2023-08-14",
+      "path": "data/chips/14-03-020-27W4__100_/20230814_swir.tif",
+      "sha256": "f7f8528ad1b57f97dc0782d74fe53ace421bb038f859faaefafa66d6ee5485de",
+      "bands": [
+        "swir"
+      ]
+    },
+    {
+      "date": "2023-08-14",
+      "path": "data/chips/14-03-020-27W4__100_/20230814_blue.tif",
+      "sha256": "b7939cf23932a1d7ce73769ed968b973f737d99b8cd269172a30cf6f4720e7c0",
+      "bands": [
+        "blue"
+      ]
+    },
+    {
+      "date": "2023-08-14",
+      "path": "data/chips/14-03-020-27W4__100_/20230814_scl.tif",
+      "sha256": "de44971e91d2ceabb2533245afc6563aa8d37de55a72a382d43198cc42d92df5",
+      "bands": [
+        "scl"
+      ]
+    },
+    {
+      "date": "2024-06-21",
+      "path": "data/chips/14-03-020-27W4__100_/20240621_red.tif",
+      "sha256": "1addcb70cd7bc4b161ba92b77ac82788f4967aebfb40ec3271917ed042905210",
+      "bands": [
+        "red"
+      ]
+    },
+    {
+      "date": "2024-06-21",
+      "path": "data/chips/14-03-020-27W4__100_/20240621_nir.tif",
+      "sha256": "dd630eb6b25f96ee751a6fdee39234d2ebc82c0bb41fd5b65852c70a5582abd1",
+      "bands": [
+        "nir"
+      ]
+    },
+    {
+      "date": "2024-06-21",
+      "path": "data/chips/14-03-020-27W4__100_/20240621_swir.tif",
+      "sha256": "5a1ae4f8212a730963dcb8927e56f236e3f77f199ed7a2bf3582bf1641f13608",
+      "bands": [
+        "swir"
+      ]
+    },
+    {
+      "date": "2024-06-21",
+      "path": "data/chips/14-03-020-27W4__100_/20240621_blue.tif",
+      "sha256": "fbb3a5c9505fb073de4b63585a6f1307286705c228f4fe4a5acc7a9d97c506e8",
+      "bands": [
+        "blue"
+      ]
+    },
+    {
+      "date": "2024-06-21",
+      "path": "data/chips/14-03-020-27W4__100_/20240621_scl.tif",
+      "sha256": "1396257cfeb0a9f9a34e41b0acbeb8b17f0de0f3164f638ee34db1c4783b6a6d",
+      "bands": [
+        "scl"
+      ]
+    },
+    {
+      "date": "2025-07-29",
+      "path": "data/chips/14-03-020-27W4__100_/20250729_red.tif",
+      "sha256": "7ce66c6caaaf05b146f71f53ef80fc02c6bf644638e6c9958a9eb23ac474f430",
+      "bands": [
+        "red"
+      ]
+    },
+    {
+      "date": "2025-07-29",
+      "path": "data/chips/14-03-020-27W4__100_/20250729_nir.tif",
+      "sha256": "038ba2bfa8f86815a61252c4e84dead4bd30bc1479512093a73de21a69a0899f",
+      "bands": [
+        "nir"
+      ]
+    },
+    {
+      "date": "2025-07-29",
+      "path": "data/chips/14-03-020-27W4__100_/20250729_swir.tif",
+      "sha256": "dd8c8f8758ddd51090edb5463b21aedbfd778cbde197a625a9f421aadc25eaec",
+      "bands": [
+        "swir"
+      ]
+    },
+    {
+      "date": "2025-07-29",
+      "path": "data/chips/14-03-020-27W4__100_/20250729_blue.tif",
+      "sha256": "f6938fdea2bb70e862c5d25c3cb3d93b3ff8da4848045e73c6fd5e345d4d924b",
+      "bands": [
+        "blue"
+      ]
+    },
+    {
+      "date": "2025-07-29",
+      "path": "data/chips/14-03-020-27W4__100_/20250729_scl.tif",
+      "sha256": "134eccf4f5b40e52d7c87cdd35e9f86342ee27900b7a18f5a9eb7c63a8de4c3c",
+      "bands": [
+        "scl"
+      ]
+    },
+    {
+      "date": "2025-09-19",
+      "path": "data/chips/14-03-020-27W4__100_/20250919_red.tif",
+      "sha256": "f077a9ee20c99002ff09273d4af49073e6e5f3111b95cb42c0cae5168801d14c",
+      "bands": [
+        "red"
+      ]
+    },
+    {
+      "date": "2025-09-19",
+      "path": "data/chips/14-03-020-27W4__100_/20250919_nir.tif",
+      "sha256": "14f65acdfee4181173d55753aa4409db450fd04d8014aebe10ccbbb187a72d20",
+      "bands": [
+        "nir"
+      ]
+    },
+    {
+      "date": "2025-09-19",
+      "path": "data/chips/14-03-020-27W4__100_/20250919_swir.tif",
+      "sha256": "e8ae2600f3b83df8a03cc8c9115e968457e675c51cf4747ac2dc007227fc8cd3",
+      "bands": [
+        "swir"
+      ]
+    },
+    {
+      "date": "2025-09-19",
+      "path": "data/chips/14-03-020-27W4__100_/20250919_blue.tif",
+      "sha256": "39b570052b12e912a31a46b751c53ee6b878980958134de23a466ce8d68c48fd",
+      "bands": [
+        "blue"
+      ]
+    },
+    {
+      "date": "2025-09-19",
+      "path": "data/chips/14-03-020-27W4__100_/20250919_scl.tif",
+      "sha256": "ca60a529741c93970742ca128cced95bde519c3ae78e3277913518f0ca2782dd",
+      "bands": [
+        "scl"
+      ]
+    },
+    {
+      "date": "2026-07-11",
+      "path": "data/chips/14-03-020-27W4__100_/20260711_red.tif",
+      "sha256": "64160aaad5f0b90c3118c92952824fab99d205eed643656d4227df947e299a62",
+      "bands": [
+        "red"
+      ]
+    },
+    {
+      "date": "2026-07-11",
+      "path": "data/chips/14-03-020-27W4__100_/20260711_nir.tif",
+      "sha256": "8ea0f9fa8ba71bcee9fd649c54dff4ca0702d8a7c36afa054ff263bcecc79945",
+      "bands": [
+        "nir"
+      ]
+    },
+    {
+      "date": "2026-07-11",
+      "path": "data/chips/14-03-020-27W4__100_/20260711_swir.tif",
+      "sha256": "b82b1276128b377d68a382bf78fe565dec9e832a93c135590da62991dcba1aa5",
+      "bands": [
+        "swir"
+      ]
+    },
+    {
+      "date": "2026-07-11",
+      "path": "data/chips/14-03-020-27W4__100_/20260711_blue.tif",
+      "sha256": "52153c0eeef2965d0e672ef2046ba9edf7d6141f0569962a71b757b3c5f8083d",
+      "bands": [
+        "blue"
+      ]
+    },
+    {
+      "date": "2026-07-11",
+      "path": "data/chips/14-03-020-27W4__100_/20260711_scl.tif",
+      "sha256": "fdfc34af3966a5dd7c56917d8fa738a4a58b5dd26759d1acf58dfe0804a8cfd9",
+      "bands": [
+        "scl"
+      ]
+    },
+    {
+      "date": "2026-08-25",
+      "path": "data/chips/14-03-020-27W4__100_/20260825_red.tif",
+      "sha256": "3fbf5b4610740d4006c42d727f98500cd3d62fecab61bfeac4d536d1321bfd96",
+      "bands": [
+        "red"
+      ]
+    },
+    {
+      "date": "2026-08-25",
+      "path": "data/chips/14-03-020-27W4__100_/20260825_nir.tif",
+      "sha256": "26270294936611f5f5ea1ff759aae637caec4ca4baba99b174c590858907ae23",
+      "bands": [
+        "nir"
+      ]
+    },
+    {
+      "date": "2026-08-25",
+      "path": "data/chips/14-03-020-27W4__100_/20260825_swir.tif",
+      "sha256": "a4c773657343760addf4ca3ef2db805a919ccd95195f1443870bef9025e7fb65",
+      "bands": [
+        "swir"
+      ]
+    },
+    {
+      "date": "2026-08-25",
+      "path": "data/chips/14-03-020-27W4__100_/20260825_blue.tif",
+      "sha256": "d797026c6c0d823457e2bd77aec05346e9faa7a108c51bbf9f621c4cc6d4a063",
+      "bands": [
+        "blue"
+      ]
+    },
+    {
+      "date": "2026-08-25",
+      "path": "data/chips/14-03-020-27W4__100_/20260825_scl.tif",
+      "sha256": "1a08db72fc9086d3b8d8f56c709c7f8ad8121647a6c0a46c02d129ed422be60b",
+      "bands": [
+        "scl"
+      ]
+    }
+  ],
+  "provenance": {
+    "sources": [
+      {
+        "name": "OWA site-specific inventory (Excel)",
+        "url": "https://www.orphanwell.ca/inventory/site-specific-inventory",
+        "accessed": "2026-09-27",
+        "license_note": "public data; inventory file month 2026-09-01, recheck live"
+      },
+      {
+        "name": "Element 84 Earth Search STAC (Sentinel-2 L2A)",
+        "url": "https://earth-search.aws.element84.com/v1",
+        "accessed": "2026-09-27"
+      },
+      {
+        "name": "Copernicus Sentinel-2 (ESA)",
+        "url": "https://sentiwiki.copernicus.eu/",
+        "accessed": "2026-09-27",
+        "license_note": "Contains modified Copernicus Sentinel data."
+      }
+    ],
+    "generated_at": "2026-09-27T06:58:59.890481+00:00",
+    "generated_by": "reclamation-ledger pipeline (human-reviewed before publish)"
+  },
+  "baseline": {
+    "period": "2023-2024",
+    "ndvi_median": 0.4522,
+    "ndvi_std": 0.0,
+    "n_observations": 2
+  },
+  "assessment_detail": {
+    "period": "2025-2026 growing seasons",
+    "ndvi_median": 0.6607,
+    "n_observations": 2,
+    "delta_vs_baseline": 0.2085
+  }
+}

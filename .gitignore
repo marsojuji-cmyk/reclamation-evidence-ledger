@@ -1,0 +1,9 @@
+.venv/
+__pycache__/
+*.pyc
+data/            # raw inputs: re-downloadable, never committed
+out/             # generated render workdir (docs/ holds the published snapshot)
+public/          # legacy generated static site dir
+*.tif
+*.tiff
+.DS_Store

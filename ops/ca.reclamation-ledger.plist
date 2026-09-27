@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>ca.reclamation-ledger</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/bash</string>
+        <string>-lc</string>
+        <!-- EDIT paths to match your checkout, then load with launchctl -->
+        <string>cd /Users/user/reclamation-ledger &amp;&amp; .venv/bin/python -m ledger.pipeline run-monthly</string>
+    </array>
+    <!-- Monthly during growing season only (May=5 .. Sep=9). Snow months skip. -->
+    <key>StartCalendarInterval</key>
+    <array>
+        <dict><key>Month</key><integer>5</integer><key>Day</key><integer>15</integer><key>Hour</key><integer>2</integer><key>Minute</key><integer>0</integer></dict>
+        <dict><key>Month</key><integer>6</integer><key>Day</key><integer>15</integer><key>Hour</key><integer>2</integer><key>Minute</key><integer>0</integer></dict>
+        <dict><key>Month</key><integer>7</integer><key>Day</key><integer>15</integer><key>Hour</key><integer>2</integer><key>Minute</key><integer>0</integer></dict>
+        <dict><key>Month</key><integer>8</integer><key>Day</key><integer>15</integer><key>Hour</key><integer>2</integer><key>Minute</key><integer>0</integer></dict>
+        <dict><key>Month</key><integer>9</integer><key>Day</key><integer>15</integer><key>Hour</key><integer>2</integer><key>Minute</key><integer>0</integer></dict>
+    </array>
+    <key>StandardOutPath</key>
+    <string>/tmp/reclamation-ledger.log</string>
+    <key>StandardErrorPath</key>
+    <string>/tmp/reclamation-ledger.err</string>
+</dict>
+</plist>
