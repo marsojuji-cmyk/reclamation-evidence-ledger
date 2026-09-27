@@ -1,1 +1,317 @@
-{"$schema":"http://json-schema.org/draft-07/schema#","description":"Self-describing evidence packet for one site assessment. The schema is the contract: every packet honors it, every renderer trusts it.","properties":{"assessment_date":{"format":"date","type":"string"},"baseline":{"properties":{"n_observations":{"type":"integer"},"ndvi_median":{"type":"number"},"ndvi_std":{"type":"number"},"period":{"type":"string"}},"type":"object"},"chips":{"description":"Raw image chips, untouched, with checksums.","items":{"properties":{"bands":{"items":{"type":"string"},"type":"array"},"date":{"format":"date","type":"string"},"path":{"type":"string"},"sha256":{"type":"string"}},"required":["date","path","sha256"],"type":"object"},"type":"array"},"claim":{"properties":{"caveats":{"items":{"type":"string"},"type":"array"},"confidence":{"enum":["low","medium","high"],"type":"string"},"rationale":{"type":"string"},"statement":{"type":"string"},"tier":{"description":"Pipeline output is never 'attributed'. Attribution requires human review.","enum":["detected","identified"],"type":"string"}},"required":["tier","statement","rationale"],"type":"object"},"observations":{"items":{"properties":{"bare_soil_mean":{"type":["number","null"]},"clear_pixel_fraction":{"type":"number"},"date":{"format":"date","type":"string"},"ndmi_mean":{"type":["number","null"]},"ndvi_mean":{"type":["number","null"]},"scene_id":{"type":"string"}},"required":["date","scene_id","ndvi_mean","ndmi_mean","clear_pixel_fraction"],"type":"object"},"type":"array"},"packet_id":{"description":"site_id + assessment date, stable","type":"string"},"provenance":{"properties":{"generated_at":{"format":"date-time","type":"string"},"generated_by":{"type":"string"},"sources":{"items":{"properties":{"accessed":{"format":"date","type":"string"},"license_note":{"type":"string"},"name":{"type":"string"},"url":{"type":"string"}},"required":["name","url","accessed"],"type":"object"},"type":"array"}},"required":["sources","generated_at","generated_by"],"type":"object"},"schema_version":{"const":"1.0.0","type":"string"},"site":{"properties":{"latitude":{"type":"number"},"longitude":{"type":"number"},"name":{"type":"string"},"owa_inventory_date":{"format":"date","type":"string"},"owa_stage":{"enum":["decommissioning","reclamation","closed","unassigned","unknown"],"type":"string"},"site_id":{"type":"string"},"uwi":{"type":"string"}},"required":["site_id","latitude","longitude","owa_stage"],"type":"object"},"transforms":{"description":"Every operation applied, in order. The argument against the result.","items":{"properties":{"at":{"format":"date-time","type":"string"},"parameters":{"type":"object"},"step":{"type":"string"},"tool":{"type":"string"}},"required":["step","tool","parameters"],"type":"object"},"type":"array"}},"required":["packet_id","schema_version","site","assessment_date","claim","observations","transforms","provenance"],"title":"Reclamation Evidence Packet","type":"object"}
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "description": "Self-describing evidence packet for one site assessment. The schema is the contract: every packet honors it, every renderer trusts it.",
+  "properties": {
+    "assessment_date": {
+      "format": "date",
+      "type": "string"
+    },
+    "baseline": {
+      "type": "object",
+      "description": "Baseline-season summary (optional).",
+      "properties": {
+        "period": {
+          "type": "string"
+        },
+        "ndvi_median": {
+          "type": "number"
+        },
+        "ndvi_std": {
+          "type": "number"
+        },
+        "n_observations": {
+          "type": "integer"
+        }
+      }
+    },
+    "chips": {
+      "description": "Raw image chips, untouched, with checksums.",
+      "items": {
+        "properties": {
+          "bands": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "date": {
+            "format": "date",
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          },
+          "sha256": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "date",
+          "path",
+          "sha256"
+        ],
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "claim": {
+      "properties": {
+        "caveats": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "confidence": {
+          "enum": [
+            "low",
+            "medium",
+            "high"
+          ],
+          "type": "string"
+        },
+        "rationale": {
+          "type": "string"
+        },
+        "statement": {
+          "type": "string"
+        },
+        "tier": {
+          "description": "Pipeline output is never 'attributed'. Attribution requires human review.",
+          "enum": [
+            "detected",
+            "identified"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "tier",
+        "statement",
+        "rationale"
+      ],
+      "type": "object"
+    },
+    "observations": {
+      "items": {
+        "properties": {
+          "bare_soil_mean": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "clear_pixel_fraction": {
+            "type": "number"
+          },
+          "date": {
+            "format": "date",
+            "type": "string"
+          },
+          "ndmi_mean": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "ndvi_mean": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "scene_id": {
+            "type": "string"
+          },
+          "savi_mean": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "description": "Soil-Adjusted Vegetation Index scene mean (supporting evidence; NDVI is primary)."
+          },
+          "msavi_mean": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "description": "Modified SAVI scene mean (supporting evidence; NDVI is primary)."
+          }
+        },
+        "required": [
+          "date",
+          "scene_id",
+          "ndvi_mean",
+          "ndmi_mean",
+          "clear_pixel_fraction"
+        ],
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "packet_id": {
+      "description": "site_id + assessment date, stable",
+      "type": "string"
+    },
+    "provenance": {
+      "properties": {
+        "generated_at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "generated_by": {
+          "type": "string"
+        },
+        "sources": {
+          "items": {
+            "properties": {
+              "accessed": {
+                "format": "date",
+                "type": "string"
+              },
+              "license_note": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "url": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "name",
+              "url",
+              "accessed"
+            ],
+            "type": "object"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "sources",
+        "generated_at",
+        "generated_by"
+      ],
+      "type": "object"
+    },
+    "schema_version": {
+      "const": "1.1.0",
+      "type": "string"
+    },
+    "site": {
+      "properties": {
+        "latitude": {
+          "type": "number"
+        },
+        "longitude": {
+          "type": "number"
+        },
+        "name": {
+          "type": "string"
+        },
+        "owa_inventory_date": {
+          "format": "date",
+          "type": "string"
+        },
+        "owa_stage": {
+          "enum": [
+            "decommissioning",
+            "reclamation",
+            "closed",
+            "unassigned",
+            "unknown"
+          ],
+          "type": "string"
+        },
+        "site_id": {
+          "type": "string"
+        },
+        "uwi": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "site_id",
+        "latitude",
+        "longitude",
+        "owa_stage"
+      ],
+      "type": "object"
+    },
+    "transforms": {
+      "description": "Every operation applied, in order. The argument against the result.",
+      "items": {
+        "properties": {
+          "at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "parameters": {
+            "type": "object"
+          },
+          "step": {
+            "type": "string"
+          },
+          "tool": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "step",
+          "tool",
+          "parameters"
+        ],
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "assessment_detail": {
+      "type": "object",
+      "description": "Assessment detail (optional).",
+      "properties": {
+        "period": {
+          "type": "string"
+        },
+        "ndvi_median": {
+          "type": "number"
+        },
+        "n_observations": {
+          "type": "integer"
+        },
+        "delta_vs_baseline": {
+          "type": "number"
+        },
+        "delta_ci95": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 2,
+          "maxItems": 2,
+          "description": "Bootstrap 95% CI [lo, hi] on the median matched-month delta."
+        },
+        "matched_months": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          },
+          "description": "Calendar months compared month-for-month (phenology guard)."
+        }
+      }
+    }
+  },
+  "required": [
+    "packet_id",
+    "schema_version",
+    "site",
+    "assessment_date",
+    "claim",
+    "observations",
+    "transforms",
+    "provenance"
+  ],
+  "title": "Reclamation Evidence Packet",
+  "type": "object"
+}

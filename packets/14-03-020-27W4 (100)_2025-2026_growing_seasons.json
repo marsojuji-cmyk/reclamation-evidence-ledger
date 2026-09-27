@@ -1,6 +1,6 @@
 {
   "packet_id": "14-03-020-27W4 (100)_2025-2026_growing_seasons",
-  "schema_version": "1.0.0",
+  "schema_version": "1.1.0",
   "site": {
     "site_id": "14-03-020-27W4 (100)",
     "name": "14-03-020-27W4 (100)",
@@ -13,12 +13,13 @@
   "claim": {
     "tier": "detected",
     "statement": "no significant change vs baseline",
-    "rationale": "Month-matched delta -0.00 is within the noise band (\u00b10.08).",
+    "rationale": "Month-matched delta -0.00 is within the noise band (\u00b10.08; 95% CI [-0.223, +0.283]).",
     "confidence": "medium",
     "caveats": [
       "10 m pixels cannot resolve wellheads; this is a vegetation screen, not a compliance verdict.",
       "Drought years depress NDVI independent of reclamation progress.",
       "Baseline and current periods are compared month-for-month (matched months: [5, 6, 7, 8, 9]) to avoid seasonal sampling bias.",
+      "Uncertainty is a bootstrap 95% CI over 5 matched-month deltas \u2014 few matched months means a wide interval, by design.",
       "Site coordinates are DLS LSD centroids (~\u00b1300 m; DLS LSD centroid (~+/-300 m; road allowances ignored)). The 500 m analysis buffer absorbs this uncertainty; this is not a survey of the wellhead.",
       "Sentinel-2's 10 m pixels cannot resolve individual wellheads.",
       "Chip download used GDAL_HTTP_UNSAFESSL on a TLS-intercepting egress proxy; payload integrity rests on S3-hosted COGs, not TLS pinning."
@@ -31,6 +32,8 @@
       "ndvi_mean": 0.1645173256686445,
       "ndmi_mean": -0.24337926878848992,
       "bare_soil_mean": 0.2566320418598264,
+      "savi_mean": 0.10410286235806518,
+      "msavi_mean": 0.09169050108637687,
       "clear_pixel_fraction": 1.0
     },
     {
@@ -39,6 +42,8 @@
       "ndvi_mean": 0.2191968144539544,
       "ndmi_mean": -0.2281319982033563,
       "bare_soil_mean": 0.2416436549892216,
+      "savi_mean": 0.13913059787391827,
+      "msavi_mean": 0.12366638484315563,
       "clear_pixel_fraction": 1.0
     },
     {
@@ -47,6 +52,8 @@
       "ndvi_mean": 0.47819373290158457,
       "ndmi_mean": 0.02364914039403832,
       "bare_soil_mean": 0.003890469819281057,
+      "savi_mean": 0.3354928366702106,
+      "msavi_mean": 0.3207441147798633,
       "clear_pixel_fraction": 1.0
     },
     {
@@ -55,6 +62,8 @@
       "ndvi_mean": 0.4422342728664811,
       "ndmi_mean": 0.07751865251553776,
       "bare_soil_mean": 0.015547566447737325,
+      "savi_mean": 0.3136072686015,
+      "msavi_mean": 0.30351296335449984,
       "clear_pixel_fraction": 0.8488
     },
     {
@@ -63,6 +72,8 @@
       "ndvi_mean": 0.4326427459381732,
       "ndmi_mean": 0.01298562527166485,
       "bare_soil_mean": 0.058216012608530196,
+      "savi_mean": 0.2798181925641639,
+      "msavi_mean": 0.26403005702625065,
       "clear_pixel_fraction": 1.0
     },
     {
@@ -71,6 +82,8 @@
       "ndvi_mean": 0.2841550306048735,
       "ndmi_mean": -0.17055605217890896,
       "bare_soil_mean": 0.20045423773789692,
+      "savi_mean": 0.16625756914384693,
+      "msavi_mean": 0.14652658842183744,
       "clear_pixel_fraction": 1.0
     },
     {
@@ -79,6 +92,8 @@
       "ndvi_mean": 0.27613539316627606,
       "ndmi_mean": -0.3025480886805369,
       "bare_soil_mean": 0.2851384720766745,
+      "savi_mean": 0.14984061334513188,
+      "msavi_mean": 0.12852565717336842,
       "clear_pixel_fraction": 1.0
     },
     {
@@ -87,6 +102,8 @@
       "ndvi_mean": 0.47181744165479966,
       "ndmi_mean": -0.05811826977615286,
       "bare_soil_mean": 0.06131291355241558,
+      "savi_mean": 0.32671051836737164,
+      "msavi_mean": 0.31613240727931685,
       "clear_pixel_fraction": 0.8708
     },
     {
@@ -95,6 +112,8 @@
       "ndvi_mean": 0.8110954000486948,
       "ndmi_mean": 0.3350661517758643,
       "bare_soil_mean": -0.3029769478084452,
+      "savi_mean": 0.5655134223452327,
+      "msavi_mean": 0.5969267621974608,
       "clear_pixel_fraction": 1.0
     },
     {
@@ -103,6 +122,8 @@
       "ndvi_mean": 0.8105725067126592,
       "ndmi_mean": 0.5107214452577004,
       "bare_soil_mean": -0.4331772009796691,
+      "savi_mean": 0.631836352837719,
+      "msavi_mean": 0.6726259733829558,
       "clear_pixel_fraction": 1.0
     },
     {
@@ -111,6 +132,8 @@
       "ndvi_mean": 0.5011751658466089,
       "ndmi_mean": 0.12856876053125874,
       "bare_soil_mean": -0.02655865211909613,
+      "savi_mean": 0.32788424176353276,
+      "msavi_mean": 0.3250835459504986,
       "clear_pixel_fraction": 1.0
     },
     {
@@ -119,6 +142,8 @@
       "ndvi_mean": 0.19176262132520056,
       "ndmi_mean": -0.2460947610953755,
       "bare_soil_mean": 0.253515216938922,
+      "savi_mean": 0.12769465654888432,
+      "msavi_mean": 0.11269078915490782,
       "clear_pixel_fraction": 1.0
     },
     {
@@ -127,6 +152,8 @@
       "ndvi_mean": 0.24845070902818753,
       "ndmi_mean": -0.23059165546869703,
       "bare_soil_mean": 0.23364113565752773,
+      "savi_mean": 0.159168505238318,
+      "msavi_mean": 0.14130101989547486,
       "clear_pixel_fraction": 0.9828
     },
     {
@@ -135,6 +162,8 @@
       "ndvi_mean": 0.6963261046797506,
       "ndmi_mean": 0.23395185222898834,
       "bare_soil_mean": -0.18049343902362652,
+      "savi_mean": 0.4934968647743526,
+      "msavi_mean": 0.4951441269135199,
       "clear_pixel_fraction": 1.0
     },
     {
@@ -143,6 +172,8 @@
       "ndvi_mean": 0.8492104888411683,
       "ndmi_mean": 0.6086470171339973,
       "bare_soil_mean": -0.5431621247612654,
+      "savi_mean": 0.5848622301484901,
+      "msavi_mean": 0.6196285109657136,
       "clear_pixel_fraction": 0.7176
     },
     {
@@ -151,6 +182,8 @@
       "ndvi_mean": 0.8160700561687151,
       "ndmi_mean": 0.5858282809928438,
       "bare_soil_mean": -0.4983665811103845,
+      "savi_mean": 0.6141320247812592,
+      "msavi_mean": 0.6597693093744021,
       "clear_pixel_fraction": 1.0
     },
     {
@@ -159,6 +192,8 @@
       "ndvi_mean": 0.36078567100014247,
       "ndmi_mean": 0.009858824814038311,
       "bare_soil_mean": 0.0890322602759285,
+      "savi_mean": 0.25211638278458626,
+      "msavi_mean": 0.23397576630419503,
       "clear_pixel_fraction": 1.0
     },
     {
@@ -167,6 +202,8 @@
       "ndvi_mean": 0.3473726557293264,
       "ndmi_mean": -0.021900978243615775,
       "bare_soil_mean": 0.12769697163498248,
+      "savi_mean": 0.233614915957822,
+      "msavi_mean": 0.21376979966800974,
       "clear_pixel_fraction": 1.0
     },
     {
@@ -175,6 +212,8 @@
       "ndvi_mean": 0.7979764191312774,
       "ndmi_mean": 0.4009799240118162,
       "bare_soil_mean": -0.3519378467202318,
+      "savi_mean": 0.5982861928130871,
+      "msavi_mean": 0.6385912596393688,
       "clear_pixel_fraction": 1.0
     },
     {
@@ -183,6 +222,8 @@
       "ndvi_mean": 0.7596052804169001,
       "ndmi_mean": 0.4357644142833706,
       "bare_soil_mean": -0.36643667800348345,
+      "savi_mean": 0.5933896020365037,
+      "msavi_mean": 0.6290259741144599,
       "clear_pixel_fraction": 0.8728
     },
     {
@@ -191,6 +232,8 @@
       "ndvi_mean": 0.6349259270718982,
       "ndmi_mean": 0.2673861098885121,
       "bare_soil_mean": -0.16628209854881898,
+      "savi_mean": 0.43618236960790946,
+      "msavi_mean": 0.43777590308749276,
       "clear_pixel_fraction": 1.0
     }
   ],
@@ -215,7 +258,7 @@
         "scenes_selected": 28,
         "buffer_m": 500.0
       },
-      "at": "2026-09-27T07:50:55.879636+00:00"
+      "at": "2026-09-27T09:02:15.261995+00:00"
     },
     {
       "step": "chip_download_windowed",
@@ -236,7 +279,7 @@
         "reference_grid": "red band (10 m)",
         "note": "chips stored as written; DN = reflectance*10000"
       },
-      "at": "2026-09-27T07:50:55.879648+00:00"
+      "at": "2026-09-27T09:02:15.262007+00:00"
     },
     {
       "step": "cloud_mask",
@@ -287,7 +330,7 @@
           }
         ]
       },
-      "at": "2026-09-27T07:50:55.879653+00:00"
+      "at": "2026-09-27T09:02:15.262012+00:00"
     },
     {
       "step": "index_computation",
@@ -296,10 +339,13 @@
         "ndvi": "(nir-red)/(nir+red)",
         "ndmi": "(nir-swir)/(nir+swir)",
         "bare_soil": "((swir+red)-(nir+blue))/((swir+red)+(nir+blue))",
+        "savi": "((nir-red)*(1+L))/(nir+red+L), L=0.5 (soil-adjusted; supporting evidence only)",
+        "msavi": "(2*nir+1-sqrt((2*nir+1)^2-8*(nir-red)))/2 (self-adjusting; supporting evidence only)",
+        "primary_signal": "ndvi",
         "scale": "DN/10000",
         "mask": "clear pixels only"
       },
-      "at": "2026-09-27T07:50:55.879655+00:00"
+      "at": "2026-09-27T09:02:15.262029+00:00"
     },
     {
       "step": "baseline_assessment",
@@ -317,15 +363,15 @@
         "recover_delta": 0.08,
         "stall_delta": -0.08
       },
-      "at": "2026-09-27T07:50:55.879658+00:00"
+      "at": "2026-09-27T09:02:15.262032+00:00"
     },
     {
       "step": "packet_build",
       "tool": "ledger.packet.build_packet",
       "parameters": {
-        "schema_version": "1.0.0"
+        "schema_version": "1.1.0"
       },
-      "at": "2026-09-27T07:50:55.879661+00:00"
+      "at": "2026-09-27T09:02:15.262050+00:00"
     }
   ],
   "chips": [
@@ -1190,7 +1236,7 @@
         "license_note": "Contains modified Copernicus Sentinel data."
       }
     ],
-    "generated_at": "2026-09-27T07:50:55.879663+00:00",
+    "generated_at": "2026-09-27T09:02:15.262053+00:00",
     "generated_by": "reclamation-ledger pipeline (human-reviewed before publish)"
   },
   "baseline": {
@@ -1203,6 +1249,17 @@
     "period": "2025-2026 growing seasons",
     "ndvi_median": 0.3541,
     "n_observations": 10,
-    "delta_vs_baseline": -0.0001
+    "delta_vs_baseline": -0.0001,
+    "delta_ci95": [
+      -0.2234,
+      0.2833
+    ],
+    "matched_months": [
+      5,
+      6,
+      7,
+      8,
+      9
+    ]
   }
 }

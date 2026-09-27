@@ -25,13 +25,16 @@ class Assessment:
     baseline_std: float
     current_ndvi: float
     delta: float
+    delta_ci95: list       # [lo, hi]: bootstrap 95% CI on the median
+                          # matched-month delta (1000 resamples, fixed seed)
     n_baseline_obs: int
     n_current_obs: int
+    matched_months: list  # calendar months compared month-for-month
     tier: str              # "detected" | "identified"
     statement: str
     rationale: str
     caveats: list
-    confidence: str        # "low" | "medium" | "high"
+    confidence: str        # "low" | "medium" | "high" (evidence-volume heuristic)
 
 
 def assess(site_id: str, baseline_monthly: dict[int, list[float]],
@@ -66,27 +69,40 @@ def assess(site_id: str, baseline_monthly: dict[int, list[float]],
     delta = float(np.median(month_deltas))
     std = float(np.std(month_deltas)) if len(month_deltas) > 2 else 0.0
 
+    # Real uncertainty: bootstrap 95% CI on the median matched-month delta.
+    # 1000 resamples over the matched-month deltas, fixed seed so packets are
+    # reproducible. With only a handful of matched months this interval is
+    # wide — that width is the honest statement of how much we know.
+    rng = np.random.default_rng(20260927)
+    d = np.asarray(month_deltas, dtype=float)
+    boots = [float(np.median(rng.choice(d, size=d.size, replace=True)))
+             for _ in range(1000)]
+    ci_lo, ci_hi = float(np.percentile(boots, 2.5)), float(np.percentile(boots, 97.5))
+
     caveats = [
         "10 m pixels cannot resolve wellheads; this is a vegetation screen, not a compliance verdict.",
         "Drought years depress NDVI independent of reclamation progress.",
         "Baseline and current periods are compared month-for-month "
         f"(matched months: {matched}) to avoid seasonal sampling bias.",
+        f"Uncertainty is a bootstrap 95% CI over {len(matched)} matched-month "
+        "deltas — few matched months means a wide interval, by design.",
     ]
 
+    ci_txt = f"95% CI [{ci_lo:+.3f}, {ci_hi:+.3f}]"
     if delta >= cfg.ndvi_recover_delta:
         tier, statement = "identified", "vegetation recovering"
         rationale = (f"Month-matched NDVI {current:.2f} exceeds the baseline "
                      f"{base:.2f} by {delta:+.2f} (median of {len(matched)} "
-                     f"matched-month deltas).")
+                     f"matched-month deltas; {ci_txt}).")
     elif delta <= cfg.ndvi_stall_delta:
         tier, statement = "identified", "vegetation stalled or regressing"
         rationale = (f"Month-matched NDVI {current:.2f} is below the baseline "
                      f"{base:.2f} by {delta:+.2f} (median of {len(matched)} "
-                     f"matched-month deltas).")
+                     f"matched-month deltas; {ci_txt}).")
     else:
         tier, statement = "detected", "no significant change vs baseline"
         rationale = (f"Month-matched delta {delta:+.2f} is within the noise band "
-                     f"(±{max(cfg.ndvi_recover_delta, abs(cfg.ndvi_stall_delta)):.2f}).")
+                     f"(±{max(cfg.ndvi_recover_delta, abs(cfg.ndvi_stall_delta)):.2f}; {ci_txt}).")
 
     # Confidence scales with evidence volume, never with enthusiasm.
     n = n_base + n_cur
@@ -95,8 +111,9 @@ def assess(site_id: str, baseline_monthly: dict[int, list[float]],
     return Assessment(
         site_id=site_id, period=period, baseline_ndvi=round(base, 4),
         baseline_std=round(std, 4), current_ndvi=round(current, 4),
-        delta=round(delta, 4), n_baseline_obs=n_base,
-        n_current_obs=n_cur, tier=tier, statement=statement,
+        delta=round(delta, 4), delta_ci95=[round(ci_lo, 4), round(ci_hi, 4)],
+        n_baseline_obs=n_base,
+        n_current_obs=n_cur, matched_months=matched, tier=tier, statement=statement,
         rationale=rationale, caveats=caveats, confidence=confidence,
     )
 
@@ -158,6 +175,10 @@ def _scene_means(chips_dir, cfg: Config = DEFAULT):
             "bare_soil_mean": indices.mean_or_nan(
                 indices.bare_soil_index(refl["swir"], refl["red"],
                                         refl["nir"], refl["blue"], clear)),
+            "savi_mean": indices.mean_or_nan(
+                indices.savi(refl["nir"], refl["red"], clear)),
+            "msavi_mean": indices.mean_or_nan(
+                indices.msavi(refl["nir"], refl["red"], clear)),
             "clear_pixel_fraction": round(indices.clear_fraction(clear), 4),
         })
     return out, manifest
@@ -206,6 +227,7 @@ def cmd_assess(args):
         {"date": s["date"], "scene_id": s["scene_id"],
          "ndvi_mean": s["ndvi_mean"], "ndmi_mean": s["ndmi_mean"],
          "bare_soil_mean": s["bare_soil_mean"],
+         "savi_mean": s["savi_mean"], "msavi_mean": s["msavi_mean"],
          "clear_pixel_fraction": s["clear_pixel_fraction"]}
         for s in scenes
     ]
@@ -233,6 +255,11 @@ def cmd_assess(args):
          "parameters": {"ndvi": "(nir-red)/(nir+red)",
                         "ndmi": "(nir-swir)/(nir+swir)",
                         "bare_soil": "((swir+red)-(nir+blue))/((swir+red)+(nir+blue))",
+                        "savi": "((nir-red)*(1+L))/(nir+red+L), L=0.5 "
+                                "(soil-adjusted; supporting evidence only)",
+                        "msavi": "(2*nir+1-sqrt((2*nir+1)^2-8*(nir-red)))/2 "
+                                 "(self-adjusting; supporting evidence only)",
+                        "primary_signal": "ndvi",
                         "scale": "DN/10000", "mask": "clear pixels only"}},
         {"step": "baseline_assessment", "tool": "ledger.change.assess",
          "parameters": {"baseline_years": baseline_years,
@@ -242,7 +269,7 @@ def cmd_assess(args):
                         "recover_delta": DEFAULT.ndvi_recover_delta,
                         "stall_delta": DEFAULT.ndvi_stall_delta}},
         {"step": "packet_build", "tool": "ledger.packet.build_packet",
-         "parameters": {"schema_version": "1.0.0"}},
+         "parameters": {"schema_version": "1.1.0"}},
     ]
     sources = [
         {"name": "OWA site-specific inventory (Excel)",
@@ -280,7 +307,9 @@ def cmd_assess(args):
                           "n_observations": a.n_baseline_obs}
     packet["assessment_detail"] = {"period": period, "ndvi_median": a.current_ndvi,
                                    "n_observations": a.n_current_obs,
-                                   "delta_vs_baseline": a.delta}
+                                   "delta_vs_baseline": a.delta,
+                                   "delta_ci95": a.delta_ci95,
+                                   "matched_months": a.matched_months}
 
     out = write_packet(packet, args.out)
     print(f"{args.site}: {a.tier.upper()} — {a.statement} "

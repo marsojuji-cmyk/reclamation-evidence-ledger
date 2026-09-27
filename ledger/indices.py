@@ -41,6 +41,28 @@ def bare_soil_index(swir: np.ndarray, red: np.ndarray,
     return _apply_mask(_safe_divide(num, den), clear)
 
 
+def savi(nir: np.ndarray, red: np.ndarray, clear: np.ndarray,
+         L: float = 0.5) -> np.ndarray:
+    """Soil-Adjusted Vegetation Index (Huete 1988). L=0.5 is the standard
+    compromise for intermediate cover; dampens soil-brightness bias that
+    inflates NDVI over sparse vegetation — the exact regime of a
+    recovering well pad."""
+    return _apply_mask(
+        _safe_divide((nir - red) * (1.0 + L), nir + red + L), clear)
+
+
+def msavi(nir: np.ndarray, red: np.ndarray,
+          clear: np.ndarray) -> np.ndarray:
+    """Modified SAVI (Qi et al. 1994). Replaces the fixed L with a
+    self-adjusting factor, so it stays honest from bare soil to full canopy
+    without a hand-tuned parameter."""
+    inner = np.clip((2 * nir + 1) ** 2 - 8 * (nir - red), 0, None)
+    with np.errstate(invalid="ignore"):
+        out = (2 * nir + 1 - np.sqrt(inner)) / 2
+    out[~np.isfinite(out)] = np.nan
+    return _apply_mask(out, clear)
+
+
 def mean_or_nan(index: np.ndarray) -> float | None:
     """Honest average: NaN if no usable pixels, never a silent zero."""
     with np.errstate(invalid="ignore"):

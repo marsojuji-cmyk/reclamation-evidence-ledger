@@ -44,7 +44,7 @@ def _esc(v) -> str:
     return html.escape(str(v))
 
 
-def render_packet(packet: dict) -> str:
+def render_packet(packet: dict, chart_file: str | None = None) -> str:
     c = packet["claim"]
     obs_rows = "".join(
         f"<tr><td>{_esc(o['date'])}</td><td><code>{_esc(o['scene_id'])}</code></td>"
@@ -64,6 +64,9 @@ def render_packet(packet: dict) -> str:
         f"(accessed {_esc(s['accessed'])})</li>" for s in packet["provenance"]["sources"]
     )
     s = packet["site"]
+    chart_html = (f'<h3>NDVI time series</h3><p><img src="assets/{_esc(chart_file)}" '
+                  f'alt="per-scene NDVI time series" style="max-width:100%"></p>'
+                  if chart_file else "")
     return PAGE_TMPL.format(
         title=_esc(packet["packet_id"]),
         attribution=ATTRIBUTION,
@@ -74,6 +77,7 @@ OWA stage: <b>{_esc(s['owa_stage'])}</b> (inventory {_esc(s.get('owa_inventory_d
 <h3>Claim <span class="tier {c['tier']}">{_esc(c['tier']).upper()}</span></h3>
 <p><b>{_esc(c['statement'])}</b> — {_esc(c['rationale'])}<br>
 Confidence: {_esc(c['confidence'])}</p>
+{chart_html}
 {caveats}
 <h3>Observations</h3>
 <table><tr><th>Date</th><th>Scene</th><th>NDVI</th><th>NDMI</th><th>Clear</th></tr>
@@ -87,32 +91,103 @@ Confidence: {_esc(c['confidence'])}</p>
     )
 
 
+def _marker_color(statement: str) -> str:
+    st = (statement or "").lower()
+    if "recovering" in st:
+        return "green"
+    if "stalled" in st or "regressing" in st:
+        return "orange"
+    return "grey"
+
+
+def render_index_map(packets: list[dict], pages: list[str]) -> str:
+    """Leaflet map of all sites, markers colored by outcome."""
+    pts = []
+    for packet, page in zip(packets, pages):
+        s = packet["site"]
+        pts.append({
+            "lat": s["latitude"], "lon": s["longitude"],
+            "site_id": packet["packet_id"],
+            "page": page,
+            "tier": packet["claim"]["tier"],
+            "statement": packet["claim"]["statement"],
+            "confidence": packet["claim"]["confidence"],
+            "color": _marker_color(packet["claim"]["statement"]),
+        })
+    data_js = json.dumps(pts)
+    return f"""
+<h2>Site map</h2>
+<div id="map" style="height:420px;max-width:100%"></div>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+const pts = {data_js};
+const map = L.map('map').setView([50.7, -113.6], 9);
+L.tileLayer('https://tile.openstreetmap.org/{{z}}/{{x}}/{{y}}.png',
+  {{attribution: '&copy; OpenStreetMap contributors'}}).addTo(map);
+const bounds = [];
+for (const p of pts) {{
+  const m = L.circleMarker([p.lat, p.lon], {{
+    radius: 7, color: p.color, fillColor: p.color, fillOpacity: 0.7, weight: 2
+  }}).addTo(map);
+  const div = document.createElement('div');
+  const a = document.createElement('a'); a.href = p.page; a.textContent = p.site_id;
+  div.appendChild(a);
+  const info = document.createElement('div');
+  info.textContent = p.tier + ' — ' + p.statement + ' (' + p.confidence + ' confidence)';
+  div.appendChild(info);
+  m.bindPopup(div);
+  bounds.push([p.lat, p.lon]);
+}}
+if (bounds.length) map.fitBounds(bounds, {{padding: [20, 20]}});
+</script>
+<p><span style="color:green">●</span> recovering
+<span style="color:orange">●</span> stalled / regressing
+<span style="color:grey">●</span> no significant change.
+Coordinates are DLS LSD centroids (±300 m) — markers show screening areas, not wellheads.</p>
+"""
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description="Render the static ledger site.")
     ap.add_argument("--packets", required=True)
     ap.add_argument("--out", required=True)
     args = ap.parse_args()
 
+    from .charts import render_site_chart
+
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
+    assets = out / "assets"
+    assets.mkdir(parents=True, exist_ok=True)
     packets = sorted(Path(args.packets).glob("*.json"))
 
-    rows = []
+    rows, pages, objs = [], [], []
     for p in packets:
         packet = json.loads(p.read_text())
         # packet_ids can contain '/' (site names like "102/10-16"); filenames must not.
-        page = re.sub(r"[\\/]", "_", packet["packet_id"]) + ".html"
-        (out / page).write_text(render_packet(packet))
+        stem = re.sub(r"[\\/]", "_", packet["packet_id"])
+        page = stem + ".html"
+        chart = stem + ".png"
+        try:
+            render_site_chart(packet, assets / chart)
+        except Exception as e:  # a missing chart must never break the ledger
+            print(f"  chart failed for {packet['packet_id']}: {e}")
+            chart = None
+        (out / page).write_text(render_packet(packet, chart))
         c = packet["claim"]
         rows.append(
             f"<tr><td><a href='{page}'>{_esc(packet['packet_id'])}</a></td>"
             f"<td><span class='tier {c['tier']}'>{_esc(c['tier'])}</span></td>"
             f"<td>{_esc(c['statement'])}</td><td>{_esc(c['confidence'])}</td></tr>"
         )
+        pages.append(page)
+        objs.append(packet)
 
     index = PAGE_TMPL.format(
         title="Index", attribution=ATTRIBUTION,
         body=f"<h2>{len(packets)} evidence packets</h2>"
+             + render_index_map(objs, pages) +
              "<table><tr><th>Packet</th><th>Tier</th><th>Finding</th><th>Confidence</th></tr>"
              + "".join(rows) + "</table>",
     )

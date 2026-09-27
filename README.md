@@ -89,7 +89,8 @@ python -m ledger.imagery fetch --sites pilots/pilot-01.txt \
 # (incremental backfill — safe to repeat for clouded-out years).
 
 # 3. Assess chips -> schema-validated evidence packet (SCL cloud mask, NDVI/NDMI/
-#    bare-soil per scene, month-matched baseline diff, claim tier)
+#    bare-soil/SAVI/MSAVI per scene, month-matched baseline diff with bootstrap
+#    95% CI on the median delta, claim tier)
 python -m ledger.change assess --site "01-06-018-26W4 (100)" \
     --chips data/chips/01-06-018-26W4__100_ \
     --baseline-start 2023 --baseline-end 2024 --assessment 2025-2026 \
@@ -140,3 +141,9 @@ Copernicus data requires attribution — see the site footer.
 ## License
 
 MIT — see [LICENSE](LICENSE).
+
+## Continuous validation
+
+`.github/workflows/validate.yml` re-validates every `packets/*.json` against
+`schemas/evidence-packet.schema.json` on each push to main. A packet that
+fails the contract never ships.

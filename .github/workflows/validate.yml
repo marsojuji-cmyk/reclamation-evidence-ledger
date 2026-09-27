@@ -1,0 +1,45 @@
+name: validate-packets
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install jsonschema
+        run: pip install jsonschema
+
+      - name: Validate every evidence packet against the schema
+        run: |
+          python - <<'EOF'
+          import glob
+          import json
+          import sys
+
+          import jsonschema
+
+          schema = json.load(open("schemas/evidence-packet.schema.json"))
+          files = sorted(glob.glob("packets/*.json"))
+          if not files:
+              sys.exit("no packets found in packets/")
+          bad = 0
+          for f in files:
+              try:
+                  jsonschema.validate(json.load(open(f)), schema)
+              except jsonschema.ValidationError as e:
+                  bad += 1
+                  print(f"INVALID {f}: {e.message}")
+          if bad:
+              sys.exit(f"{bad}/{len(files)} packets failed schema validation")
+          print(f"validated {len(files)} packets against schema "
+                f"v{schema['properties']['schema_version']['const']}")
+          EOF

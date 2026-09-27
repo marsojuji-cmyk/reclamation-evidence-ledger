@@ -37,7 +37,7 @@ def build_packet(site: dict, assessment: dict, observations: list[dict],
     packet_id = f"{site['site_id']}_{assessment['period'].replace(' ', '_')}"
     return {
         "packet_id": packet_id,
-        "schema_version": "1.0.0",
+        "schema_version": "1.1.0",
         "site": site,
         "assessment_date": datetime.now(timezone.utc).date().isoformat(),
         "claim": {
