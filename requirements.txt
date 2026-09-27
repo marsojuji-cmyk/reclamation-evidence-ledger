@@ -14,6 +14,9 @@ python-dateutil>=2.8
 openpyxl>=3.1        # OWA inventory ships as Excel
 pyarrow>=15.0        # parquet site registry
 
+# Tests (not needed for the pipeline itself)
+pytest>=8.0
+
 # Optional: nicer STAC ergonomics (Planetary Computer signing)
 # planetary-computer>=1.0
 # odc-stac>=0.3

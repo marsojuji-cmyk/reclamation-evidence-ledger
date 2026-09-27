@@ -14,13 +14,12 @@
           "type": "string"
         },
         "ndvi_median": {
-          "type": "number"
+          "type": "number",
+          "description": "Median of per-month baseline medians over matched months. Context only: the delta is NOT derived by subtracting this from assessment_detail.ndvi_median."
         },
-        "ndvi_std": {
-          "type": "number"
-        },
-        "n_observations": {
-          "type": "integer"
+        "n_scene_observations": {
+          "type": "integer",
+          "description": "Count of scene-level clear-pixel NDVI means (one per scene per month) in baseline years falling in matched months. Distinct from assessment_detail.n_scene_observations (current period) and from len(observations) (all scenes, all months)."
         }
       }
     },
@@ -275,13 +274,24 @@
           "type": "string"
         },
         "ndvi_median": {
-          "type": "number"
+          "type": "number",
+          "description": "Median of per-month current-period medians over matched months. Context only: the delta is NOT derived by subtracting baseline.ndvi_median from this."
         },
-        "n_observations": {
-          "type": "integer"
+        "n_scene_observations": {
+          "type": "integer",
+          "description": "Count of scene-level clear-pixel NDVI means (one per scene per month) in assessment years falling in matched months. Distinct from baseline.n_scene_observations (baseline period) and from len(observations) (all scenes, all months)."
         },
         "delta_vs_baseline": {
-          "type": "number"
+          "type": "number",
+          "description": "Median of the per-month (current-median minus baseline-median) deltas over matched months. This is NOT the difference of the two ndvi_median fields (median of differences != difference of medians); see delta_method_note."
+        },
+        "delta_std": {
+          "type": "number",
+          "description": "Standard deviation of the matched-month deltas — the spread of the month-for-month differences the delta summarizes. NOT baseline NDVI variation; named for what it is."
+        },
+        "delta_method_note": {
+          "type": "string",
+          "description": "Plain-language statement of how delta_vs_baseline relates (and does not relate) to the displayed medians."
         },
         "delta_ci95": {
           "type": "array",
@@ -290,7 +300,7 @@
           },
           "minItems": 2,
           "maxItems": 2,
-          "description": "Bootstrap 95% CI [lo, hi] on the median matched-month delta."
+          "description": "Bootstrap 95% CI [lo, hi] on the median matched-month delta. OMITTED (not null) when fewer than 4 months are matched: at n<4 the resampled-median distribution is degenerate, so absence of the field is the honest uncertainty statement."
         },
         "matched_months": {
           "type": "array",

@@ -76,7 +76,7 @@ def main():
                 "packet": new_packets[0].name,
                 "tier": p.get("claim", {}).get("tier"),
                 "classification": p.get("claim", {}).get("statement"),
-                "n_observations": p.get("assessment_detail", {}).get("n_observations"),
+                "n_current_scene_observations": p.get("assessment_detail", {}).get("n_scene_observations"),
                 "baseline_ndvi": p.get("baseline", {}).get("ndvi_median"),
                 "current_ndvi": p.get("assessment_detail", {}).get("ndvi_median"),
                 "delta": p.get("assessment_detail", {}).get("delta_vs_baseline"),
@@ -98,7 +98,7 @@ def main():
     (ROOT / "ops" / "assess_results.json").write_text(json.dumps(out, indent=2))
     with open(ROOT / "ops" / "assess_results.csv", "w", newline="") as f:
         w = csv.DictWriter(f, fieldnames=["site", "status", "packet", "tier", "classification",
-                                         "n_observations", "baseline_ndvi", "current_ndvi",
+                                         "n_current_scene_observations", "baseline_ndvi", "current_ndvi",
                                          "delta", "confidence"])
         w.writeheader()
         for r_ in results:

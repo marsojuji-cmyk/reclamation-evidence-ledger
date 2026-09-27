@@ -13,13 +13,13 @@
   "claim": {
     "tier": "detected",
     "statement": "no significant change vs baseline",
-    "rationale": "Month-matched delta +0.08 is within the noise band (\u00b10.08; 95% CI [-0.148, +0.425]).",
+    "rationale": "Median matched-month delta +0.08 is within the noise band (\u00b10.08; baseline median 0.25, current median 0.39; 95% CI [-0.148, +0.425]).",
     "confidence": "medium",
     "caveats": [
       "10 m pixels cannot resolve wellheads; this is a vegetation screen, not a compliance verdict.",
       "Drought years depress NDVI independent of reclamation progress.",
       "Baseline and current periods are compared month-for-month (matched months: [5, 6, 7, 8, 9]) to avoid seasonal sampling bias.",
-      "Uncertainty is a bootstrap 95% CI over 5 matched-month deltas \u2014 few matched months means a wide interval, by design.",
+      "Uncertainty is a bootstrap 95% CI over 5 matched-month deltas.",
       "Site coordinates are DLS LSD centroids (~\u00b1300 m; DLS LSD centroid (~+/-300 m; road allowances ignored)). The 500 m analysis buffer absorbs this uncertainty; this is not a survey of the wellhead.",
       "Sentinel-2's 10 m pixels cannot resolve individual wellheads.",
       "Chip download used GDAL_HTTP_UNSAFESSL on a TLS-intercepting egress proxy; payload integrity rests on S3-hosted COGs, not TLS pinning."
@@ -278,7 +278,7 @@
         "scenes_selected": 28,
         "buffer_m": 500.0
       },
-      "at": "2026-09-27T09:02:11.468484+00:00"
+      "at": "2026-09-27T10:54:16.075689+00:00"
     },
     {
       "step": "chip_download_windowed",
@@ -299,7 +299,7 @@
         "reference_grid": "red band (10 m)",
         "note": "chips stored as written; DN = reflectance*10000"
       },
-      "at": "2026-09-27T09:02:11.468496+00:00"
+      "at": "2026-09-27T10:54:16.075701+00:00"
     },
     {
       "step": "cloud_mask",
@@ -340,7 +340,7 @@
           }
         ]
       },
-      "at": "2026-09-27T09:02:11.468500+00:00"
+      "at": "2026-09-27T10:54:16.075706+00:00"
     },
     {
       "step": "index_computation",
@@ -353,9 +353,10 @@
         "msavi": "(2*nir+1-sqrt((2*nir+1)^2-8*(nir-red)))/2 (self-adjusting; supporting evidence only)",
         "primary_signal": "ndvi",
         "scale": "DN/10000",
+        "scale_justification": "ledger/data/radiometric_lineage.json: per-scene STAC audit (processing baseline + earthsearch:boa_offset_applied per scene); the data provider removed the PB>=04.00 +1000 DN offset when generating these COGs, confirmed by chip-level DN minima ~1. Not assumed \u2014 recorded.",
         "mask": "clear pixels only"
       },
-      "at": "2026-09-27T09:02:11.468503+00:00"
+      "at": "2026-09-27T10:54:16.075709+00:00"
     },
     {
       "step": "baseline_assessment",
@@ -373,7 +374,7 @@
         "recover_delta": 0.08,
         "stall_delta": -0.08
       },
-      "at": "2026-09-27T09:02:11.468505+00:00"
+      "at": "2026-09-27T10:54:16.075711+00:00"
     },
     {
       "step": "packet_build",
@@ -381,7 +382,7 @@
       "parameters": {
         "schema_version": "1.1.0"
       },
-      "at": "2026-09-27T09:02:11.468508+00:00"
+      "at": "2026-09-27T10:54:16.075714+00:00"
     }
   ],
   "chips": [
@@ -1326,30 +1327,31 @@
         "license_note": "Contains modified Copernicus Sentinel data."
       }
     ],
-    "generated_at": "2026-09-27T09:02:11.468511+00:00",
+    "generated_at": "2026-09-27T10:54:16.075716+00:00",
     "generated_by": "reclamation-ledger pipeline (human-reviewed before publish)"
   },
   "baseline": {
     "period": "2023-2024",
     "ndvi_median": 0.2504,
-    "ndvi_std": 0.1922,
-    "n_observations": 13
+    "n_scene_observations": 13
   },
   "assessment_detail": {
     "period": "2025-2026 growing seasons",
     "ndvi_median": 0.392,
-    "n_observations": 10,
+    "n_scene_observations": 10,
     "delta_vs_baseline": 0.0776,
-    "delta_ci95": [
-      -0.148,
-      0.4249
-    ],
+    "delta_std": 0.1922,
+    "delta_method_note": "delta_vs_baseline is the median of per-month (current-median minus baseline-median) deltas over matched months; it is not the difference of baseline.ndvi_median and assessment_detail.ndvi_median.",
     "matched_months": [
       5,
       6,
       7,
       8,
       9
+    ],
+    "delta_ci95": [
+      -0.148,
+      0.4249
     ]
   }
 }

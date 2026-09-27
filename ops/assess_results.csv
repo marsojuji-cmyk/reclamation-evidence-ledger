@@ -1,4 +1,4 @@
-site,status,packet,tier,classification,n_observations,baseline_ndvi,current_ndvi,delta,confidence
+site,status,packet,tier,classification,n_current_scene_observations,baseline_ndvi,current_ndvi,delta,confidence
 01-28-020-27W4 (Facility),assessed,01-28-020-27W4 (Facility)_2025-2026_growing_seasons.json,identified,vegetation recovering,2,0.2682,0.3666,0.0983,low
 05-13-020-27W4 (100),assessed,05-13-020-27W4 (100)_2025-2026_growing_seasons.json,identified,vegetation recovering,2,0.2083,0.4199,0.2116,low
 06-21-020-27W4 (Facility),assessed,06-21-020-27W4 (Facility)_2025-2026_growing_seasons.json,detected,no significant change vs baseline,10,0.3554,0.4908,0.0617,medium

@@ -17,16 +17,27 @@ from dataclasses import dataclass
 from .config import DEFAULT, Config
 
 
+# Bootstrap CIs over matched-month deltas are degenerate below this many
+# matched months (with n=2 the resampled-median distribution has only 3
+# distinct values: the interval looks precise and means almost nothing).
+# Below the threshold we report NO interval rather than a misleading one.
+MIN_MATCHED_MONTHS_FOR_CI = 4
+
+
 @dataclass
 class Assessment:
     site_id: str
     period: str            # e.g. "2026 growing season"
-    baseline_ndvi: float
-    baseline_std: float
-    current_ndvi: float
+    baseline_ndvi: float   # median of per-month baseline medians (context only)
+    delta_std: float       # std dev of the matched-month DELTAS — NOT baseline
+                          # variation. Named for what it is: spread of the
+                          # month-for-month differences the delta summarizes.
+    current_ndvi: float    # median of per-month current medians (context only)
     delta: float
-    delta_ci95: list       # [lo, hi]: bootstrap 95% CI on the median
-                          # matched-month delta (1000 resamples, fixed seed)
+    delta_ci95: list | None  # [lo, hi]: bootstrap 95% CI on the median
+                             # matched-month delta (1000 resamples, fixed
+                             # seed); None when len(matched_months) < 4 —
+                             # an interval there would be degenerate, not wide
     n_baseline_obs: int
     n_current_obs: int
     matched_months: list  # calendar months compared month-for-month
@@ -71,38 +82,57 @@ def assess(site_id: str, baseline_monthly: dict[int, list[float]],
 
     # Real uncertainty: bootstrap 95% CI on the median matched-month delta.
     # 1000 resamples over the matched-month deltas, fixed seed so packets are
-    # reproducible. With only a handful of matched months this interval is
-    # wide — that width is the honest statement of how much we know.
-    rng = np.random.default_rng(20260927)
-    d = np.asarray(month_deltas, dtype=float)
-    boots = [float(np.median(rng.choice(d, size=d.size, replace=True)))
-             for _ in range(1000)]
-    ci_lo, ci_hi = float(np.percentile(boots, 2.5)), float(np.percentile(boots, 97.5))
+    # reproducible. With few matched months this interval is DEGENERATE, not
+    # wide: at n=2 the resampled-median distribution has only 3 distinct
+    # values, so the interval looks precise and means almost nothing. Below
+    # MIN_MATCHED_MONTHS_FOR_CI we refuse to report one — a missing interval
+    # is the honest statement of how much we know.
+    if len(matched) >= MIN_MATCHED_MONTHS_FOR_CI:
+        rng = np.random.default_rng(20260927)
+        d = np.asarray(month_deltas, dtype=float)
+        boots = [float(np.median(rng.choice(d, size=d.size, replace=True)))
+                 for _ in range(1000)]
+        ci_lo, ci_hi = float(np.percentile(boots, 2.5)), float(np.percentile(boots, 97.5))
+        ci = [round(ci_lo, 4), round(ci_hi, 4)]
+        ci_txt = f"95% CI [{ci_lo:+.3f}, {ci_hi:+.3f}]"
+        ci_caveat = (f"Uncertainty is a bootstrap 95% CI over {len(matched)} "
+                     "matched-month deltas.")
+    else:
+        ci = None
+        ci_txt = (f"interval not estimated (only {len(matched)} matched months; "
+                  f"a bootstrap CI needs >= {MIN_MATCHED_MONTHS_FOR_CI})")
+        ci_caveat = (f"No uncertainty interval is reported: {len(matched)} "
+                     f"matched months is below the {MIN_MATCHED_MONTHS_FOR_CI} "
+                     "needed for a non-degenerate bootstrap CI. The delta "
+                     "below is a point estimate only.")
 
     caveats = [
         "10 m pixels cannot resolve wellheads; this is a vegetation screen, not a compliance verdict.",
         "Drought years depress NDVI independent of reclamation progress.",
         "Baseline and current periods are compared month-for-month "
         f"(matched months: {matched}) to avoid seasonal sampling bias.",
-        f"Uncertainty is a bootstrap 95% CI over {len(matched)} matched-month "
-        "deltas — few matched months means a wide interval, by design.",
+        ci_caveat,
     ]
 
-    ci_txt = f"95% CI [{ci_lo:+.3f}, {ci_hi:+.3f}]"
     if delta >= cfg.ndvi_recover_delta:
         tier, statement = "identified", "vegetation recovering"
-        rationale = (f"Month-matched NDVI {current:.2f} exceeds the baseline "
-                     f"{base:.2f} by {delta:+.2f} (median of {len(matched)} "
-                     f"matched-month deltas; {ci_txt}).")
+        rationale = (f"Median matched-month NDVI delta {delta:+.2f} (median of "
+                     f"{len(matched)} matched-month deltas; baseline median "
+                     f"{base:.2f}, current median {current:.2f}; {ci_txt}).")
     elif delta <= cfg.ndvi_stall_delta:
         tier, statement = "identified", "vegetation stalled or regressing"
-        rationale = (f"Month-matched NDVI {current:.2f} is below the baseline "
-                     f"{base:.2f} by {delta:+.2f} (median of {len(matched)} "
-                     f"matched-month deltas; {ci_txt}).")
+        rationale = (f"Median matched-month NDVI delta {delta:+.2f} (median of "
+                     f"{len(matched)} matched-month deltas; baseline median "
+                     f"{base:.2f}, current median {current:.2f}; {ci_txt}).")
     else:
         tier, statement = "detected", "no significant change vs baseline"
-        rationale = (f"Month-matched delta {delta:+.2f} is within the noise band "
-                     f"(±{max(cfg.ndvi_recover_delta, abs(cfg.ndvi_stall_delta)):.2f}; {ci_txt}).")
+        rationale = (f"Median matched-month delta {delta:+.2f} is within the noise band "
+                     f"(±{max(cfg.ndvi_recover_delta, abs(cfg.ndvi_stall_delta)):.2f}; "
+                     f"baseline median {base:.2f}, current median {current:.2f}; {ci_txt}).")
+    # The delta is the median of per-month deltas, NOT the difference of the
+    # two displayed medians (median of differences != difference of medians).
+    # The rationale states all three numbers so the relationship is exact by
+    # construction: nothing is implied to subtract.
 
     # Confidence scales with evidence volume, never with enthusiasm.
     n = n_base + n_cur
@@ -110,8 +140,8 @@ def assess(site_id: str, baseline_monthly: dict[int, list[float]],
 
     return Assessment(
         site_id=site_id, period=period, baseline_ndvi=round(base, 4),
-        baseline_std=round(std, 4), current_ndvi=round(current, 4),
-        delta=round(delta, 4), delta_ci95=[round(ci_lo, 4), round(ci_hi, 4)],
+        delta_std=round(std, 4), current_ndvi=round(current, 4),
+        delta=round(delta, 4), delta_ci95=ci,
         n_baseline_obs=n_base,
         n_current_obs=n_cur, matched_months=matched, tier=tier, statement=statement,
         rationale=rationale, caveats=caveats, confidence=confidence,
@@ -260,7 +290,14 @@ def cmd_assess(args):
                         "msavi": "(2*nir+1-sqrt((2*nir+1)^2-8*(nir-red)))/2 "
                                  "(self-adjusting; supporting evidence only)",
                         "primary_signal": "ndvi",
-                        "scale": "DN/10000", "mask": "clear pixels only"}},
+                        "scale": "DN/10000",
+                        "scale_justification": "ledger/data/radiometric_lineage.json: "
+                        "per-scene STAC audit (processing baseline + "
+                        "earthsearch:boa_offset_applied per scene); the data "
+                        "provider removed the PB>=04.00 +1000 DN offset when "
+                        "generating these COGs, confirmed by chip-level DN "
+                        "minima ~1. Not assumed — recorded.",
+                        "mask": "clear pixels only"}},
         {"step": "baseline_assessment", "tool": "ledger.change.assess",
          "parameters": {"baseline_years": baseline_years,
                         "assessment_years": current_years,
@@ -303,18 +340,31 @@ def cmd_assess(args):
     )
     packet["claim"]["caveats"] = caveats
     packet["baseline"] = {"period": f"{baseline_years[0]}-{baseline_years[-1]}",
-                          "ndvi_median": a.baseline_ndvi, "ndvi_std": a.baseline_std,
-                          "n_observations": a.n_baseline_obs}
-    packet["assessment_detail"] = {"period": period, "ndvi_median": a.current_ndvi,
-                                   "n_observations": a.n_current_obs,
-                                   "delta_vs_baseline": a.delta,
-                                   "delta_ci95": a.delta_ci95,
-                                   "matched_months": a.matched_months}
+                          "ndvi_median": a.baseline_ndvi,
+                          "n_scene_observations": a.n_baseline_obs}
+    packet["assessment_detail"] = {
+        "period": period, "ndvi_median": a.current_ndvi,
+        "n_scene_observations": a.n_current_obs,
+        "delta_vs_baseline": a.delta,
+        "delta_std": a.delta_std,
+        # Median of per-month deltas != difference of the displayed medians.
+        # Stated here so no reader has to discover it by subtraction.
+        "delta_method_note": (
+            "delta_vs_baseline is the median of per-month "
+            "(current-median minus baseline-median) deltas over matched "
+            "months; it is not the difference of baseline.ndvi_median and "
+            "assessment_detail.ndvi_median."),
+        "matched_months": a.matched_months}
+    if a.delta_ci95 is not None:
+        # Omitted (not null) below MIN_MATCHED_MONTHS_FOR_CI matched months:
+        # the schema keeps the field optional so absence is the honest signal.
+        packet["assessment_detail"]["delta_ci95"] = a.delta_ci95
 
     out = write_packet(packet, args.out)
     print(f"{args.site}: {a.tier.upper()} — {a.statement} "
-          f"(delta {a.delta:+.3f}, baseline {a.baseline_ndvi:.3f} "
-          f"-> current {a.current_ndvi:.3f}, confidence {a.confidence})")
+          f"(delta {a.delta:+.3f} = median of {len(a.matched_months)} matched-month deltas; "
+          f"baseline median {a.baseline_ndvi:.3f}, current median {a.current_ndvi:.3f}, "
+          f"confidence {a.confidence})")
     print(f"  packet: {out}")
     return out
 
