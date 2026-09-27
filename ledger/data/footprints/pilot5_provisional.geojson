@@ -1,0 +1,220 @@
+{
+  "type": "FeatureCollection",
+  "properties": {
+    "note": "PROVISIONAL interpreter estimates. See README.md."
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "site_id": "16-14-018-26W4 (100)",
+        "confidence_class": "medium",
+        "disturbance_resolved": true,
+        "interpreter_rule": "False-colour composite (NIR->red, red->green, blue->blue) of the latest clear Sentinel-2 scene per site, DLS centroid marked. Disturbance = contiguous low-vegetation (dark) patch around the centroid distinct from surrounding fields; where no such patch exists, the polygon traces the field parcel containing the centroid and disturbance_resolved=false. 10 m pixels cannot resolve wellheads or pads; all boundaries are interpreter estimates.",
+        "interpreted_scene_date": "2026-08-08",
+        "digitized_date": "2026-09-27",
+        "note": "Dark low-vegetation patch ~200x350 m around the DLS centroid; boundary gradational; adjacent bright-red oval may be reclaimed ground or unrelated. Pad itself not resolved at 10 m.",
+        "superseded_by": "Authoritative footprint wins: AER reclamation application site plan, OWA project boundary, or licensed high-resolution survey."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -107.437768,
+              50.521597
+            ],
+            [
+              -107.434925,
+              50.52187
+            ],
+            [
+              -107.434195,
+              50.520318
+            ],
+            [
+              -107.434914,
+              50.518271
+            ],
+            [
+              -107.437053,
+              50.517977
+            ],
+            [
+              -107.438239,
+              50.519093
+            ],
+            [
+              -107.438399,
+              50.520717
+            ],
+            [
+              -107.437768,
+              50.521597
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "site_id": "05-13-020-27W4 (100)",
+        "confidence_class": "low",
+        "disturbance_resolved": false,
+        "interpreter_rule": "False-colour composite (NIR->red, red->green, blue->blue) of the latest clear Sentinel-2 scene per site, DLS centroid marked. Disturbance = contiguous low-vegetation (dark) patch around the centroid distinct from surrounding fields; where no such patch exists, the polygon traces the field parcel containing the centroid and disturbance_resolved=false. 10 m pixels cannot resolve wellheads or pads; all boundaries are interpreter estimates.",
+        "interpreted_scene_date": "2026-08-25",
+        "digitized_date": "2026-09-27",
+        "note": "Centroid falls inside a large section-aligned dark field; no discrete pad resolved at 10 m. Polygon traces the field parcel, NOT a disturbance.",
+        "superseded_by": "Authoritative footprint wins: AER reclamation application site plan, OWA project boundary, or licensed high-resolution survey."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -113.582555,
+              50.688841
+            ],
+            [
+              -113.572797,
+              50.689057
+            ],
+            [
+              -113.572425,
+              50.682251
+            ],
+            [
+              -113.582182,
+              50.682035
+            ],
+            [
+              -113.582555,
+              50.688841
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "site_id": "14-03-020-27W4 (100)",
+        "confidence_class": "low",
+        "disturbance_resolved": false,
+        "interpreter_rule": "False-colour composite (NIR->red, red->green, blue->blue) of the latest clear Sentinel-2 scene per site, DLS centroid marked. Disturbance = contiguous low-vegetation (dark) patch around the centroid distinct from surrounding fields; where no such patch exists, the polygon traces the field parcel containing the centroid and disturbance_resolved=false. 10 m pixels cannot resolve wellheads or pads; all boundaries are interpreter estimates.",
+        "interpreted_scene_date": "2026-08-25",
+        "digitized_date": "2026-09-27",
+        "note": "Centroid sits on the corner of four fields; no discrete pad resolved. Polygon traces the darker adjacent parcel as the area of interest.",
+        "superseded_by": "Authoritative footprint wins: AER reclamation application site plan, OWA project boundary, or licensed high-resolution survey."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -113.624725,
+              50.666324
+            ],
+            [
+              -113.618223,
+              50.666471
+            ],
+            [
+              -113.617893,
+              50.660542
+            ],
+            [
+              -113.624394,
+              50.660395
+            ],
+            [
+              -113.624725,
+              50.666324
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "site_id": "07-30-018-26W4 (100)",
+        "confidence_class": "low",
+        "disturbance_resolved": false,
+        "interpreter_rule": "False-colour composite (NIR->red, red->green, blue->blue) of the latest clear Sentinel-2 scene per site, DLS centroid marked. Disturbance = contiguous low-vegetation (dark) patch around the centroid distinct from surrounding fields; where no such patch exists, the polygon traces the field parcel containing the centroid and disturbance_resolved=false. 10 m pixels cannot resolve wellheads or pads; all boundaries are interpreter estimates.",
+        "interpreted_scene_date": "2026-07-11",
+        "digitized_date": "2026-09-27",
+        "note": "No visible disturbance; ground uniformly vegetated around the centroid. Parcel drawn as area of interest only.",
+        "superseded_by": "Authoritative footprint wins: AER reclamation application site plan, OWA project boundary, or licensed high-resolution survey."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -107.541113,
+              50.543487
+            ],
+            [
+              -107.532943,
+              50.543244
+            ],
+            [
+              -107.533384,
+              50.537229
+            ],
+            [
+              -107.541554,
+              50.537473
+            ],
+            [
+              -107.541113,
+              50.543487
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "site_id": "13-17-019-27W4 (100)",
+        "confidence_class": "low",
+        "disturbance_resolved": false,
+        "interpreter_rule": "False-colour composite (NIR->red, red->green, blue->blue) of the latest clear Sentinel-2 scene per site, DLS centroid marked. Disturbance = contiguous low-vegetation (dark) patch around the centroid distinct from surrounding fields; where no such patch exists, the polygon traces the field parcel containing the centroid and disturbance_resolved=false. 10 m pixels cannot resolve wellheads or pads; all boundaries are interpreter estimates.",
+        "interpreted_scene_date": "2026-08-25",
+        "digitized_date": "2026-09-27",
+        "note": "Centroid on a N-S field boundary; no discrete pad resolved at 10 m. Polygon traces the west parcel containing the centroid.",
+        "superseded_by": "Authoritative footprint wins: AER reclamation application site plan, OWA project boundary, or licensed high-resolution survey."
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -113.671518,
+              50.608342
+            ],
+            [
+              -113.66333,
+              50.608529
+            ],
+            [
+              -113.66299,
+              50.60251
+            ],
+            [
+              -113.671177,
+              50.602323
+            ],
+            [
+              -113.671518,
+              50.608342
+            ]
+          ]
+        ]
+      }
+    }
+  ]
+}
