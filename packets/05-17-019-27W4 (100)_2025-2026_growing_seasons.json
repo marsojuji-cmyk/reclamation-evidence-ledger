@@ -175,7 +175,7 @@
         "scenes_selected": 26,
         "buffer_m": 500.0
       },
-      "at": "2026-09-27T07:17:35.684437+00:00"
+      "at": "2026-09-27T07:51:01.646429+00:00"
     },
     {
       "step": "chip_download_windowed",
@@ -196,7 +196,7 @@
         "reference_grid": "red band (10 m)",
         "note": "chips stored as written; DN = reflectance*10000"
       },
-      "at": "2026-09-27T07:17:35.684449+00:00"
+      "at": "2026-09-27T07:51:01.646442+00:00"
     },
     {
       "step": "cloud_mask",
@@ -262,7 +262,7 @@
           }
         ]
       },
-      "at": "2026-09-27T07:17:35.684454+00:00"
+      "at": "2026-09-27T07:51:01.646446+00:00"
     },
     {
       "step": "index_computation",
@@ -274,7 +274,7 @@
         "scale": "DN/10000",
         "mask": "clear pixels only"
       },
-      "at": "2026-09-27T07:17:35.684457+00:00"
+      "at": "2026-09-27T07:51:01.646449+00:00"
     },
     {
       "step": "baseline_assessment",
@@ -292,7 +292,7 @@
         "recover_delta": 0.08,
         "stall_delta": -0.08
       },
-      "at": "2026-09-27T07:17:35.684460+00:00"
+      "at": "2026-09-27T07:51:01.646454+00:00"
     },
     {
       "step": "packet_build",
@@ -300,7 +300,7 @@
       "parameters": {
         "schema_version": "1.0.0"
       },
-      "at": "2026-09-27T07:17:35.684464+00:00"
+      "at": "2026-09-27T07:51:01.646457+00:00"
     }
   ],
   "chips": [
@@ -965,7 +965,7 @@
         "license_note": "Contains modified Copernicus Sentinel data."
       }
     ],
-    "generated_at": "2026-09-27T07:17:35.684467+00:00",
+    "generated_at": "2026-09-27T07:51:01.646459+00:00",
     "generated_by": "reclamation-ledger pipeline (human-reviewed before publish)"
   },
   "baseline": {

@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-09-27T07:17:52Z",
-  "elapsed_seconds": 31.1,
+  "generated_at": "2026-09-27T07:51:19Z",
+  "elapsed_seconds": 33.1,
   "results": [
     {
       "site": "01-28-020-27W4 (Facility)",
@@ -27,6 +27,42 @@
       "confidence": "low"
     },
     {
+      "site": "06-21-020-27W4 (Facility)",
+      "status": "assessed",
+      "packet": "06-21-020-27W4 (Facility)_2025-2026_growing_seasons.json",
+      "tier": "detected",
+      "classification": "no significant change vs baseline",
+      "n_observations": 10,
+      "baseline_ndvi": 0.3554,
+      "current_ndvi": 0.4908,
+      "delta": 0.0617,
+      "confidence": "medium"
+    },
+    {
+      "site": "07-16-020-27W4 (102/10-16)",
+      "status": "assessed",
+      "packet": "07-16-020-27W4 (102_10-16)_2025-2026_growing_seasons.json",
+      "tier": "detected",
+      "classification": "no significant change vs baseline",
+      "n_observations": 10,
+      "baseline_ndvi": 0.2504,
+      "current_ndvi": 0.392,
+      "delta": 0.0776,
+      "confidence": "medium"
+    },
+    {
+      "site": "08-29-020-27W4 (Facility)",
+      "status": "assessed",
+      "packet": "08-29-020-27W4 (Facility)_2025-2026_growing_seasons.json",
+      "tier": "detected",
+      "classification": "no significant change vs baseline",
+      "n_observations": 10,
+      "baseline_ndvi": 0.3111,
+      "current_ndvi": 0.3593,
+      "delta": 0.036,
+      "confidence": "medium"
+    },
+    {
       "site": "12-23-020-27W4 (Multi) - MIXED",
       "status": "assessed",
       "packet": "12-23-020-27W4 (Multi) - MIXED_2025-2026_growing_seasons.json",
@@ -37,6 +73,42 @@
       "current_ndvi": 0.3587,
       "delta": 0.0889,
       "confidence": "low"
+    },
+    {
+      "site": "14-03-020-27W4 (100)",
+      "status": "assessed",
+      "packet": "14-03-020-27W4 (100)_2025-2026_growing_seasons.json",
+      "tier": "detected",
+      "classification": "no significant change vs baseline",
+      "n_observations": 10,
+      "baseline_ndvi": 0.4422,
+      "current_ndvi": 0.3541,
+      "delta": -0.0001,
+      "confidence": "medium"
+    },
+    {
+      "site": "16-09-020-27W4 (Multi)",
+      "status": "assessed",
+      "packet": "16-09-020-27W4 (Multi)_2025-2026_growing_seasons.json",
+      "tier": "detected",
+      "classification": "no significant change vs baseline",
+      "n_observations": 9,
+      "baseline_ndvi": 0.3572,
+      "current_ndvi": 0.4856,
+      "delta": 0.0435,
+      "confidence": "medium"
+    },
+    {
+      "site": "16-20-020-27W4 (100)",
+      "status": "assessed",
+      "packet": "16-20-020-27W4 (100)_2025-2026_growing_seasons.json",
+      "tier": "detected",
+      "classification": "no significant change vs baseline",
+      "n_observations": 10,
+      "baseline_ndvi": 0.3313,
+      "current_ndvi": 0.3886,
+      "delta": 0.0724,
+      "confidence": "medium"
     },
     {
       "site": "02-07-019-27W4 (100)",
@@ -75,6 +147,18 @@
       "confidence": "low"
     },
     {
+      "site": "06-26-019-27W4 (100) - WIPA",
+      "status": "assessed",
+      "packet": "06-26-019-27W4 (100) - WIPA_2025-2026_growing_seasons.json",
+      "tier": "detected",
+      "classification": "no significant change vs baseline",
+      "n_observations": 9,
+      "baseline_ndvi": 0.2974,
+      "current_ndvi": 0.3844,
+      "delta": 0.0696,
+      "confidence": "medium"
+    },
+    {
       "site": "08-04-019-27W4 (100)",
       "status": "assessed",
       "packet": "08-04-019-27W4 (100)_2025-2026_growing_seasons.json",
@@ -97,6 +181,54 @@
       "current_ndvi": 0.5828,
       "delta": 0.0131,
       "confidence": "low"
+    },
+    {
+      "site": "10-32-019-27W4 (Multi)",
+      "status": "assessed",
+      "packet": "10-32-019-27W4 (Multi)_2025-2026_growing_seasons.json",
+      "tier": "detected",
+      "classification": "no significant change vs baseline",
+      "n_observations": 10,
+      "baseline_ndvi": 0.2688,
+      "current_ndvi": 0.4425,
+      "delta": 0.0587,
+      "confidence": "medium"
+    },
+    {
+      "site": "13-17-019-27W4 (100)",
+      "status": "assessed",
+      "packet": "13-17-019-27W4 (100)_2025-2026_growing_seasons.json",
+      "tier": "identified",
+      "classification": "vegetation recovering",
+      "n_observations": 10,
+      "baseline_ndvi": 0.2695,
+      "current_ndvi": 0.5824,
+      "delta": 0.0869,
+      "confidence": "medium"
+    },
+    {
+      "site": "16-27-019-27W4 (100) - WIPA",
+      "status": "assessed",
+      "packet": "16-27-019-27W4 (100) - WIPA_2025-2026_growing_seasons.json",
+      "tier": "detected",
+      "classification": "no significant change vs baseline",
+      "n_observations": 9,
+      "baseline_ndvi": 0.4001,
+      "current_ndvi": 0.3659,
+      "delta": 0.0077,
+      "confidence": "medium"
+    },
+    {
+      "site": "01-06-018-26W4 (100)",
+      "status": "assessed",
+      "packet": "01-06-018-26W4 (100)_2025-2026_growing_seasons.json",
+      "tier": "detected",
+      "classification": "no significant change vs baseline",
+      "n_observations": 10,
+      "baseline_ndvi": 0.3344,
+      "current_ndvi": 0.4778,
+      "delta": 0.0568,
+      "confidence": "medium"
     },
     {
       "site": "03-08-018-26W4 (100)",
@@ -195,50 +327,5 @@
       "confidence": "high"
     }
   ],
-  "failures": [
-    {
-      "site": "06-21-020-27W4 (Facility)",
-      "reason": "assess exit 1: ch/workspace/reclamation-ledger/ledger/change.py\", line 197, in cmd_assess\n    a = assess(args.site, base_monthly, cur_monthly, period)\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/hatch/workspace/reclamation-ledger/ledger/change.py\", line 52, in assess\n    raise ValueError(\nValueError: 06-21-020-27W4 (Facility): need >=2 month-matched baseline/current months, got []\n"
-    },
-    {
-      "site": "07-16-020-27W4 (102/10-16)",
-      "reason": "assess exit 1: /workspace/reclamation-ledger/ledger/change.py\", line 197, in cmd_assess\n    a = assess(args.site, base_monthly, cur_monthly, period)\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/hatch/workspace/reclamation-ledger/ledger/change.py\", line 52, in assess\n    raise ValueError(\nValueError: 07-16-020-27W4 (102/10-16): need >=2 month-matched baseline/current months, got [8]\n"
-    },
-    {
-      "site": "08-29-020-27W4 (Facility)",
-      "reason": "assess exit 1: ch/workspace/reclamation-ledger/ledger/change.py\", line 197, in cmd_assess\n    a = assess(args.site, base_monthly, cur_monthly, period)\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/hatch/workspace/reclamation-ledger/ledger/change.py\", line 52, in assess\n    raise ValueError(\nValueError: 08-29-020-27W4 (Facility): need >=2 month-matched baseline/current months, got []\n"
-    },
-    {
-      "site": "14-03-020-27W4 (100)",
-      "reason": "assess exit 1: /hatch/workspace/reclamation-ledger/ledger/change.py\", line 197, in cmd_assess\n    a = assess(args.site, base_monthly, cur_monthly, period)\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/hatch/workspace/reclamation-ledger/ledger/change.py\", line 52, in assess\n    raise ValueError(\nValueError: 14-03-020-27W4 (100): need >=2 month-matched baseline/current months, got [8]\n"
-    },
-    {
-      "site": "16-09-020-27W4 (Multi)",
-      "reason": "assess exit 1: atch/workspace/reclamation-ledger/ledger/change.py\", line 197, in cmd_assess\n    a = assess(args.site, base_monthly, cur_monthly, period)\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/hatch/workspace/reclamation-ledger/ledger/change.py\", line 52, in assess\n    raise ValueError(\nValueError: 16-09-020-27W4 (Multi): need >=2 month-matched baseline/current months, got [8]\n"
-    },
-    {
-      "site": "16-20-020-27W4 (100)",
-      "reason": "assess exit 1: e/hatch/workspace/reclamation-ledger/ledger/change.py\", line 197, in cmd_assess\n    a = assess(args.site, base_monthly, cur_monthly, period)\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/hatch/workspace/reclamation-ledger/ledger/change.py\", line 52, in assess\n    raise ValueError(\nValueError: 16-20-020-27W4 (100): need >=2 month-matched baseline/current months, got []\n"
-    },
-    {
-      "site": "06-26-019-27W4 (100) - WIPA",
-      "reason": "assess exit 1: workspace/reclamation-ledger/ledger/change.py\", line 197, in cmd_assess\n    a = assess(args.site, base_monthly, cur_monthly, period)\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/hatch/workspace/reclamation-ledger/ledger/change.py\", line 52, in assess\n    raise ValueError(\nValueError: 06-26-019-27W4 (100) - WIPA: need >=2 month-matched baseline/current months, got [8]\n"
-    },
-    {
-      "site": "10-32-019-27W4 (Multi)",
-      "reason": "assess exit 1: hatch/workspace/reclamation-ledger/ledger/change.py\", line 197, in cmd_assess\n    a = assess(args.site, base_monthly, cur_monthly, period)\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/hatch/workspace/reclamation-ledger/ledger/change.py\", line 52, in assess\n    raise ValueError(\nValueError: 10-32-019-27W4 (Multi): need >=2 month-matched baseline/current months, got []\n"
-    },
-    {
-      "site": "13-17-019-27W4 (100)",
-      "reason": "assess exit 1: e/hatch/workspace/reclamation-ledger/ledger/change.py\", line 197, in cmd_assess\n    a = assess(args.site, base_monthly, cur_monthly, period)\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/hatch/workspace/reclamation-ledger/ledger/change.py\", line 52, in assess\n    raise ValueError(\nValueError: 13-17-019-27W4 (100): need >=2 month-matched baseline/current months, got []\n"
-    },
-    {
-      "site": "16-27-019-27W4 (100) - WIPA",
-      "reason": "assess exit 1: /workspace/reclamation-ledger/ledger/change.py\", line 197, in cmd_assess\n    a = assess(args.site, base_monthly, cur_monthly, period)\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/hatch/workspace/reclamation-ledger/ledger/change.py\", line 52, in assess\n    raise ValueError(\nValueError: 16-27-019-27W4 (100) - WIPA: need >=2 month-matched baseline/current months, got []\n"
-    },
-    {
-      "site": "01-06-018-26W4 (100)",
-      "reason": "assess exit 1: /hatch/workspace/reclamation-ledger/ledger/change.py\", line 197, in cmd_assess\n    a = assess(args.site, base_monthly, cur_monthly, period)\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/hatch/workspace/reclamation-ledger/ledger/change.py\", line 52, in assess\n    raise ValueError(\nValueError: 01-06-018-26W4 (100): need >=2 month-matched baseline/current months, got [5]\n"
-    }
-  ]
+  "failures": []
 }
