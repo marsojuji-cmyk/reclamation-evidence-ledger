@@ -62,3 +62,18 @@ tiers {detected, identified}, no compliance verdicts ever.
   skipped as already present. 0 honest refusals.
 - 2026-09-28 ~02:05 UTC: render complete (99 pages + index + 99 charts),
   docs/ Pages snapshot rebuilt (rsync out/ledger -> docs/).
+- 2026-09-28 ~02:10 UTC: PUSH REFUSED (correctly). Remote main moved out of
+  band while pilot-02 was building: remote holds 66ff974 (as 12cacb0f) +
+  3 new commits — 4a4cfc62 chore(deps) xarray (#5), a4a22bd6 chore(deps)
+  jsonschema (#4), a4fe2941 docs: CHANGELOG entry for v0.1.0 (all
+  2026-09-27 ~07:24 MDT, ~12h before this session). gh_api_push.py refused
+  because its recorded remote_head (12cacb0f) != current ref (a4fe2941) —
+  the script's divergence safeguard working as designed.
+  No force-push, no state-file edit: destruction or safeguard bypass is
+  not this coordinator's call. Instead, remote's file changes were mirrored
+  byte-identical into local (requirements.txt dep bumps, CHANGELOG.md) as
+  commit c2f9ae0, so the working tree is content-complete with remote main.
+  Local HEAD c2f9ae0 is unpushed; parent decides the push (safe path: update
+  .git/interlock-api-sync remote_head to a4fe2941, then gh_api_push.py —
+  it will append local commits as children of remote HEAD; trees already
+  carry the dep bumps + CHANGELOG, so nothing is reverted).
