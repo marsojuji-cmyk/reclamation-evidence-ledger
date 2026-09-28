@@ -1,0 +1,122 @@
+# Pilot 02 — 2026-09-27
+# Goal: expand to ~100 sites with licensee diversity (pilot-01 was Lexin-only).
+# Carry-over: 27 pilot-01 sites (LEXIN RESOURCES LTD; 3 townships SW Calgary).
+# New: 72 sites — up to 6 each from 12 new licensees,
+# OWA stage=reclamation, component=Well & Access Road, within 150 km of Calgary
+# (51.05,-114.07), coords via DLS LSD centroid (~+/-300 m). Within-licensee:
+# round-robin across distinct townships, median sorted site_id per township —
+# deterministic, avoids pad clustering. LR PROCESSING had 0 qualifying sites,
+# replaced by TERRA ENERGY CORP.
+# Per-licensee picks:
+#   HOUSTON OIL & GAS LTD: 6 sites, 6 townships
+#   TRIDENT EXPLORATION (ALBERTA) CORP: 6 sites, 6 townships
+#   SANLING ENERGY LTD: 6 sites, 6 townships
+#   CANADIAN OIL & GAS INTERNATIONAL INC: 6 sites, 6 townships
+#   MANITOK ENERGY INC: 6 sites, 6 townships
+#   VERITY ENERGY LTD: 6 sites, 4 townships
+#   TERRA ENERGY CORP: 6 sites, 6 townships
+#   TUSCANY ENERGY LTD: 6 sites, 6 townships
+#   ANTERRA ENERGY INC: 6 sites, 5 townships
+#   NEO EXPLORATION INC: 6 sites, 3 townships
+#   WOLF COULEE RESOURCES INC: 6 sites, 3 townships
+#   LGX OIL + GAS INC: 6 sites, 6 townships
+# Total: 99 sites
+01-28-020-27W4 (Facility)
+05-13-020-27W4 (100)
+06-21-020-27W4 (Facility)
+07-16-020-27W4 (102/10-16)
+08-29-020-27W4 (Facility)
+12-23-020-27W4 (Multi) - MIXED
+14-03-020-27W4 (100)
+16-09-020-27W4 (Multi)
+16-20-020-27W4 (100)
+02-07-019-27W4 (100)
+05-08-019-27W4 (100)
+05-17-019-27W4 (100)
+06-26-019-27W4 (100) - WIPA
+08-04-019-27W4 (100)
+08-21-019-27W4 (100)
+10-32-019-27W4 (Multi)
+13-17-019-27W4 (100)
+16-27-019-27W4 (100) - WIPA
+01-06-018-26W4 (100)
+03-08-018-26W4 (100)
+06-11-018-26W4 (100)
+06-36-018-26W4 (Multi) - MIXED
+07-30-018-26W4 (100)
+10-02-018-26W4 (100)
+14-14-018-26W4 (100)
+16-04-018-26W4 (100)
+16-14-018-26W4 (100)
+06-35-011-22W4 (102)
+04-21-011-27W4 (100)
+02-23-012-22W4 (100)
+07-22-013-21W4 (102)
+08-16-014-19W4 (100)
+09-05-014-22W4 (100)
+11-02-029-18W4 (102)
+06-20-029-19W4 (100)
+08-10-029-26W4 (100)
+11-26-029-27W4 (100)
+02-02-030-18W4 (100)
+16-15-030-19W4 (102)
+06-33-011-28W4 (100) - WIPA
+15-32-013-19W4 (100) - PS
+08-31-013-20W4 (Facility)
+14-27-014-19W4 (Facility)
+06-07-014-20W4 (100)
+16-12-014-21W4 (Facility)
+14-29-012-27W4 (102) - WIPA
+16-16-030-16W4 (100) - WIPA
+10-31-030-23W4 (100)
+03-29-030-24W4 (102/14-29)
+09-09-031-23W4 (100)
+16-12-036-28W4 (100) - WIPA
+11-08-014-22W4 (Multi)
+07-21-022-21W4 (100/02-21)
+06-35-022-22W4 (100/07-35)
+14-11-022-25W4 (100/13-11)
+16-23-023-22W4 (100/01-26)
+16-08-023-23W4 (100/04-16)
+05-34-016-20W4 (102)
+05-33-017-20W4 (100)
+11-14-017-21W4 (100)
+06-30-018-20W4 (100)
+03-28-016-20W4 (100)
+07-03-017-20W4 (100)
+04-06-031-28W4 (100)
+04-27-035-25W4 (102)
+12-17-036-03W5 (100)
+08-31-036-21W4 (100)
+15-04-037-21W4 (100)
+04-28-038-03W5 (100)
+06-31-013-19W4 (100)
+16-22-013-21W4 (Facility)
+11-20-014-19W4 (100)
+04-12-014-20W4 (100)
+06-06-014-21W4 (100)
+13-01-014-22W4 (100)
+14-31-021-25W4 (100/06-31)
+01-36-021-26W4 (100/05-31)
+06-07-022-25W4 (100)
+16-13-022-26W4 (100)
+10-03-023-26W4 (100)
+14-31-021-25W4 (100)
+16-36-029-01W5 (Facility)
+08-22-030-01W5 (100)
+10-08-031-01W5 (100)
+08-11-030-01W5 (100)
+06-08-031-01W5 (100)
+12-01-030-01W5 (Facility)
+08-19-014-20W4 (100/01-19)
+11-27-015-18W4 (Facility)
+09-18-015-19W4 (102) - WIPA
+05-17-014-20W4 (100)
+11-08-015-18W4 (100/10-08)
+09-14-014-20W4 (100)
+14-30-016-17W4 (100)
+06-23-016-18W4 (100)
+06-17-016-20W4 (100)
+08-23-016-21W4 (100)
+02-13-016-22W4 (100)
+14-02-017-19W4 (Multi)
