@@ -1,28 +1,100 @@
 site,status,packet,tier,classification,n_current_scene_observations,baseline_ndvi,current_ndvi,delta,confidence
-01-28-020-27W4 (Facility),assessed,01-28-020-27W4 (Facility)_2025-2026_growing_seasons.json,identified,vegetation recovering,2,0.2682,0.3666,0.0983,low
-05-13-020-27W4 (100),assessed,05-13-020-27W4 (100)_2025-2026_growing_seasons.json,identified,vegetation recovering,2,0.2083,0.4199,0.2116,low
-06-21-020-27W4 (Facility),assessed,06-21-020-27W4 (Facility)_2025-2026_growing_seasons.json,detected,no significant change vs baseline,10,0.3554,0.4908,0.0617,medium
-07-16-020-27W4 (102/10-16),assessed,07-16-020-27W4 (102_10-16)_2025-2026_growing_seasons.json,detected,no significant change vs baseline,10,0.2504,0.392,0.0776,medium
-08-29-020-27W4 (Facility),assessed,08-29-020-27W4 (Facility)_2025-2026_growing_seasons.json,detected,no significant change vs baseline,10,0.3111,0.3593,0.036,medium
-12-23-020-27W4 (Multi) - MIXED,assessed,12-23-020-27W4 (Multi) - MIXED_2025-2026_growing_seasons.json,identified,vegetation recovering,2,0.2698,0.3587,0.0889,low
-14-03-020-27W4 (100),assessed,14-03-020-27W4 (100)_2025-2026_growing_seasons.json,detected,no significant change vs baseline,10,0.4422,0.3541,-0.0001,medium
-16-09-020-27W4 (Multi),assessed,16-09-020-27W4 (Multi)_2025-2026_growing_seasons.json,detected,no significant change vs baseline,9,0.3572,0.4856,0.0435,medium
-16-20-020-27W4 (100),assessed,16-20-020-27W4 (100)_2025-2026_growing_seasons.json,detected,no significant change vs baseline,10,0.3313,0.3886,0.0724,medium
-02-07-019-27W4 (100),assessed,02-07-019-27W4 (100)_2025-2026_growing_seasons.json,identified,vegetation recovering,5,0.2982,0.4111,0.0836,medium
-05-08-019-27W4 (100),assessed,05-08-019-27W4 (100)_2025-2026_growing_seasons.json,detected,no significant change vs baseline,4,0.2262,0.2728,0.0661,medium
-05-17-019-27W4 (100),assessed,05-17-019-27W4 (100)_2025-2026_growing_seasons.json,detected,no significant change vs baseline,3,0.5637,0.6435,0.0798,low
-06-26-019-27W4 (100) - WIPA,assessed,06-26-019-27W4 (100) - WIPA_2025-2026_growing_seasons.json,detected,no significant change vs baseline,9,0.2974,0.3844,0.0696,medium
-08-04-019-27W4 (100),assessed,08-04-019-27W4 (100)_2025-2026_growing_seasons.json,identified,vegetation recovering,3,0.5027,0.5931,0.0903,low
-08-21-019-27W4 (100),assessed,08-21-019-27W4 (100)_2025-2026_growing_seasons.json,detected,no significant change vs baseline,3,0.5697,0.5828,0.0131,low
-10-32-019-27W4 (Multi),assessed,10-32-019-27W4 (Multi)_2025-2026_growing_seasons.json,detected,no significant change vs baseline,10,0.2688,0.4425,0.0587,medium
-13-17-019-27W4 (100),assessed,13-17-019-27W4 (100)_2025-2026_growing_seasons.json,identified,vegetation recovering,10,0.2695,0.5824,0.0869,medium
-16-27-019-27W4 (100) - WIPA,assessed,16-27-019-27W4 (100) - WIPA_2025-2026_growing_seasons.json,detected,no significant change vs baseline,9,0.4001,0.3659,0.0077,medium
-01-06-018-26W4 (100),assessed,01-06-018-26W4 (100)_2025-2026_growing_seasons.json,detected,no significant change vs baseline,10,0.3344,0.4778,0.0568,medium
-03-08-018-26W4 (100),assessed,03-08-018-26W4 (100)_2025-2026_growing_seasons.json,detected,no significant change vs baseline,10,0.266,0.3423,0.0773,medium
-06-11-018-26W4 (100),assessed,06-11-018-26W4 (100)_2025-2026_growing_seasons.json,identified,vegetation recovering,12,0.2889,0.4766,0.1369,high
-06-36-018-26W4 (Multi) - MIXED,assessed,06-36-018-26W4 (Multi) - MIXED_2025-2026_growing_seasons.json,identified,vegetation recovering,2,0.4035,0.502,0.0985,low
-07-30-018-26W4 (100),assessed,07-30-018-26W4 (100)_2025-2026_growing_seasons.json,detected,no significant change vs baseline,2,0.5,0.4547,-0.0453,low
-10-02-018-26W4 (100),assessed,10-02-018-26W4 (100)_2025-2026_growing_seasons.json,identified,vegetation recovering,11,0.4137,0.4581,0.0837,medium
-14-14-018-26W4 (100),assessed,14-14-018-26W4 (100)_2025-2026_growing_seasons.json,identified,vegetation recovering,12,0.2466,0.4086,0.1375,high
-16-04-018-26W4 (100),assessed,16-04-018-26W4 (100)_2025-2026_growing_seasons.json,identified,vegetation recovering,11,0.3661,0.5324,0.1436,medium
-16-14-018-26W4 (100),assessed,16-14-018-26W4 (100)_2025-2026_growing_seasons.json,identified,vegetation recovering,13,0.2976,0.4539,0.1454,high
+01-28-020-27W4 (Facility),already_present,01-28-020-27W4 (Facility)_2025-2026_growing_seasons.json,,,,,,,
+05-13-020-27W4 (100),already_present,05-13-020-27W4 (100)_2025-2026_growing_seasons.json,,,,,,,
+06-21-020-27W4 (Facility),already_present,06-21-020-27W4 (Facility)_2025-2026_growing_seasons.json,,,,,,,
+07-16-020-27W4 (102/10-16),already_present,07-16-020-27W4 (102_10-16)_2025-2026_growing_seasons.json,,,,,,,
+08-29-020-27W4 (Facility),already_present,08-29-020-27W4 (Facility)_2025-2026_growing_seasons.json,,,,,,,
+12-23-020-27W4 (Multi) - MIXED,already_present,12-23-020-27W4 (Multi) - MIXED_2025-2026_growing_seasons.json,,,,,,,
+14-03-020-27W4 (100),already_present,14-03-020-27W4 (100)_2025-2026_growing_seasons.json,,,,,,,
+16-09-020-27W4 (Multi),already_present,16-09-020-27W4 (Multi)_2025-2026_growing_seasons.json,,,,,,,
+16-20-020-27W4 (100),already_present,16-20-020-27W4 (100)_2025-2026_growing_seasons.json,,,,,,,
+02-07-019-27W4 (100),already_present,02-07-019-27W4 (100)_2025-2026_growing_seasons.json,,,,,,,
+05-08-019-27W4 (100),already_present,05-08-019-27W4 (100)_2025-2026_growing_seasons.json,,,,,,,
+05-17-019-27W4 (100),already_present,05-17-019-27W4 (100)_2025-2026_growing_seasons.json,,,,,,,
+06-26-019-27W4 (100) - WIPA,already_present,06-26-019-27W4 (100) - WIPA_2025-2026_growing_seasons.json,,,,,,,
+08-04-019-27W4 (100),already_present,08-04-019-27W4 (100)_2025-2026_growing_seasons.json,,,,,,,
+08-21-019-27W4 (100),already_present,08-21-019-27W4 (100)_2025-2026_growing_seasons.json,,,,,,,
+10-32-019-27W4 (Multi),already_present,10-32-019-27W4 (Multi)_2025-2026_growing_seasons.json,,,,,,,
+13-17-019-27W4 (100),already_present,13-17-019-27W4 (100)_2025-2026_growing_seasons.json,,,,,,,
+16-27-019-27W4 (100) - WIPA,already_present,16-27-019-27W4 (100) - WIPA_2025-2026_growing_seasons.json,,,,,,,
+01-06-018-26W4 (100),already_present,01-06-018-26W4 (100)_2025-2026_growing_seasons.json,,,,,,,
+03-08-018-26W4 (100),already_present,03-08-018-26W4 (100)_2025-2026_growing_seasons.json,,,,,,,
+06-11-018-26W4 (100),already_present,06-11-018-26W4 (100)_2025-2026_growing_seasons.json,,,,,,,
+06-36-018-26W4 (Multi) - MIXED,already_present,06-36-018-26W4 (Multi) - MIXED_2025-2026_growing_seasons.json,,,,,,,
+07-30-018-26W4 (100),already_present,07-30-018-26W4 (100)_2025-2026_growing_seasons.json,,,,,,,
+10-02-018-26W4 (100),already_present,10-02-018-26W4 (100)_2025-2026_growing_seasons.json,,,,,,,
+14-14-018-26W4 (100),already_present,14-14-018-26W4 (100)_2025-2026_growing_seasons.json,,,,,,,
+16-04-018-26W4 (100),already_present,16-04-018-26W4 (100)_2025-2026_growing_seasons.json,,,,,,,
+16-14-018-26W4 (100),already_present,16-14-018-26W4 (100)_2025-2026_growing_seasons.json,,,,,,,
+06-35-011-22W4 (102),assessed,06-35-011-22W4 (102)_2025-2026_growing_seasons.json,identified,vegetation recovering,9,0.4043,0.5155,0.1112,medium
+04-21-011-27W4 (100),assessed,04-21-011-27W4 (100)_2025-2026_growing_seasons.json,detected,no significant change vs baseline,8,0.4411,0.4475,0.0224,medium
+02-23-012-22W4 (100),assessed,02-23-012-22W4 (100)_2025-2026_growing_seasons.json,detected,no significant change vs baseline,8,0.3889,0.4589,0.0565,medium
+07-22-013-21W4 (102),assessed,07-22-013-21W4 (102)_2025-2026_growing_seasons.json,detected,no significant change vs baseline,9,0.3765,0.3837,-0.0007,medium
+08-16-014-19W4 (100),assessed,08-16-014-19W4 (100)_2025-2026_growing_seasons.json,detected,no significant change vs baseline,10,0.4517,0.6175,0.0552,medium
+09-05-014-22W4 (100),assessed,09-05-014-22W4 (100)_2025-2026_growing_seasons.json,detected,no significant change vs baseline,8,0.3994,0.3774,0.0025,medium
+11-02-029-18W4 (102),assessed,11-02-029-18W4 (102)_2025-2026_growing_seasons.json,detected,no significant change vs baseline,6,0.2576,0.329,0.0763,medium
+06-20-029-19W4 (100),assessed,06-20-029-19W4 (100)_2025-2026_growing_seasons.json,detected,no significant change vs baseline,9,0.2471,0.3709,0.0041,medium
+08-10-029-26W4 (100),assessed,08-10-029-26W4 (100)_2025-2026_growing_seasons.json,detected,no significant change vs baseline,4,0.6151,0.5847,-0.0305,low
+11-26-029-27W4 (100),assessed,11-26-029-27W4 (100)_2025-2026_growing_seasons.json,detected,no significant change vs baseline,7,0.4835,0.4978,0.0289,medium
+02-02-030-18W4 (100),assessed,02-02-030-18W4 (100)_2025-2026_growing_seasons.json,detected,no significant change vs baseline,6,0.4517,0.4387,0.047,medium
+16-15-030-19W4 (102),assessed,16-15-030-19W4 (102)_2025-2026_growing_seasons.json,identified,vegetation recovering,7,0.2853,0.481,0.1285,medium
+06-33-011-28W4 (100) - WIPA,assessed,06-33-011-28W4 (100) - WIPA_2025-2026_growing_seasons.json,detected,no significant change vs baseline,10,0.3416,0.4121,0.0313,medium
+15-32-013-19W4 (100) - PS,assessed,15-32-013-19W4 (100) - PS_2025-2026_growing_seasons.json,identified,vegetation recovering,9,0.2777,0.5285,0.0978,medium
+08-31-013-20W4 (Facility),assessed,08-31-013-20W4 (Facility)_2025-2026_growing_seasons.json,detected,no significant change vs baseline,10,0.4431,0.4362,0.0306,medium
+14-27-014-19W4 (Facility),assessed,14-27-014-19W4 (Facility)_2025-2026_growing_seasons.json,detected,no significant change vs baseline,6,0.5263,0.6538,0.0254,medium
+06-07-014-20W4 (100),assessed,06-07-014-20W4 (100)_2025-2026_growing_seasons.json,detected,no significant change vs baseline,9,0.3092,0.3286,-0.0049,medium
+16-12-014-21W4 (Facility),assessed,16-12-014-21W4 (Facility)_2025-2026_growing_seasons.json,detected,no significant change vs baseline,9,0.3294,0.3371,0.0005,medium
+14-29-012-27W4 (102) - WIPA,assessed,14-29-012-27W4 (102) - WIPA_2025-2026_growing_seasons.json,identified,vegetation recovering,7,0.3669,0.5952,0.0889,medium
+16-16-030-16W4 (100) - WIPA,assessed,16-16-030-16W4 (100) - WIPA_2025-2026_growing_seasons.json,identified,vegetation recovering,7,0.4372,0.5164,0.0818,medium
+10-31-030-23W4 (100),assessed,10-31-030-23W4 (100)_2025-2026_growing_seasons.json,detected,no significant change vs baseline,9,0.3036,0.2475,0.0308,medium
+03-29-030-24W4 (102/14-29),assessed,03-29-030-24W4 (102_14-29)_2025-2026_growing_seasons.json,detected,no significant change vs baseline,8,0.4622,0.443,0.0058,medium
+09-09-031-23W4 (100),assessed,09-09-031-23W4 (100)_2025-2026_growing_seasons.json,detected,no significant change vs baseline,8,0.259,0.2817,0.0325,medium
+16-12-036-28W4 (100) - WIPA,assessed,16-12-036-28W4 (100) - WIPA_2025-2026_growing_seasons.json,detected,no significant change vs baseline,9,0.6003,0.3833,-0.0727,medium
+11-08-014-22W4 (Multi),assessed,11-08-014-22W4 (Multi)_2025-2026_growing_seasons.json,detected,no significant change vs baseline,8,0.3552,0.4251,0.0788,medium
+07-21-022-21W4 (100/02-21),assessed,07-21-022-21W4 (100_02-21)_2025-2026_growing_seasons.json,identified,vegetation recovering,6,0.3519,0.3679,0.0904,medium
+06-35-022-22W4 (100/07-35),assessed,06-35-022-22W4 (100_07-35)_2025-2026_growing_seasons.json,detected,no significant change vs baseline,4,0.2694,0.287,0.0187,low
+14-11-022-25W4 (100/13-11),assessed,14-11-022-25W4 (100_13-11)_2025-2026_growing_seasons.json,detected,no significant change vs baseline,7,0.4589,0.4893,-0.0393,medium
+16-23-023-22W4 (100/01-26),assessed,16-23-023-22W4 (100_01-26)_2025-2026_growing_seasons.json,detected,no significant change vs baseline,8,0.36,0.526,0.0755,medium
+16-08-023-23W4 (100/04-16),assessed,16-08-023-23W4 (100_04-16)_2025-2026_growing_seasons.json,detected,no significant change vs baseline,7,0.4139,0.4356,0.0165,medium
+05-34-016-20W4 (102),assessed,05-34-016-20W4 (102)_2025-2026_growing_seasons.json,identified,vegetation recovering,7,0.3278,0.4365,0.0857,medium
+05-33-017-20W4 (100),assessed,05-33-017-20W4 (100)_2025-2026_growing_seasons.json,detected,no significant change vs baseline,9,0.17,0.2903,0.0469,medium
+11-14-017-21W4 (100),assessed,11-14-017-21W4 (100)_2025-2026_growing_seasons.json,detected,no significant change vs baseline,7,0.5238,0.4947,0.0261,medium
+06-30-018-20W4 (100),assessed,06-30-018-20W4 (100)_2025-2026_growing_seasons.json,detected,no significant change vs baseline,9,0.3797,0.3924,0.0419,medium
+03-28-016-20W4 (100),assessed,03-28-016-20W4 (100)_2025-2026_growing_seasons.json,detected,no significant change vs baseline,7,0.1767,0.1737,0.0172,medium
+07-03-017-20W4 (100),assessed,07-03-017-20W4 (100)_2025-2026_growing_seasons.json,detected,no significant change vs baseline,7,0.3526,0.3901,-0.0028,medium
+04-06-031-28W4 (100),assessed,04-06-031-28W4 (100)_2025-2026_growing_seasons.json,detected,no significant change vs baseline,8,0.3979,0.4879,-0.0044,medium
+04-27-035-25W4 (102),assessed,04-27-035-25W4 (102)_2025-2026_growing_seasons.json,identified,vegetation stalled or regressing,9,0.7037,0.3723,-0.18,medium
+12-17-036-03W5 (100),assessed,12-17-036-03W5 (100)_2025-2026_growing_seasons.json,detected,no significant change vs baseline,7,0.7018,0.7662,0.0644,medium
+08-31-036-21W4 (100),assessed,08-31-036-21W4 (100)_2025-2026_growing_seasons.json,detected,no significant change vs baseline,6,0.6617,0.6861,0.0244,medium
+15-04-037-21W4 (100),assessed,15-04-037-21W4 (100)_2025-2026_growing_seasons.json,detected,no significant change vs baseline,8,0.5492,0.5787,0.0293,medium
+04-28-038-03W5 (100),assessed,04-28-038-03W5 (100)_2025-2026_growing_seasons.json,detected,no significant change vs baseline,7,0.5685,0.519,-0.0432,medium
+06-31-013-19W4 (100),assessed,06-31-013-19W4 (100)_2025-2026_growing_seasons.json,detected,no significant change vs baseline,8,0.5589,0.6196,-0.0294,medium
+16-22-013-21W4 (Facility),assessed,16-22-013-21W4 (Facility)_2025-2026_growing_seasons.json,detected,no significant change vs baseline,6,0.3518,0.3434,0.0024,medium
+11-20-014-19W4 (100),assessed,11-20-014-19W4 (100)_2025-2026_growing_seasons.json,detected,no significant change vs baseline,9,0.4637,0.4801,0.021,medium
+04-12-014-20W4 (100),assessed,04-12-014-20W4 (100)_2025-2026_growing_seasons.json,identified,vegetation recovering,6,0.2978,0.3255,0.0865,medium
+06-06-014-21W4 (100),assessed,06-06-014-21W4 (100)_2025-2026_growing_seasons.json,detected,no significant change vs baseline,8,0.3445,0.2391,-0.0287,medium
+13-01-014-22W4 (100),assessed,13-01-014-22W4 (100)_2025-2026_growing_seasons.json,identified,vegetation recovering,8,0.3599,0.4427,0.1021,medium
+14-31-021-25W4 (100/06-31),assessed,14-31-021-25W4 (100_06-31)_2025-2026_growing_seasons.json,detected,no significant change vs baseline,7,0.4291,0.571,0.0322,medium
+01-36-021-26W4 (100/05-31),assessed,01-36-021-26W4 (100_05-31)_2025-2026_growing_seasons.json,detected,no significant change vs baseline,6,0.3012,0.3732,0.0304,medium
+06-07-022-25W4 (100),assessed,06-07-022-25W4 (100)_2025-2026_growing_seasons.json,identified,vegetation recovering,6,0.3374,0.4178,0.0804,medium
+16-13-022-26W4 (100),assessed,16-13-022-26W4 (100)_2025-2026_growing_seasons.json,identified,vegetation recovering,7,0.3913,0.4402,0.0968,medium
+10-03-023-26W4 (100),assessed,10-03-023-26W4 (100)_2025-2026_growing_seasons.json,detected,no significant change vs baseline,6,0.5572,0.5076,-0.0143,medium
+14-31-021-25W4 (100),assessed,14-31-021-25W4 (100)_2025-2026_growing_seasons.json,detected,no significant change vs baseline,7,0.4739,0.571,0.0322,medium
+16-36-029-01W5 (Facility),assessed,16-36-029-01W5 (Facility)_2025-2026_growing_seasons.json,detected,no significant change vs baseline,8,0.5138,0.5643,0.0618,medium
+08-22-030-01W5 (100),assessed,08-22-030-01W5 (100)_2025-2026_growing_seasons.json,detected,no significant change vs baseline,6,0.5421,0.5583,0.0376,medium
+10-08-031-01W5 (100),assessed,10-08-031-01W5 (100)_2025-2026_growing_seasons.json,detected,no significant change vs baseline,6,0.3009,0.3851,0.0449,medium
+08-11-030-01W5 (100),assessed,08-11-030-01W5 (100)_2025-2026_growing_seasons.json,detected,no significant change vs baseline,6,0.4258,0.4732,0.0474,medium
+06-08-031-01W5 (100),assessed,06-08-031-01W5 (100)_2025-2026_growing_seasons.json,detected,no significant change vs baseline,6,0.3609,0.4435,0.0334,medium
+12-01-030-01W5 (Facility),assessed,12-01-030-01W5 (Facility)_2025-2026_growing_seasons.json,detected,no significant change vs baseline,5,0.3632,0.3837,0.0321,medium
+08-19-014-20W4 (100/01-19),assessed,08-19-014-20W4 (100_01-19)_2025-2026_growing_seasons.json,detected,no significant change vs baseline,9,0.1736,0.1886,0.0066,medium
+11-27-015-18W4 (Facility),assessed,11-27-015-18W4 (Facility)_2025-2026_growing_seasons.json,identified,vegetation recovering,8,0.3972,0.6846,0.1562,medium
+09-18-015-19W4 (102) - WIPA,assessed,09-18-015-19W4 (102) - WIPA_2025-2026_growing_seasons.json,detected,no significant change vs baseline,9,0.5399,0.3639,-0.0513,medium
+05-17-014-20W4 (100),assessed,05-17-014-20W4 (100)_2025-2026_growing_seasons.json,detected,no significant change vs baseline,9,0.3294,0.3583,0.0151,medium
+11-08-015-18W4 (100/10-08),assessed,11-08-015-18W4 (100_10-08)_2025-2026_growing_seasons.json,detected,no significant change vs baseline,8,0.4326,0.4064,0.006,medium
+09-14-014-20W4 (100),assessed,09-14-014-20W4 (100)_2025-2026_growing_seasons.json,identified,vegetation recovering,8,0.3936,0.5412,0.1812,medium
+14-30-016-17W4 (100),assessed,14-30-016-17W4 (100)_2025-2026_growing_seasons.json,identified,vegetation stalled or regressing,9,0.3993,0.3115,-0.0878,medium
+06-23-016-18W4 (100),assessed,06-23-016-18W4 (100)_2025-2026_growing_seasons.json,detected,no significant change vs baseline,7,0.4708,0.3467,-0.0219,medium
+06-17-016-20W4 (100),assessed,06-17-016-20W4 (100)_2025-2026_growing_seasons.json,identified,vegetation recovering,6,0.2662,0.5445,0.222,medium
+08-23-016-21W4 (100),assessed,08-23-016-21W4 (100)_2025-2026_growing_seasons.json,detected,no significant change vs baseline,6,0.2615,0.2344,-0.0129,medium
+02-13-016-22W4 (100),assessed,02-13-016-22W4 (100)_2025-2026_growing_seasons.json,detected,no significant change vs baseline,9,0.2453,0.305,0.0595,medium
+14-02-017-19W4 (Multi),assessed,14-02-017-19W4 (Multi)_2025-2026_growing_seasons.json,detected,no significant change vs baseline,9,0.3132,0.2896,-0.017,medium

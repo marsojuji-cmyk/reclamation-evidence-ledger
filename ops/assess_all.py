@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Assess all pilot sites in pilots/pilot-01.txt, skipping and recording failures.
+"""Assess all pilot sites in a pilot manifest, skipping and recording failures.
 
-Usage: .venv/bin/python ops/assess_all.py
+Usage: .venv/bin/python ops/assess_all.py [--sites pilots/pilot-02.txt]
 Writes packets/*.json and ops/assess_results.json + failures list.
 Safe to rerun: skips sites whose packet already exists (unless --force).
 """
@@ -23,9 +23,9 @@ def packet_name(site_id: str) -> str:
     return packet_filename(f"{site_id}_2025-2026_growing_seasons")
 
 
-def load_sites() -> list[str]:
+def load_sites(manifest: str) -> list[str]:
     sites = []
-    for line in (ROOT / "pilots" / "pilot-01.txt").read_text().splitlines():
+    for line in (ROOT / manifest).read_text().splitlines():
         line = line.strip()
         if line and not line.startswith("#"):
             sites.append(line)
@@ -35,9 +35,11 @@ def load_sites() -> list[str]:
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--force", action="store_true", help="re-assess even if packet exists")
+    ap.add_argument("--sites", default="pilots/pilot-02.txt",
+                    help="pilot manifest (one site_id per line)")
     args = ap.parse_args()
 
-    sites = load_sites()
+    sites = load_sites(args.sites)
     results, failures = [], []
     t0 = time.time()
     for i, site in enumerate(sites, 1):

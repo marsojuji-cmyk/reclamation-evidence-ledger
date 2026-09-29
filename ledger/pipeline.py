@@ -2,7 +2,7 @@
 
 This is the entry point the launchd plist calls:
 
-    python -m ledger.pipeline run-monthly --sites pilots/pilot-01.txt
+    python -m ledger.pipeline run-monthly --sites pilots/pilot-02.txt
 
 It chains the three stages that already exist as CLIs:
   1. ledger.imagery fetch   (incremental; skips dates already on disk)
@@ -57,7 +57,7 @@ def main() -> None:
     ap = argparse.ArgumentParser(description="Reclamation Evidence Ledger pipeline.")
     sub = ap.add_subparsers(dest="cmd", required=True)
     r = sub.add_parser("run-monthly", help="fetch + assess + render for pilot sites")
-    r.add_argument("--sites", default="pilots/pilot-01.txt")
+    r.add_argument("--sites", default="pilots/pilot-02.txt")
     r.add_argument("--registry", default="data/sites.parquet")
     r.add_argument("--chips", default="data/chips")
     r.add_argument("--packets", default="packets")
