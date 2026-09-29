@@ -1,3 +1,8 @@
+## v0.3.0 (2026-09-29)
+
+- feat: interactive evidence dashboard generated from packets
+- fix: bump CI to Python 3.12 for rasterio 1.5 support (#8)
+
 ## v0.2.0 (2026-09-28)
 
 - feat: pilot-02 evidence — 72 new packets, tier/identified results, Pages snapshot
