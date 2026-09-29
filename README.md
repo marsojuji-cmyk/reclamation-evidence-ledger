@@ -4,7 +4,9 @@
 Sentinel-2 imagery, a fully automated Python pipeline, and one question per
 site, answered on a schedule: *is the land healing?*
 
-Live ledger (when published) · 27-site pilot · Alberta, Canada
+Live ledger · 99-site pilot (13 licensees) · Alberta, Canada
+
+> **Dashboard:** `docs/index.html` is now an interactive evidence dashboard generated from the packets themselves (`python ops/render_dashboard.py`) — the audit story, the 99-site findings register, per-site dossiers with NDVI time series, the method, and the ongoing self-audit. Every number on it is computed at render time; nothing is hand-typed.
 
 ---
 

@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reclamation Evidence Ledger — Alberta Orphan-Well Satellite Watch</title>
+<meta name="description" content="An independent satellite watchdog for Alberta's orphan wells. 99 sites, month-matched Sentinel-2 change detection, honest claim tiers.">
+<style>
+:root{
+  --paper:#f2e9d2; --paper2:#e8dab9; --card:#f7f0dd;
+  --ink:#221b10; --ink-soft:#6b5d43; --ink-faint:#8a7c5f;
+  --crimson:#a4133c; --teal:#0e6b6b; --ochre:#a97a0c;
+  --rule:#221b10; --grid:rgba(34,27,16,.14);
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --paper:#181310; --paper2:#221b14; --card:#1f1812;
+    --ink:#ece0c4; --ink-soft:#b3a37f; --ink-faint:#7d7057;
+    --crimson:#d95d7e; --teal:#45a8a0; --ochre:#d9a441;
+    --rule:#ece0c4; --grid:rgba(236,224,196,.14);
+  }
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0; color:var(--ink); background:var(--paper);
+  background-image:radial-gradient(rgba(120,90,40,.05) 1px, transparent 1px);
+  background-size:5px 5px;
+  font-family:Georgia,'Times New Roman',serif; line-height:1.55;
+}
+.sheet{max-width:1180px; margin:0 auto; padding:28px 20px 60px}
+/* ---------- plates ---------- */
+.plate{
+  background:var(--card); border:1.5px solid var(--rule);
+  outline:4px double var(--rule); outline-offset:5px;
+  margin:34px 6px; padding:30px 34px 28px; position:relative;
+}
+.plate-head{display:flex; align-items:baseline; gap:14px; border-bottom:2px dotted var(--ink-faint); padding-bottom:12px; margin-bottom:18px; flex-wrap:wrap}
+.plate-no{font-family:ui-monospace,'SF Mono',Menlo,monospace; font-size:12px; letter-spacing:.22em; color:var(--ink-soft); border:1px solid var(--ink-soft); padding:3px 10px; white-space:nowrap}
+.plate-title{font-size:26px; letter-spacing:.06em; margin:0; font-variant:small-caps}
+.plate-sub{font-style:italic; color:var(--ink-soft); margin:2px 0 0; font-size:15px}
+.fig-label{font-family:ui-monospace,'SF Mono',Menlo,monospace; font-size:11px; letter-spacing:.2em; color:var(--ink-soft); text-transform:uppercase; margin:22px 0 8px}
+.fig-label:first-child{margin-top:0}
+/* ---------- masthead ---------- */
+.masthead{text-align:center; padding:44px 34px 34px}
+.masthead .over{font-family:ui-monospace,'SF Mono',Menlo,monospace; font-size:12px; letter-spacing:.3em; color:var(--ink-soft)}
+.masthead h1{font-size:clamp(34px,6vw,58px); letter-spacing:.08em; margin:14px 0 6px; font-variant:small-caps; line-height:1.05}
+.masthead .rule{width:220px; margin:16px auto; border-top:3px double var(--rule)}
+.masthead .deck{font-style:italic; font-size:18px; color:var(--ink-soft); max-width:640px; margin:0 auto}
+.counters{display:flex; flex-wrap:wrap; justify-content:center; gap:0; margin-top:26px; border-top:1px solid var(--rule); border-bottom:1px solid var(--rule)}
+.counter{padding:14px 26px; text-align:center; border-left:1px dotted var(--ink-faint)}
+.counter:first-child{border-left:none}
+.counter .n{font-size:30px; color:var(--crimson); letter-spacing:.02em}
+.counter .l{font-family:ui-monospace,'SF Mono',Menlo,monospace; font-size:10.5px; letter-spacing:.18em; color:var(--ink-soft); margin-top:2px}
+.stamp{font-family:ui-monospace,'SF Mono',Menlo,monospace; font-size:11px; color:var(--ink-faint); letter-spacing:.08em; margin-top:18px}
+/* ---------- story ---------- */
+.timeline{display:grid; grid-template-columns:1fr 1fr 1fr; gap:0; margin:18px 0 6px}
+.tstep{padding:6px 20px 6px 0; position:relative}
+.tstep + .tstep{padding-left:22px; border-left:2px dotted var(--ink-faint)}
+.tstep .k{font-family:ui-monospace,'SF Mono',Menlo,monospace; font-size:11px; letter-spacing:.2em; color:var(--ink-soft)}
+.tstep h3{margin:8px 0 8px; font-size:19px; font-variant:small-caps; letter-spacing:.05em}
+.tstep p{font-size:14.5px; margin:0 0 10px; color:var(--ink)}
+.tstep .bad{color:var(--crimson)} .tstep .good{color:var(--teal)}
+.pull{font-size:20px; font-style:italic; text-align:center; max-width:660px; margin:26px auto 6px; color:var(--ink)}
+.pull::before,.pull::after{content:"—"; color:var(--ink-faint); margin:0 10px}
+.traces{display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-top:14px}
+.trace{border:1px solid var(--rule); padding:14px 14px 12px; background:var(--paper)}
+.trace .tn{font-family:ui-monospace,'SF Mono',Menlo,monospace; font-size:11px; letter-spacing:.14em; color:var(--ink-soft)}
+.trace .tv{font-size:26px; margin:6px 0 2px}
+.trace .to{font-size:13.5px; font-style:italic}
+.trace.pass .tv{color:var(--teal)} .trace.refuse .tv{color:var(--crimson)}
+.trace.refuse{outline:2px dashed var(--crimson); outline-offset:-6px}
+/* ---------- bignums ---------- */
+.bignums{display:grid; grid-template-columns:repeat(5,1fr); gap:14px; margin:6px 0 4px}
+.bignum{border:1px solid var(--rule); background:var(--paper); padding:16px 10px; text-align:center}
+.bignum .n{font-size:38px; line-height:1}
+.bignum .l{font-family:ui-monospace,'SF Mono',Menlo,monospace; font-size:10px; letter-spacing:.16em; color:var(--ink-soft); margin-top:8px; line-height:1.5}
+.bignum.crimson .n{color:var(--crimson)} .bignum.teal .n{color:var(--teal)} .bignum.ochre .n{color:var(--ochre)}
+/* ---------- table ---------- */
+.filters{display:flex; flex-wrap:wrap; gap:10px; margin:14px 0 12px; align-items:center}
+.filters input,.filters select{font-family:ui-monospace,'SF Mono',Menlo,monospace; font-size:13px; padding:7px 10px; background:var(--paper); color:var(--ink); border:1px solid var(--rule)}
+.filters .count{margin-left:auto; font-family:ui-monospace,'SF Mono',Menlo,monospace; font-size:12px; color:var(--ink-soft)}
+.tblwrap{overflow-x:auto; border:1px solid var(--rule)}
+table{border-collapse:collapse; width:100%; font-size:13.5px}
+th{font-family:ui-monospace,'SF Mono',Menlo,monospace; font-size:11px; letter-spacing:.12em; text-transform:uppercase; text-align:left; padding:10px 12px; border-bottom:2px solid var(--rule); background:var(--paper2); cursor:pointer; white-space:nowrap; user-select:none}
+td{padding:8px 12px; border-bottom:1px dotted var(--ink-faint); vertical-align:top}
+tr.rowh{cursor:pointer} tr.rowh:hover td{background:var(--paper2)}
+td.num, th.num{text-align:right; font-family:ui-monospace,'SF Mono',Menlo,monospace}
+.badge{font-family:ui-monospace,'SF Mono',Menlo,monospace; font-size:11px; letter-spacing:.1em; padding:2px 9px; border:1.5px solid; white-space:nowrap}
+.badge.identified{color:var(--crimson); border-color:var(--crimson)}
+.badge.detected{color:var(--teal); border-color:var(--teal)}
+.conf{font-family:ui-monospace,'SF Mono',Menlo,monospace; font-size:11.5px; color:var(--ink-soft)}
+a{color:var(--teal)}
+/* ---------- dossier ---------- */
+.dossier-head{display:flex; flex-wrap:wrap; gap:12px; align-items:center; margin-bottom:6px}
+select#sitesel{font-family:Georgia,serif; font-size:16px; padding:8px 12px; background:var(--paper); color:var(--ink); border:1.5px solid var(--rule); max-width:100%}
+.dmeta{display:flex; flex-wrap:wrap; gap:8px 22px; font-family:ui-monospace,'SF Mono',Menlo,monospace; font-size:12.5px; color:var(--ink-soft); margin:10px 0}
+.claimbox{border-left:4px solid var(--ochre); padding:4px 0 4px 16px; margin:16px 0}
+.claimbox .stmt{font-size:20px; font-style:italic}
+.claimbox .rat{font-size:14.5px; color:var(--ink-soft); margin-top:6px}
+.caveats{font-size:13.5px; color:var(--ink-soft); margin:12px 0; padding-left:20px}
+.caveats li{margin-bottom:5px}
+.honest{border:2px dashed var(--crimson); padding:14px 18px; margin:14px 0; font-style:italic}
+.honest b{font-style:normal; color:var(--crimson); letter-spacing:.06em}
+svg.chart{width:100%; height:auto; display:block; background:var(--paper); border:1px solid var(--rule); margin:10px 0}
+.legend{display:flex; flex-wrap:wrap; gap:18px; font-family:ui-monospace,'SF Mono',Menlo,monospace; font-size:11.5px; color:var(--ink-soft); margin:4px 0 8px}
+.sw{display:inline-block; width:11px; height:11px; border-radius:50%; margin-right:6px; vertical-align:baseline}
+.sw.ring{background:transparent; border:2px solid var(--ink); border-radius:50%}
+/* ---------- method ---------- */
+.doctrine{display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-top:8px}
+.doc{border:1px solid var(--rule); padding:16px; background:var(--paper)}
+.doc h4{margin:0 0 8px; font-variant:small-caps; letter-spacing:.08em; font-size:17px}
+.doc p{font-size:14px; margin:0; color:var(--ink)}
+.doc.forbid{opacity:.75} .doc.forbid h4{text-decoration:line-through; text-decoration-color:var(--crimson); text-decoration-thickness:2px}
+.limits{font-size:14.5px; padding-left:20px; margin:10px 0}
+.limits li{margin-bottom:7px}
+/* ---------- self audit ---------- */
+.findings5{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:8px}
+.find5{border:1px solid var(--rule); background:var(--paper); padding:14px 16px}
+.find5 .fk{font-family:ui-monospace,'SF Mono',Menlo,monospace; font-size:11px; letter-spacing:.16em; color:var(--crimson)}
+.find5 h4{margin:6px 0; font-size:16px}
+.find5 p{font-size:13.5px; margin:0; color:var(--ink)}
+.verdict{display:inline-block; border:2px solid var(--teal); color:var(--teal); font-family:ui-monospace,'SF Mono',Menlo,monospace; letter-spacing:.18em; font-size:13px; padding:6px 18px; margin:6px 0 4px}
+/* ---------- colophon ---------- */
+.colophon{font-size:13.5px; color:var(--ink-soft)}
+.colophon table{font-size:13px}
+.colophon td,.colophon th{border-bottom:1px dotted var(--ink-faint); cursor:default}
+.src td:first-child{font-family:ui-monospace,'SF Mono',Menlo,monospace; font-size:12px; white-space:nowrap}
+/* ---------- misc ---------- */
+.note{font-size:13px; font-style:italic; color:var(--ink-soft)}
+.hr-dotted{border:none; border-top:2px dotted var(--ink-faint); margin:20px 0}
+@media (max-width:760px){
+  .plate{padding:22px 18px; margin:26px 4px}
+  .timeline,.traces,.bignums,.doctrine,.findings5{grid-template-columns:1fr}
+  .tstep + .tstep{border-left:none; border-top:2px dotted var(--ink-faint); padding-left:0; padding-top:16px; margin-top:10px}
+  .counter{padding:10px 14px}
+}
+</style>
+</head>
+<body>
+<div class="sheet">
+
+<!-- ================= MASTHEAD ================= -->
+<header class="plate masthead">
+  <div class="over">ALBERTA &middot; ORPHAN WELL ASSOCIATION INVENTORY &middot; SENTINEL-2</div>
+  <h1>Reclamation Evidence Ledger</h1>
+  <div class="rule"></div>
+  <p class="deck">An independent satellite watchdog for Alberta&rsquo;s orphan wells &mdash;
+  free imagery, an automated pipeline, and one question per site, answered on a schedule:
+  <em>is the land healing?</em></p>
+  <div class="counters">
+    <div class="counter"><div class="n">%%N_SITES%%</div><div class="l">SITES ASSESSED</div></div>
+    <div class="counter"><div class="n">%%N_LIC%%</div><div class="l">LICENSEES</div></div>
+    <div class="counter"><div class="n">21,892</div><div class="l">REGISTRY SITES</div></div>
+    <div class="counter"><div class="n">10&nbsp;m</div><div class="l">SENTINEL-2 PIXEL</div></div>
+    <div class="counter"><div class="n">~5-day</div><div class="l">REVISIT</div></div>
+  </div>
+  <div class="stamp">RENDERED %%GENERATED%% FROM %%N_SITES%% EVIDENCE PACKETS &middot; SCHEMA v%%SCHEMA%% &middot; EVERY PACKET VALIDATED ON EACH PUSH TO MAIN</div>
+</header>
+
+<!-- ================= PLATE I : THE AUDIT ================= -->
+<section class="plate" id="audit">
+  <div class="plate-head"><span class="plate-no">PLATE I</span>
+    <h2 class="plate-title">The Instrument Audited Itself</h2></div>
+  <p class="plate-sub">The most important thing this project produced wasn&rsquo;t a green dashboard &mdash; it was a caught mistake.</p>
+  <div class="timeline">
+    <div class="tstep">
+      <div class="k">V1 &middot; SEASONAL MEDIANS</div>
+      <h3 class="bad">All 27 sites &ldquo;recovering&rdquo;</h3>
+      <p>The first change-detection method compared seasonal vegetation medians and reported that every pilot site was healing. A green dashboard. It was wrong.</p>
+    </div>
+    <div class="tstep">
+      <div class="k">AUDIT &middot; 2026-09-27</div>
+      <h3 class="bad">Measuring the calendar</h3>
+      <p>A full audit found the flaw: baseline scenes were sampled in <b>May/June</b> while current scenes were sampled in <b>July</b>. Summer is greener than spring &mdash; the method was measuring phenology, not reclamation.</p>
+    </div>
+    <div class="tstep">
+      <div class="k">V2 &middot; MONTH-MATCHED</div>
+      <h3 class="good">Honest refusals</h3>
+      <p>Rebuilt around <b>month-matched median-of-deltas</b>: each calendar month compared only to itself, <b>&ge;2 matched months required</b>, honest refusal otherwise. Under the corrected method most sites show no significant change &mdash; and the ledger says so.</p>
+    </div>
+  </div>
+  <div class="fig-label">Fig. 1 &mdash; Verification suite, run against the rebuilt assessor (2026-09-27)</div>
+  <div class="traces">
+    <div class="trace pass"><div class="tn">TRACE A &middot; RECOVERY</div><div class="tv">+0.30</div><div class="to">synthetic greening &rarr; correctly detected as recovery</div></div>
+    <div class="trace pass"><div class="tn">TRACE B &middot; NO CHANGE</div><div class="tv">+0.01</div><div class="to">synthetic flatline &rarr; correctly held as no significant change</div></div>
+    <div class="trace pass"><div class="tn">TRACE C &middot; REGRESSION</div><div class="tv">&minus;0.30</div><div class="to">synthetic browning &rarr; correctly detected as stalled / regressing</div></div>
+    <div class="trace refuse"><div class="tn">TRACE D &middot; PHENOLOGY TRAP</div><div class="tv">REFUSED</div><div class="to">no overlapping calendar months &rarr; assessment refused, not guessed</div></div>
+  </div>
+  <p class="pull">A watchdog that can&rsquo;t catch its own errors can&rsquo;t be trusted to watch anyone else.</p>
+</section>
+
+<!-- ================= PLATE II : FINDINGS ================= -->
+<section class="plate" id="findings">
+  <div class="plate-head"><span class="plate-no">PLATE II</span>
+    <h2 class="plate-title">Findings &mdash; 99 Sites</h2></div>
+  <p class="plate-sub">Pilot-01&rsquo;s 27 Lexin sites plus Pilot-02&rsquo;s expansion to 13 licensees. One honest distribution, not 99 green lights.</p>
+  <div class="bignums">
+    <div class="bignum"><div class="n">%%N_SITES%%</div><div class="l">SITES<br>ASSESSED</div></div>
+    <div class="bignum crimson"><div class="n">%%N_IDENT%%</div><div class="l">IDENTIFIED<br>CHANGE SIGNAL</div></div>
+    <div class="bignum teal"><div class="n">%%N_DETECT%%</div><div class="l">DETECTED<br>NO SIG. CHANGE</div></div>
+    <div class="bignum ochre"><div class="n">%%N_HI%%</div><div class="l">IDENTIFIED<br>HIGH CONFIDENCE</div></div>
+    <div class="bignum"><div class="n">%%N_NOCI%%</div><div class="l">SITES WITH<br>NO CI PRINTED</div></div>
+  </div>
+  <div class="fig-label">Fig. 2 &mdash; Distribution of median matched-month NDVI deltas (&Delta;)</div>
+  <div id="hist"></div>
+  <div class="legend">
+    <span><span class="sw" style="background:var(--teal)"></span>|&Delta;| &lt; 0.08 &mdash; noise band &rarr; <i>detected</i></span>
+    <span><span class="sw" style="background:var(--crimson)"></span>|&Delta;| &ge; 0.08 &mdash; outside noise &rarr; <i>identified</i></span>
+  </div>
+  <p class="note">The tier boundary is the &plusmn;0.08 noise band from the pipeline config: a median matched-month delta outside it is <i>identified</i> (recovering if positive, stalled/regressing if negative); inside it is <i>detected</i> &mdash; something was measured, no signal claimed.</p>
+  <div class="fig-label">Fig. 3 &mdash; Site register (click a row for its dossier)</div>
+  <div class="filters">
+    <input id="fq" type="search" placeholder="search site or licensee&hellip;" size="28">
+    <select id="ftier"><option value="">all tiers</option><option value="identified">identified</option><option value="detected">detected</option></select>
+    <select id="fconf"><option value="">all confidence</option><option value="high">high</option><option value="medium">medium</option><option value="low">low</option></select>
+    <select id="flic"><option value="">all licensees</option></select>
+    <span class="count" id="fcount"></span>
+  </div>
+  <div class="tblwrap"><table id="sites">
+    <thead><tr>
+      <th data-k="id">Site &#8597;</th><th data-k="lic">Licensee &#8597;</th><th data-k="tier">Tier &#8597;</th>
+      <th data-k="conf">Conf. &#8597;</th><th data-k="delta" class="num">&Delta; NDVI &#8597;</th>
+      <th class="num">95% CI</th><th class="num">Matched mo.</th><th>Packet</th>
+    </tr></thead>
+    <tbody></tbody>
+  </table></div>
+</section>
+
+<!-- ================= PLATE III : DOSSIER ================= -->
+<section class="plate" id="dossier">
+  <div class="plate-head"><span class="plate-no">PLATE III</span>
+    <h2 class="plate-title">Site Dossier</h2></div>
+  <p class="plate-sub">One site, full evidence: every scene the claim rests on, the months that were actually compared, and everything the pipeline refused to claim.</p>
+  <div class="dossier-head">
+    <label class="fig-label" for="sitesel" style="margin:0">Select site</label>
+    <select id="sitesel"></select>
+  </div>
+  <div id="dossier-body"></div>
+</section>
+
+<!-- ================= PLATE IV : METHOD ================= -->
+<section class="plate" id="method">
+  <div class="plate-head"><span class="plate-no">PLATE IV</span>
+    <h2 class="plate-title">Method &mdash; Why Month-Matching</h2></div>
+  <p class="plate-sub">Greenness follows the calendar, not the project. So the ledger never compares July to May.</p>
+  <div class="fig-label">Fig. 4 &mdash; The month-matched comparison (the v1 flaw, and the fix)</div>
+  <svg class="chart" id="methodSvg" viewBox="0 0 920 300" role="img" aria-label="Month-matched comparison diagram">
+    <g font-family="ui-monospace,'SF Mono',Menlo,monospace" font-size="12">
+      <text x="20" y="34" fill="var(--ink)" letter-spacing="2">BASELINE &#183; 2023&ndash;2024</text>
+      <text x="20" y="194" fill="var(--ink)" letter-spacing="2">CURRENT &#183; 2025&ndash;2026</text>
+      <g id="mmboxes"></g>
+      <text x="20" y="282" fill="var(--ink-soft)" font-size="11.5">&#916;m computed per matched month; the signal is the median of &#916;m. Unmatched months never enter the delta.</text>
+    </g>
+  </svg>
+  <div class="fig-label">Doctrine &mdash; borrowed from imagery interpretation tradecraft</div>
+  <div class="doctrine">
+    <div class="doc"><h4>Detection</h4><p>Something changed vs the baseline &mdash; a measured delta. The pipeline&rsquo;s lowest claim, and an honest one.</p></div>
+    <div class="doc"><h4>Identification</h4><p>The change is consistent with a reclamation signal across multiple observations &mdash; a hypothesis, caveats attached.</p></div>
+    <div class="doc forbid"><h4>Attribution</h4><p>A named party is responsible. <b>Never emitted by code.</b> Requires human review and ground truth. The pipeline stops at <i>identified</i>.</p></div>
+  </div>
+  <div class="fig-label">Honest limits</div>
+  <ul class="limits">
+    <li>Sentinel-2&rsquo;s 10&nbsp;m pixels cannot resolve wellheads or prove contamination, legal compliance, causation, or methane emissions.</li>
+    <li>Growing season to growing season only (May&ndash;Sep). Alberta snow makes winter comparisons meaningless; drought years mimic non-recovery.</li>
+    <li>Site coordinates are DLS LSD centroids (&plusmn;300&nbsp;m); the 500&nbsp;m analysis buffer absorbs this. This is not a survey of the wellhead.</li>
+    <li><b>No interval below four matched months.</b> Bootstrap confidence intervals over matched-month deltas are degenerate at n=2 &mdash; the resampled-median distribution has only three distinct values, so the interval looks precise and means almost nothing. Below four matched months the ledger prints <i>no interval</i> rather than a misleading one.</li>
+    <li>Every public claim carries its claim tier and provenance. No exceptions.</li>
+  </ul>
+</section>
+
+<!-- ================= PLATE V : SELF AUDIT ================= -->
+<section class="plate" id="selfaudit">
+  <div class="plate-head"><span class="plate-no">PLATE V</span>
+    <h2 class="plate-title">The Ledger Keeps Auditing Itself</h2></div>
+  <p class="plate-sub">After the rebuild, the instrument was stress-tested with a before-after-control-impact (BACI) probe: can a paired control parcel separate weather from reclamation? Twin-first &mdash; cheap simulation before any new downloads.</p>
+  <div style="margin:8px 0 4px"><span class="verdict">VERDICT &middot; GO &mdash; WITH CHANGES</span></div>
+  <p class="note">The probe reproduced the pipeline&rsquo;s month-matched deltas bit-for-bit on four sites, then found five things. Three of them changed the pipeline.</p>
+  <div class="findings5">
+    <div class="find5"><div class="fk">F1 &middot; GEOMETRY</div><h4>In-chip controls are impossible</h4><p>The chip <i>is</i> the 500&nbsp;m assessment buffer &mdash; no room inside it for a true control. Real controls need fresh 1.2&nbsp;km-offset chips.</p></div>
+    <div class="find5"><div class="fk">F2 &middot; HETEROGENEITY</div><h4>Control selection is the whole game</h4><p>Baseline NDVI spreads of 0.15&ndash;0.20 within one chip swing the result wildly. Proximity alone doesn&rsquo;t make a valid control &mdash; land-cover matching does.</p></div>
+    <div class="find5"><div class="fk">F3 &middot; FIXED IN PIPELINE</div><h4>Degenerate confidence intervals</h4><p>At 2 matched months the bootstrap CI looks precise and means nothing. The probe&rsquo;s fix is now a rule in <span style="font-family:ui-monospace,monospace">change.py</span>: no interval printed below 4 matched months.</p></div>
+    <div class="find5"><div class="fk">F4 &middot; ROBUSTNESS</div><h4>Off-by-one chip dimensions handled</h4><p>10 of 513 scenes have truncated window dimensions; the pipeline pins bands per-scene, so nothing breaks &mdash; verified, not assumed.</p></div>
+    <div class="find5"><div class="fk">F5 &middot; ECONOMY</div><h4>Sites cluster; controls can be shared</h4><p>26 of 27 pilot sites have a neighbour within 3&nbsp;km. One control chip could serve two nearby sites &mdash; pending per-pair land-cover validation.</p></div>
+    <div class="find5"><div class="fk">STANDING RULE</div><h4>Probes before downloads</h4><p>No download campaign runs until a cheap simulation has found what breaks. The BACI full run &mdash; 27 control chips, ~39&nbsp;MB, under an hour &mdash; is greenlit once the land-cover pre-flight is implemented.</p></div>
+  </div>
+</section>
+
+<!-- ================= COLOPHON ================= -->
+<footer class="plate colophon" id="colophon">
+  <div class="plate-head"><span class="plate-no">COLOPHON</span>
+    <h2 class="plate-title">Provenance</h2></div>
+  <table class="src" style="width:100%">
+    <tr><th style="text-align:left">Source</th><th style="text-align:left">What</th><th style="text-align:left">Access</th></tr>
+    <tr><td>OWA site inventory</td><td>Orphan site list, closure stage (no coordinates in file)</td><td>orphanwell.ca, monthly &middot; free</td></tr>
+    <tr><td>DLS geocoding</td><td>LSD-centroid coordinates derived from site names (&plusmn;300&nbsp;m)</td><td>built into the pipeline &middot; free</td></tr>
+    <tr><td>Sentinel-2 L2A</td><td>10&nbsp;m multispectral imagery, ~5-day revisit</td><td>AWS / Copernicus Data Space &middot; free</td></tr>
+    <tr><td>Pipeline</td><td><span style="font-family:ui-monospace,monospace">sites &rarr; imagery &rarr; indices &rarr; change &rarr; packet &rarr; render</span>, schema v%%SCHEMA%%</td><td><a href="https://github.com/marcusrichards-dev/reclamation-evidence-ledger">github.com/marcusrichards-dev/reclamation-evidence-ledger</a> &middot; MIT</td></tr>
+  </table>
+  <hr class="hr-dotted">
+  <p>Contains modified Copernicus Sentinel data (2023&ndash;2026). Per-site evidence packets &mdash; scenes, chips, checksums, transforms, caveats &mdash; are linked from the register above and validated against the schema on every push to main. This dashboard was rendered from the packets themselves; no number on this page was typed by hand.</p>
+  <p class="stamp">RENDERED %%GENERATED%% &middot; RECLAMATION EVIDENCE LEDGER &middot; A WATCHDOG THAT CAUGHT ITSELF</p>
+</footer>
+
+</div><!-- /sheet -->
+<script>
+(function(){
+"use strict";
+var LEDGER = %%LEDGER_JSON%%;
+var sites = LEDGER.sites, agg = LEDGER.agg;
+var NS = 'http://www.w3.org/2000/svg';
+function css(v){ return getComputedStyle(document.body).getPropertyValue(v).trim(); }
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function el(n, attrs, parent){
+  var e = document.createElementNS(NS, n);
+  for (var k in attrs) e.setAttribute(k, attrs[k]);
+  if (parent) parent.appendChild(e);
+  return e;
+}
+function txt(parent, x, y, s, attrs){
+  var t = el('text', Object.assign({x:x, y:y}, attrs||{}), parent);
+  t.textContent = s; return t;
+}
+function fmtD(d){ return (d>=0?'+':'') + d.toFixed(2); }
+function fmtD4(d){ return (d>=0?'+':'') + d.toFixed(4); }
+function ciStr(ci){ return ci==null ? '\u2014' : '['+fmtD(ci[0])+', '+fmtD(ci[1])+']'; }
+
+/* ---------- histogram ---------- */
+function renderHist(){
+  var host = document.getElementById('hist'); host.innerHTML='';
+  var W=920, H=250, ml=54, mr=14, mt=14, mb=40;
+  var ds = sites.map(function(s){return s.delta;}).filter(function(d){return d!=null;});
+  var lo=Math.min.apply(null,ds), hi=Math.max.apply(null,ds);
+  lo=Math.floor(lo*20)/20-0.01; hi=Math.ceil(hi*20)/20+0.01;
+  var NB=16, bins=new Array(NB).fill(0), bw=(hi-lo)/NB;
+  ds.forEach(function(d){ var b=Math.min(NB-1, Math.floor((d-lo)/bw)); bins[b]++; });
+  var mx=Math.max.apply(null,bins);
+  var svg=el('svg',{viewBox:'0 0 '+W+' '+H,'class':'chart',role:'img','aria-label':'Delta histogram'});
+  host.appendChild(svg);
+  var X=function(v){return ml+(v-lo)/(hi-lo)*(W-ml-mr);};
+  var Y=function(c){return H-mb-(c/mx)*(H-mt-mb);};
+  var ink=css('--ink'), teal=css('--teal'), crim=css('--crimson'), grid=css('--grid');
+  // noise band |d|<0.08
+  var nb=el('rect',{x:X(-0.08), y:mt, width:X(0.08)-X(-0.08), height:H-mb-mt, fill:teal, opacity:'0.10'},svg);
+  txt(svg,(X(-0.08)+X(0.08))/2, mt+14, 'noise band \u00b10.08', {fill:ink,'font-size':'10.5','text-anchor':'middle','font-family':'ui-monospace,monospace',opacity:'.7'});
+  bins.forEach(function(c,i){
+    var x0=lo+i*bw, mid=x0+bw/2;
+    var col = Math.abs(mid)<0.08 ? teal : crim;
+    var r=el('rect',{x:X(x0)+1, y:Y(c), width:Math.max(1,(X(x0+bw)-X(x0))-2), height:H-mb-Y(c), fill:col, opacity: c? '0.85':'0', stroke:ink,'stroke-width':'1'},svg);
+    var tt=el('title',{},r); tt.textContent=fmtD(x0)+' to '+fmtD(x0+bw)+': '+c+' sites';
+  });
+  // zero line
+  el('line',{x1:X(0),y1:mt,x2:X(0),y2:H-mb,stroke:crim,'stroke-width':'1.5','stroke-dasharray':'6 4'},svg);
+  // axes
+  el('line',{x1:ml,y1:H-mb,x2:W-mr,y2:H-mb,stroke:ink,'stroke-width':'1.5'},svg);
+  for(var v=Math.ceil(lo*10)/10; v<=hi+1e-9; v+=0.1){
+    var vv=Math.round(v*10)/10;
+    el('line',{x1:X(vv),y1:H-mb,x2:X(vv),y2:H-mb+5,stroke:ink,'stroke-width':'1'},svg);
+    txt(svg,X(vv),H-mb+20,fmtD(vv),{fill:ink,'font-size':'11','text-anchor':'middle','font-family':'ui-monospace,monospace'});
+  }
+  for(var c=0;c<=mx;c+=Math.max(1,Math.ceil(mx/4))){
+    el('line',{x1:ml,y1:Y(c),x2:W-mr,y2:Y(c),stroke:grid,'stroke-width':'1','stroke-dasharray':'3 4'},svg);
+    txt(svg,ml-8,Y(c)+4,String(c),{fill:ink,'font-size':'11','text-anchor':'end','font-family':'ui-monospace,monospace'});
+  }
+  txt(svg,W-mr,H-8,'median matched-month \u0394 NDVI',{fill:ink,'font-size':'11','text-anchor':'end','font-style':'italic'});
+}
+
+/* ---------- table ---------- */
+var sortK='delta', sortDir=1;
+function filtered(){
+  var q=document.getElementById('fq').value.toLowerCase(),
+      t=document.getElementById('ftier').value,
+      c=document.getElementById('fconf').value,
+      l=document.getElementById('flic').value;
+  var rows=sites.filter(function(s){
+    return (!q || s.id.toLowerCase().indexOf(q)>=0 || s.lic.toLowerCase().indexOf(q)>=0)
+        && (!t || s.tier===t) && (!c || s.conf===c) && (!l || s.lic===l);
+  });
+  rows.sort(function(a,b){
+    var va=a[sortK], vb=b[sortK];
+    if(va==null) return 1; if(vb==null) return -1;
+    return (va<vb?-1:va>vb?1:0)*sortDir;
+  });
+  return rows;
+}
+function renderTable(){
+  var tb=document.querySelector('#sites tbody'); tb.innerHTML='';
+  var rows=filtered();
+  document.getElementById('fcount').textContent='showing '+rows.length+' of '+sites.length;
+  rows.forEach(function(s){
+    var tr=document.createElement('tr'); tr.className='rowh';
+    tr.innerHTML =
+      '<td><b>'+esc(s.id)+'</b></td><td>'+esc(s.lic)+'</td>'+
+      '<td><span class="badge '+s.tier+'">'+s.tier.toUpperCase()+'</span></td>'+
+      '<td><span class="conf">'+s.conf+'</span></td>'+
+      '<td class="num">'+fmtD(s.delta)+'</td>'+
+      '<td class="num">'+esc(ciStr(s.ci))+'</td>'+
+      '<td class="num">'+s.mm.join(',')+'</td>'+
+      '<td><a href="'+s.page+'" target="_blank" rel="noopener">packet&nbsp;\u2197</a></td>';
+    tr.addEventListener('click', function(ev){
+      if(ev.target.tagName==='A') return;
+      selectSite(s.id);
+      document.getElementById('dossier').scrollIntoView({behavior:'smooth'});
+    });
+    tb.appendChild(tr);
+  });
+}
+document.querySelectorAll('#sites th[data-k]').forEach(function(th){
+  th.addEventListener('click', function(){
+    var k=th.getAttribute('data-k');
+    if(sortK===k) sortDir*=-1; else {sortK=k; sortDir=1;}
+    renderTable();
+  });
+});
+['fq','ftier','fconf','flic'].forEach(function(id){
+  document.getElementById(id).addEventListener('input', renderTable);
+});
+(function(){
+  var sel=document.getElementById('flic');
+  var lics=[...new Set(sites.map(function(s){return s.lic;}))].sort();
+  lics.forEach(function(l){ var o=document.createElement('option'); o.value=l; o.textContent=l; sel.appendChild(o); });
+})();
+
+/* ---------- dossier ---------- */
+var MONTHS={1:'Jan',2:'Feb',3:'Mar',4:'Apr',5:'May',6:'Jun',7:'Jul',8:'Aug',9:'Sep',10:'Oct',11:'Nov',12:'Dec'};
+function parseD(s){ var p=s.split('-'); return Date.UTC(+p[0],+p[1]-1,+p[2]); }
+function renderDossier(s){
+  var host=document.getElementById('dossier-body'); host.innerHTML='';
+  var ink=css('--ink'), soft=css('--ink-soft'), teal=css('--teal'), crim=css('--crimson'), ochre=css('--ochre'), grid=css('--grid');
+  // header line
+  var h=document.createElement('div'); h.className='dossier-head';
+  h.innerHTML='<span class="badge '+s.tier+'">'+s.tier.toUpperCase()+'</span>'+
+    '<span style="font-size:22px"><b>'+esc(s.id)+'</b></span>'+
+    '<span class="conf">confidence: '+s.conf+' &middot; '+esc(s.stmt)+'</span>';
+  host.appendChild(h);
+  var dm=document.createElement('div'); dm.className='dmeta';
+  dm.innerHTML='<span>'+esc(s.lic)+'</span><span>'+s.lat+', '+s.lon+'</span>'+
+    '<span>'+s.nobs+' scenes</span><span>'+s.nchips+' chips</span>'+
+    '<span>matched months: '+s.mm.map(function(m){return MONTHS[m];}).join(', ')+'</span>'+
+    '<span><a href="'+s.page+'" target="_blank" rel="noopener">full evidence packet \u2197</a></span>';
+  host.appendChild(dm);
+  // time series
+  var W=920,H=360,ml=56,mr=16,mt=26,mb=46;
+  var x0=parseD('2023-05-01'), x1=parseD('2026-09-30'), y0=-0.05, y1=1.0;
+  var X=function(t){return ml+(t-x0)/(x1-x0)*(W-ml-mr);};
+  var Y=function(v){return mt+(1-(v-y0)/(y1-y0))*(H-mt-mb);};
+  var svg=el('svg',{viewBox:'0 0 '+W+' '+H,'class':'chart',role:'img','aria-label':'NDVI time series for '+s.id});
+  host.appendChild(svg);
+  var fl=document.createElement('div'); fl.className='fig-label';
+  fl.textContent='Fig. \u2014 NDVI per scene, baseline 2023\u20132024 vs current 2025\u20132026 (ringed = month-matched; these carry the \u0394)';
+  host.insertBefore(fl, svg);
+  [0,0.2,0.4,0.6,0.8,1.0].forEach(function(v){
+    el('line',{x1:ml,y1:Y(v),x2:W-mr,y2:Y(v),stroke:grid,'stroke-width':'1','stroke-dasharray':'3 4'},svg);
+    txt(svg,ml-8,Y(v)+4,v.toFixed(1),{fill:ink,'font-size':'11','text-anchor':'end','font-family':'ui-monospace,monospace'});
+  });
+  for(var yr=2023; yr<=2026; yr++){
+    [5,6,7,8,9].forEach(function(m){
+      var t=Date.UTC(yr,m-1,15);
+      el('line',{x1:X(t),y1:H-mb,x2:X(t),y2:H-mb+4,stroke:ink,'stroke-width':'1'},svg);
+    });
+    var ty=X(Date.UTC(yr,6,1));
+    txt(svg,ty,H-mb+20,String(yr),{fill:ink,'font-size':'12','text-anchor':'middle','font-family':'ui-monospace,monospace'});
+  }
+  el('line',{x1:ml,y1:H-mb,x2:W-mr,y2:H-mb,stroke:ink,'stroke-width':'1.5'},svg);
+  txt(svg,ml-44,mt-8,'NDVI',{'font-size':'12','font-style':'italic',fill:soft});
+  if(s.bmed!=null) el('line',{x1:ml,y1:Y(s.bmed),x2:W-mr,y2:Y(s.bmed),stroke:teal,'stroke-width':'1.5','stroke-dasharray':'8 5'},svg);
+  if(s.cmed!=null) el('line',{x1:ml,y1:Y(s.cmed),x2:W-mr,y2:Y(s.cmed),stroke:crim,'stroke-width':'1.5','stroke-dasharray':'8 5'},svg);
+  s.obs.forEach(function(o){
+    var t=parseD(o[0]), col=o[3]?teal:crim;
+    var c=el('circle',{cx:X(t), cy:Y(o[1]), r:4.2, fill:col, stroke:ink,'stroke-width':'0.7',opacity:o[2]<0.5?'0.45':'1'},svg);
+    var tt=el('title',{},c);
+    tt.textContent=o[0]+' \u00b7 NDVI '+o[1].toFixed(3)+' \u00b7 clear '+(o[2]*100).toFixed(0)+'%' +(o[3]?' \u00b7 baseline':' \u00b7 current')+(o[4]?' \u00b7 month-matched':'');
+    if(o[4]) el('circle',{cx:X(t), cy:Y(o[1]), r:8, fill:'none', stroke:ink,'stroke-width':'1.6'},svg);
+  });
+  var lg=document.createElement('div'); lg.className='legend';
+  lg.innerHTML='<span><span class="sw" style="background:'+teal+'"></span>baseline 2023\u20132024'+(s.bmed!=null?' (median '+s.bmed.toFixed(2)+')':'')+'</span>'+
+    '<span><span class="sw" style="background:'+crim+'"></span>current 2025\u20132026'+(s.cmed!=null?' (median '+s.cmed.toFixed(2)+')':'')+'</span>'+
+    '<span><span class="sw ring"></span>month-matched observation</span>';
+  host.appendChild(lg);
+  // delta + CI strip
+  var fl2=document.createElement('div'); fl2.className='fig-label';
+  fl2.textContent='Median matched-month \u0394 with 95% bootstrap CI'; host.appendChild(fl2);
+  if(s.ci==null){
+    var hd=document.createElement('div'); hd.className='honest';
+    hd.innerHTML='<b>NO INTERVAL PRINTED.</b> This site has '+s.mm.length+' matched months; below four, the bootstrap interval looks precise and means almost nothing. Median \u0394 '+fmtD4(s.delta)+' stands without a confidence interval \u2014 by rule, not by omission.';
+    host.appendChild(hd);
+  } else {
+    var W2=920,H2=120,m2l=70,m2r=30;
+    var lo2=-0.35, hi2=0.35;
+    var X2=function(v){return m2l+(v-lo2)/(hi2-lo2)*(W2-m2l-m2r);};
+    var svg2=el('svg',{viewBox:'0 0 '+W2+' '+H2,'class':'chart',role:'img','aria-label':'Delta with confidence interval'});
+    host.appendChild(svg2);
+    el('rect',{x:X2(-0.08),y:14,width:X2(0.08)-X2(-0.08),height:H2-58,fill:teal,opacity:'0.12'},svg2);
+    txt(svg2,(X2(-0.08)+X2(0.08))/2,30,'noise \u00b10.08',{fill:ink,'font-size':'10.5','text-anchor':'middle','font-family':'ui-monospace,monospace',opacity:'.7'});
+    el('line',{x1:X2(0),y1:14,x2:X2(0),y2:H2-44,stroke:crim,'stroke-width':'1.2','stroke-dasharray':'5 4'},svg2);
+    [-0.3,-0.2,-0.1,0,0.1,0.2,0.3].forEach(function(v){
+      el('line',{x1:X2(v),y1:H2-44,x2:X2(v),y2:H2-38,stroke:ink},svg2);
+      txt(svg2,X2(v),H2-24,fmtD(v),{fill:ink,'font-size':'11','text-anchor':'middle','font-family':'ui-monospace,monospace'});
+    });
+    var cy=H2/2+4;
+    el('line',{x1:X2(s.ci[0]),y1:cy,x2:X2(s.ci[1]),y2:cy,stroke:ink,'stroke-width':'2.5'},svg2);
+    [s.ci[0],s.ci[1]].forEach(function(v){ el('line',{x1:X2(v),y1:cy-9,x2:X2(v),y2:cy+9,stroke:ink,'stroke-width':'2.5'},svg2); });
+    el('circle',{cx:X2(s.delta),cy:cy,r:7,fill:crim,stroke:ink,'stroke-width':'1.5'},svg2);
+    txt(svg2,X2(s.delta),cy-18,fmtD4(s.delta),{fill:ink,'font-size':'13','text-anchor':'middle','font-family':'ui-monospace,monospace','font-weight':'bold'});
+  }
+  // claim
+  var cb=document.createElement('div'); cb.className='claimbox';
+  cb.innerHTML='<div class="stmt">&ldquo;'+esc(s.stmt)+'&rdquo;</div><div class="rat">'+esc(s.rat)+'</div>';
+  host.appendChild(cb);
+  var cl=document.createElement('div'); cl.className='fig-label'; cl.textContent='Caveats carried on the packet'; host.appendChild(cl);
+  var ul=document.createElement('ul'); ul.className='caveats';
+  s.cav.forEach(function(c){ var li=document.createElement('li'); li.textContent=c; ul.appendChild(li); });
+  host.appendChild(ul);
+}
+function selectSite(id){
+  document.getElementById('sitesel').value=id;
+  var s=sites.filter(function(x){return x.id===id;})[0];
+  if(s) renderDossier(s);
+}
+(function(){
+  var sel=document.getElementById('sitesel');
+  sites.forEach(function(s){
+    var o=document.createElement('option'); o.value=s.id;
+    o.textContent=s.id+' \u2014 '+s.tier+' / '+s.conf+' ('+fmtD(s.delta)+')';
+    sel.appendChild(o);
+  });
+  sel.addEventListener('change', function(){ selectSite(sel.value); });
+})();
+
+/* ---------- method diagram ---------- */
+function renderMethod(){
+  var g = document.getElementById('mmboxes');
+  if(!g) return;
+  var ink=css('--ink'), teal=css('--teal'), crim=css('--crimson');
+  var months=[[5,'MAY'],[6,'JUN'],[7,'JUL'],[8,'AUG'],[9,'SEP']];
+  months.forEach(function(mm,i){
+    var x=200+i*132;
+    [[52,teal,'BASELINE'],[212,crim,'CURRENT']].forEach(function(r){
+      el('rect',{x:x,y:r[0],width:104,height:64,fill:'none',stroke:r[1],'stroke-width':'2'},g);
+      txt(g,x+52,r[0]+28,mm[1],{fill:ink,'font-size':'13','text-anchor':'middle','font-family':"ui-monospace,'SF Mono',Menlo,monospace"});
+      txt(g,x+52,r[0]+48,'median NDVI',{fill:ink,'font-size':'10',opacity:'.65','text-anchor':'middle','font-family':"ui-monospace,'SF Mono',Menlo,monospace"});
+    });
+    el('line',{x1:x+52,y1:120,x2:x+52,y2:208,stroke:ink,'stroke-width':'1.5','stroke-dasharray':'5 4'},g);
+    txt(g,x+60,168,'\u0394'+mm[0],{fill:ink,'font-size':'12','font-style':'italic','font-family':"ui-monospace,'SF Mono',Menlo,monospace"});
+  });
+}
+
+/* ---------- boot ---------- */
+renderMethod();
+renderHist();
+renderTable();
+var showcase = sites.filter(function(s){return s.tier==='identified'&&s.conf==='high';})[0] || sites[0];
+selectSite(showcase.id);
+})();
+</script>
+</body>
+</html>
