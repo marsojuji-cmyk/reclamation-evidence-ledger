@@ -11,7 +11,7 @@ pyproj>=3.6
 matplotlib>=3.11.2
 jsonschema>=4.26.0
 python-dateutil>=2.9.0.post0
-openpyxl>=3.1        # OWA inventory ships as Excel
+openpyxl>=3.1.5        # OWA inventory ships as Excel
 pyarrow>=15.0        # parquet site registry
 
 # Tests (not needed for the pipeline itself)
