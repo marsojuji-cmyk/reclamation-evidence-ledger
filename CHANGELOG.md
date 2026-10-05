@@ -1,3 +1,7 @@
+## v0.3.1 (2026-10-05)
+
+- fix: grant lint-title job pull-requests read permission (#14)
+
 ## v0.3.0 (2026-09-29)
 
 - feat: interactive evidence dashboard generated from packets
