@@ -2,7 +2,8 @@
 
 **An independent satellite watchdog for Alberta's orphan wells.** Free
 Sentinel-2 imagery, a fully automated Python pipeline, and one question per
-site, answered on a schedule: *is the land healing?*
+site, answered on a schedule: *is the land healing?* Every claim stamped for
+provenance, uncertainty, and limits.
 
 Live ledger · 99-site pilot (13 licensees) · Alberta, Canada
 
@@ -16,7 +17,9 @@ Alberta has tens of thousands of orphan oil and gas wells — sites whose
 operators walked away, leaving cleanup to the public purse. Nobody was
 watching whether reclaimed land actually recovers. This project watches from
 orbit and publishes exactly what it sees, with every claim stamped for
-provenance, uncertainty, and limits.
+provenance, uncertainty, and limits — including its own caught mistakes: the
+first method reported all 27 pilot sites recovering, and a full audit found
+it was measuring the calendar, not reclamation.
 
 The most important thing this project produced wasn't a green dashboard — it
 was a caught mistake. The first version of the change-detection method
