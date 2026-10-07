@@ -125,7 +125,8 @@ ops/             launchd plist for the recurring run
 ## Recurring run
 
 `ops/ca.reclamation-ledger.plist` runs the full pipeline monthly during growing
-season (May–Sep) and refreshes the OWA inventory each run. Install with:
+season (May–Sep) and refreshes the OWA inventory each run. First replace
+`/path/to/reclamation-evidence-ledger` in the plist with your checkout path, then install with:
 
 ```bash
 cp ops/ca.reclamation-ledger.plist ~/Library/LaunchAgents/

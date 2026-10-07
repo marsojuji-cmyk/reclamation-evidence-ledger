@@ -9,7 +9,7 @@
         <string>/bin/bash</string>
         <string>-lc</string>
         <!-- EDIT paths to match your checkout, then load with launchctl -->
-        <string>cd /Users/user/reclamation-ledger &amp;&amp; .venv/bin/python -m ledger.pipeline run-monthly</string>
+        <string>cd /path/to/reclamation-evidence-ledger &amp;&amp; .venv/bin/python -m ledger.pipeline run-monthly</string>
     </array>
     <!-- Monthly during growing season only (May=5 .. Sep=9). Snow months skip. -->
     <key>StartCalendarInterval</key>
