@@ -8,7 +8,7 @@ An independent satellite watchdog. It uses free Sentinel-2 imagery and a fully a
 
 **[Live evidence dashboard](https://marsojuji-cmyk.github.io/reclamation-evidence-ledger/)** · 99-site pilot · 13 licensees · Alberta, Canada
 
-The dashboard (`docs/index.html`) renders from the packets themselves with `python ops/render_dashboard.py`. It shows the audit story, the 99-site findings register, per-site dossiers with NDVI time series, the method, and the ongoing self-audit. It computes every number at render time; nothing is hand-typed.
+The dashboard (`docs/index.html`) renders from the packets themselves with `python ops/render_dashboard.py`. It shows the audit story, the 99-site findings register, per-site dossiers with NDVI time series, the method, and the ongoing self-audit. It computes every packet-derived number (sites, licensees, findings, render stamp) at render time. The one fixed figure is the registry-size counter (21,892), taken from the 2026-09-01 OWA inventory.
 
 ## What it guarantees
 
@@ -94,7 +94,7 @@ anyone else.
 ## What it does
 
 1. **Registry** — downloads the Orphan Well Association's monthly inventory
-   (21,892 geocoded sites) and derives coordinates from Dominion Land Survey
+   (21,892 geocoded sites in the 2026-09-01 file used for the pilot; that file is not committed. The 2026-10-01 file geocodes to 22,057 sites, re-run 2026-10-07) and derives coordinates from Dominion Land Survey
    names to ~±300 m LSD centroids.
 2. **Imagery** — queries the Sentinel-2 STAC catalog and downloads windowed
    red/NIR/SWIR/blue/SCL chips (500 m buffers) with per-scene checksums,
