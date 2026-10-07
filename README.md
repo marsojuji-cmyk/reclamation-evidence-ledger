@@ -1,28 +1,83 @@
 # Reclamation Evidence Ledger
 
-**An independent satellite watchdog for Alberta's orphan wells.** Free
-Sentinel-2 imagery, a fully automated Python pipeline, and one question per
-site, answered on a schedule: *is the land healing?* Every claim stamped for
-provenance, uncertainty, and limits.
+**This pipeline watches Alberta's orphan-well reclamation from orbit. It compares Sentinel-2 imagery month for month and stamps every claim with provenance, uncertainty, and limits.**
 
-Live ledger · 99-site pilot (13 licensees) · Alberta, Canada
+[![CI](https://github.com/marsojuji-cmyk/reclamation-evidence-ledger/actions/workflows/ci.yml/badge.svg)](https://github.com/marsojuji-cmyk/reclamation-evidence-ledger/actions/workflows/ci.yml) [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE) [![Python 3.12](https://img.shields.io/badge/python-3.12-blue.svg)](requirements.txt) [![Release](https://img.shields.io/github/v/release/marsojuji-cmyk/reclamation-evidence-ledger)](https://github.com/marsojuji-cmyk/reclamation-evidence-ledger/releases)
 
-> **Dashboard:** `docs/index.html` is now an interactive evidence dashboard generated from the packets themselves (`python ops/render_dashboard.py`) — the audit story, the 99-site findings register, per-site dossiers with NDVI time series, the method, and the ongoing self-audit. Every number on it is computed at render time; nothing is hand-typed.
+An independent satellite watchdog. It uses free Sentinel-2 imagery and a fully automated Python pipeline, and it answers one question per site on a schedule: *is the land healing?*
 
----
+**[Live evidence dashboard](https://marsojuji-cmyk.github.io/reclamation-evidence-ledger/)** · 99-site pilot · 13 licensees · Alberta, Canada
+
+The dashboard (`docs/index.html`) renders from the packets themselves with `python ops/render_dashboard.py`. It shows the audit story, the 99-site findings register, per-site dossiers with NDVI time series, the method, and the ongoing self-audit. It computes every number at render time; nothing is hand-typed.
+
+## What it guarantees
+
+- **No attribution, ever.** The packet schema allows only `detected` or `identified` claim tiers. `attributed` is not a valid value, so the pipeline cannot name a responsible party (`schemas/evidence-packet.schema.json`).
+- **Month-matched or nothing.** The assessment compares each calendar month only with itself. With fewer than 2 matched months it refuses to assess (`ledger/change.py` raises).
+- **No interval without data.** It reports a bootstrap 95% CI on the median delta only with at least 4 matched months. Otherwise the interval is `None`, never guessed (`MIN_MATCHED_MONTHS_FOR_CI`).
+- **Raw evidence is kept.** Every chip is stored untouched with a per-scene SHA-256 checksum, and every transform is logged in the packet.
+- **Every published packet honors the contract.** CI validates every `packets/*.json` against the schema on each push to main. A packet that fails never ships.
+
+## Quickstart
+
+```bash
+python3 -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
+
+# 1. Build the site registry — downloads the current OWA monthly inventory automatically.
+#    The OWA file carries no coordinates: sites are geocoded from their
+#    Dominion Land Survey names to LSD centroids (~+/-300 m; road allowances ignored).
+python -m ledger.sites --out data/sites.parquet
+
+# 2. Fetch imagery chips for pilot sites (STAC query + windowed band download,
+#    500 m buffer crops, per-site manifest with URLs, checksums, rejections)
+python -m ledger.imagery fetch --sites pilots/pilot-01.txt \
+    --start 2023-05-01 --end 2026-08-31 --out data/chips --max-scenes 10
+# Re-running fetch for a site only downloads dates it doesn't already have
+# (incremental backfill — safe to repeat for clouded-out years).
+
+# 3. Assess chips -> schema-validated evidence packet (SCL cloud mask, NDVI/NDMI/
+#    bare-soil/SAVI/MSAVI per scene, month-matched baseline diff with bootstrap
+#    95% CI on the median delta, claim tier)
+python -m ledger.change assess --site "01-06-018-26W4 (100)" \
+    --chips data/chips/01-06-018-26W4__100_ \
+    --baseline-start 2023 --baseline-end 2024 --assessment 2025-2026 \
+    --out packets/
+
+# 4. Render the static ledger site
+python -m ledger.render --packets packets/ --out out/ledger/
+
+# 5. Recurring run (the entry point ops/ca.reclamation-ledger.plist calls):
+#    fetch new scenes + assess all pilot sites + re-render. No-ops outside
+#    the growing season (May-Sep).
+python -m ledger.pipeline run-monthly --sites pilots/pilot-01.txt
+```
+
+## How it fails
+
+| Condition | Behavior |
+|---|---|
+| Fewer than 2 month-matched baseline/current months | `ledger.change` raises and writes no packet for that site, never a guess |
+| Fewer than 4 matched months | The median delta is reported without a confidence interval |
+| Cloud or shadow over the site (SCL mask) | Scene rejected and the rejection recorded in the per-site manifest |
+| Recurring run outside May–Sep | No-op: winter snow makes comparisons meaningless |
+| Packet violates the schema | CI fails and the packet does not ship |
+
+## Evidence
+
+- **99 evidence packets** are committed in `packets/`: 71 `detected` and 28 `identified`. CI validates all of them against schema v1.1.0 (`validate.yml`, passing on main).
+- **13 licensees** across the 99 pilot sites (`ops/pilot02-results.csv`).
+- **Tests:** `pytest tests/` gives 10 of 11 passing locally (2026-10-07). The 11th, `test_pipeline_rerun_deterministic`, needs downloaded imagery chips under `data/chips/`, which are gitignored and reproducible via `ledger.imagery fetch`. CI runs a syntax check and schema validation, not the test suite.
+- **The caught mistake is documented below.** The first method reported all 27 pilot sites recovering, and the audit traced that to seasonal sampling bias.
 
 ## The story in 60 seconds
 
 Alberta has tens of thousands of orphan oil and gas wells — sites whose
 operators walked away, leaving cleanup to the public purse. Nobody was
 watching whether reclaimed land actually recovers. This project watches from
-orbit and publishes exactly what it sees, with every claim stamped for
-provenance, uncertainty, and limits — including its own caught mistakes: the
-first method reported all 27 pilot sites recovering, and a full audit found
-it was measuring the calendar, not reclamation.
+orbit and publishes exactly what it sees.
 
-The most important thing this project produced wasn't a green dashboard — it
-was a caught mistake. The first version of the change-detection method
+Its most important output is a caught mistake, not a green dashboard. The first version of the change-detection method
 compared seasonal vegetation medians and reported that **all 27 pilot sites
 were recovering**. A full audit found the flaw: baseline scenes were sampled
 in May/June while current scenes were sampled in July. Summer is greener than
@@ -66,7 +121,7 @@ Borrowed from imagery interpretation tradecraft:
 - **Screen, don't accuse.** Outputs prioritize sites for ground inspection.
   They are not compliance verdicts.
 
-## Honest limits
+## Known limits
 
 - Sentinel-2's 10 m pixels cannot resolve wellheads or prove contamination,
   legal compliance, causation, or methane emissions.
@@ -74,41 +129,6 @@ Borrowed from imagery interpretation tradecraft:
   (Nov–Mar) makes winter comparisons meaningless; drought years mimic
   non-recovery.
 - Every public claim carries its claim tier and provenance. No exceptions.
-
-## Quickstart
-
-```bash
-python3 -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
-
-# 1. Build the site registry — downloads the current OWA monthly inventory automatically.
-#    The OWA file carries no coordinates: sites are geocoded from their
-#    Dominion Land Survey names to LSD centroids (~+/-300 m; road allowances ignored).
-python -m ledger.sites --out data/sites.parquet
-
-# 2. Fetch imagery chips for pilot sites (STAC query + windowed band download,
-#    500 m buffer crops, per-site manifest with URLs, checksums, rejections)
-python -m ledger.imagery fetch --sites pilots/pilot-01.txt \
-    --start 2023-05-01 --end 2026-08-31 --out data/chips --max-scenes 10
-# Re-running fetch for a site only downloads dates it doesn't already have
-# (incremental backfill — safe to repeat for clouded-out years).
-
-# 3. Assess chips -> schema-validated evidence packet (SCL cloud mask, NDVI/NDMI/
-#    bare-soil/SAVI/MSAVI per scene, month-matched baseline diff with bootstrap
-#    95% CI on the median delta, claim tier)
-python -m ledger.change assess --site "01-06-018-26W4 (100)" \
-    --chips data/chips/01-06-018-26W4__100_ \
-    --baseline-start 2023 --baseline-end 2024 --assessment 2025-2026 \
-    --out packets/
-
-# 4. Render the static ledger site
-python -m ledger.render --packets packets/ --out out/ledger/
-
-# 5. Recurring run (the entry point ops/ca.reclamation-ledger.plist calls):
-#    fetch new scenes + assess all pilot sites + re-render. No-ops outside
-#    the growing season (May-Sep).
-python -m ledger.pipeline run-monthly --sites pilots/pilot-01.txt
-```
 
 ## Layout
 
@@ -144,12 +164,10 @@ launchctl load ~/Library/LaunchAgents/ca.reclamation-ledger.plist
 
 Copernicus data requires attribution — see the site footer.
 
+## Status
+
+v0.3.1 ([releases](https://github.com/marsojuji-cmyk/reclamation-evidence-ledger/releases)), with a 99-site pilot published. Outputs prioritize sites for ground inspection. They are not compliance verdicts.
+
 ## License
 
-MIT — see [LICENSE](LICENSE).
-
-## Continuous validation
-
-`.github/workflows/validate.yml` re-validates every `packets/*.json` against
-`schemas/evidence-packet.schema.json` on each push to main. A packet that
-fails the contract never ships.
+MIT. See [LICENSE](LICENSE). Copernicus Sentinel data requires attribution; see the site footer.
