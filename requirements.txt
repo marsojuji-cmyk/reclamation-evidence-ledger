@@ -1,7 +1,7 @@
 # Core stack — everything here is free and runs on a Mac.
 pystac-client>=0.9.0
 rasterio>=1.5.2
-geopandas>=1.1.4
+geopandas>=1.2.0
 xarray>=2026.9.0
 numpy>=2.5.3
 pandas>=3.0.6
