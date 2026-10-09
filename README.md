@@ -1,5 +1,7 @@
 # Reclamation Evidence Ledger
 
+> **Notice (2026-10-09):** The screening results here did not hold up under pre-registered testing, and the well reports are not evidence of recovery at any well. See [NEGATIVE-RESULT-2026-10-09.md](NEGATIVE-RESULT-2026-10-09.md).
+
 **This pipeline watches Alberta's orphan-well reclamation from orbit. It compares Sentinel-2 imagery month for month and stamps every claim with provenance, uncertainty, and limits.**
 
 [![CI](https://github.com/marsojuji-cmyk/reclamation-evidence-ledger/actions/workflows/ci.yml/badge.svg)](https://github.com/marsojuji-cmyk/reclamation-evidence-ledger/actions/workflows/ci.yml) [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE) [![Python 3.12](https://img.shields.io/badge/python-3.12-blue.svg)](requirements.txt) [![Release](https://img.shields.io/github/v/release/marsojuji-cmyk/reclamation-evidence-ledger)](https://github.com/marsojuji-cmyk/reclamation-evidence-ledger/releases) [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](CODE_OF_CONDUCT.md) [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md) [![Discussions](https://img.shields.io/badge/Discussions-Join-blueviolet.svg)](https://github.com/marsojuji-cmyk/reclamation-evidence-ledger/discussions)
