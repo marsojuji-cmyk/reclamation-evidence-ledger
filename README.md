@@ -2,7 +2,7 @@
 
 **This pipeline watches Alberta's orphan-well reclamation from orbit. It compares Sentinel-2 imagery month for month and stamps every claim with provenance, uncertainty, and limits.**
 
-[![CI](https://github.com/marsojuji-cmyk/reclamation-evidence-ledger/actions/workflows/ci.yml/badge.svg)](https://github.com/marsojuji-cmyk/reclamation-evidence-ledger/actions/workflows/ci.yml) [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE) [![Python 3.12](https://img.shields.io/badge/python-3.12-blue.svg)](requirements.txt) [![Release](https://img.shields.io/github/v/release/marsojuji-cmyk/reclamation-evidence-ledger)](https://github.com/marsojuji-cmyk/reclamation-evidence-ledger/releases)
+[![CI](https://github.com/marsojuji-cmyk/reclamation-evidence-ledger/actions/workflows/ci.yml/badge.svg)](https://github.com/marsojuji-cmyk/reclamation-evidence-ledger/actions/workflows/ci.yml) [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE) [![Python 3.12](https://img.shields.io/badge/python-3.12-blue.svg)](requirements.txt) [![Release](https://img.shields.io/github/v/release/marsojuji-cmyk/reclamation-evidence-ledger)](https://github.com/marsojuji-cmyk/reclamation-evidence-ledger/releases) [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](CODE_OF_CONDUCT.md) [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md) [![Discussions](https://img.shields.io/badge/Discussions-Join-blueviolet.svg)](https://github.com/marsojuji-cmyk/reclamation-evidence-ledger/discussions)
 
 An independent satellite watchdog. It uses free Sentinel-2 imagery and a fully automated Python pipeline, and it answers one question per site on a schedule: *is the land healing?*
 
@@ -173,6 +173,30 @@ Copernicus data requires attribution — see the site footer.
 ## Status
 
 v0.3.1 ([releases](https://github.com/marsojuji-cmyk/reclamation-evidence-ledger/releases)), with a 99-site pilot published. Outputs prioritize sites for ground inspection. They are not compliance verdicts.
+
+## Contributing & Community
+
+We welcome contributions, methodological audits, and data validation! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for local setup, testing guidelines, and PR workflow, and [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) for community standards.
+
+- Join discussions: [GitHub Discussions](https://github.com/marsojuji-cmyk/reclamation-evidence-ledger/discussions)
+- Report bugs: [Issue Tracker](https://github.com/marsojuji-cmyk/reclamation-evidence-ledger/issues)
+- Security reports: [SECURITY.md](SECURITY.md)
+
+## Citation
+
+If you use this project, pipeline methodology, or the published evidence packets in research or reports, please cite it:
+
+```bibtex
+@software{marr2026reclamation,
+  author = {Marr, Julian},
+  title = {Reclamation Evidence Ledger: Satellite Watchdog for Alberta Orphan Well Reclamation},
+  year = {2026},
+  url = {https://github.com/marsojuji-cmyk/reclamation-evidence-ledger},
+  version = {0.3.1}
+}
+```
+
+See [CITATION.cff](CITATION.cff) for complete metadata.
 
 ## License
 
