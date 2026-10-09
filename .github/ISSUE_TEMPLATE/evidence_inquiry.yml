@@ -1,0 +1,41 @@
+name: Evidence / Site Audit Inquiry
+description: Inquire about or challenge the satellite evidence assessment for a specific well site
+title: "audit: "
+labels: ["audit", "evidence"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Every evidence packet is public and audited. If you represent an operator, landowner, municipality, or researcher questioning a finding, provide the site details below.
+  - type: input
+    id: site-id
+    attributes:
+      label: Well / Site Identifier (DLS or UWI)
+      description: The Dominion Land Survey name or unique well identifier.
+      placeholder: e.g. 01-06-018-26W4 (100)
+    validations:
+      required: true
+  - type: dropdown
+    id: claim-tier
+    attributes:
+      label: Current Reported Claim Tier
+      options:
+        - "detected"
+        - "identified"
+        - "insufficient data"
+    validations:
+      required: true
+  - type: textarea
+    id: evidence-details
+    attributes:
+      label: Discrepancy or Observation Details
+      description: Explain the discrepancy (e.g. ground-truth reclamation date, local sensor observations, imagery artifact).
+    validations:
+      required: true
+  - type: textarea
+    id: supporting-data
+    attributes:
+      label: Supporting Documents / Data Links
+      description: Links to AER filings, OWA releases, high-resolution imagery, or soil records.
+    validations:
+      required: false

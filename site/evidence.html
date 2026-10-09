@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>99-Site Evidence Register — Reclamation Evidence</title>
+  <meta name="description" content="Searchable register of 99 analysis packets across 13 Western Canadian energy licensees. Real Sentinel-2 deltas and confidence intervals.">
+  <link rel="stylesheet" href="style.css">
+  <script src="ledger.js"></script>
+  <script defer src="app.js"></script>
+</head>
+<body>
+
+  <!-- Institutional Telemetry Command Header Bar -->
+  <aside class="top-command-bar" aria-label="System Telemetry">
+    <div class="telemetry-strip">
+      <div class="telemetry-item">
+        <span class="telemetry-dot"></span>
+        <span>Sensor: <strong>ESA Sentinel-2 MSI (10m Resolution)</strong></span>
+      </div>
+      <div class="telemetry-item">
+        <span>Coverage: <strong>Western Canadian Sedimentary Basin</strong></span>
+      </div>
+      <div class="telemetry-item">
+        <span>Framework: <strong>AER Directive 088 / Area-Based Closure Aligned</strong></span>
+      </div>
+    </div>
+    <div class="telemetry-strip">
+      <div class="telemetry-item">
+        <span>Public Ledger: <strong>99 Cryptographically Verifiable Packets</strong></span>
+      </div>
+      <a href="https://marsojuji-cmyk.github.io/reclamation-evidence-ledger/" target="_blank" rel="noopener" class="telemetry-link">
+        View Raw Git Ledger &rarr;
+      </a>
+    </div>
+  </aside>
+
+  <!-- Top Hero Header Bar -->
+  <header class="top-hero-banner">
+    <div class="brand-intro">
+      <div class="brand-title-wrap">
+        <a href="index.html" style="text-decoration: none; display: flex; align-items: center; gap: 12px;">
+          <div class="brand-logo-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+              <polyline points="2 17 12 22 22 17"></polyline>
+              <polyline points="2 12 12 17 22 12"></polyline>
+            </svg>
+          </div>
+          <h1 class="brand-title">Reclamation Evidence</h1>
+        </a>
+      </div>
+      <p class="brand-subtitle">Public Evidence Base · 99 Analysis Packets across 13 Licensees</p>
+    </div>
+
+    <div class="top-pills-row">
+      <div class="pill-badge">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+        71 Detected Recoveries
+      </div>
+      <div class="pill-badge">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+        28 Stalled / Regressing
+      </div>
+      <a href="order.html" class="pill-badge active-cta">
+        + Order 15-Site Pilot ($7,500 CAD)
+      </a>
+    </div>
+  </header>
+
+  <div class="app-container">
+
+    <!-- Sidebar Navigation -->
+    <aside class="app-sidebar">
+      <a href="index.html" class="sidebar-logo" title="Dashboard">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path><path d="M2 12h20"></path></svg>
+      </a>
+      <nav class="sidebar-nav">
+        <a href="index.html" class="nav-item" title="Dashboard Overview">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+          <span class="nav-tooltip">Dashboard Overview</span>
+        </a>
+        <a href="order.html" class="nav-item" title="Order Screening">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+          <span class="nav-tooltip">Order Screening</span>
+        </a>
+        <a href="projects.html" class="nav-item" title="Projects">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg>
+          <span class="nav-tooltip">Projects</span>
+        </a>
+        <a href="evidence.html" class="nav-item active" title="Evidence Ledger">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+          <span class="nav-tooltip">Evidence Register</span>
+        </a>
+        <a href="method.html" class="nav-item" title="Method & Limits">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+          <span class="nav-tooltip">Method & Limits</span>
+        </a>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="app-main">
+      <div class="panel-card" style="border: none; padding: 0;">
+        <div class="panel-header" style="margin-bottom: 20px;">
+          <div>
+            <h2 class="greeting-text">Verified Evidence Register</h2>
+            <p style="font-size: 13px; color: var(--slate-500); margin-top: 4px;">
+              99 analysis packets across 13 licensees. 71 detected; 28 identified. Confidence: 86 medium, 10 low, 3 high.
+            </p>
+          </div>
+          <a href="https://marsojuji-cmyk.github.io/reclamation-evidence-ledger/" target="_blank" rel="noopener" class="btn-sample-load" style="text-decoration: none;">
+            Explore Public Git Ledger &rarr;
+          </a>
+        </div>
+
+        <!-- Filter Row -->
+        <div class="ledger-filter-row">
+          <div class="ledger-pills-filter">
+            <button class="filter-pill-btn active" data-tier="all">All Packets (99)</button>
+            <button class="filter-pill-btn" data-tier="detected">Detected Recoveries (71)</button>
+            <button class="filter-pill-btn" data-tier="identified">Stalled / Regressing (28)</button>
+            <button class="filter-pill-btn" data-tier="high">High Confidence (3)</button>
+          </div>
+          <input type="text" id="ledger-search-input" class="form-input" style="width: 260px;" placeholder="Filter by LSD or Licensee...">
+        </div>
+
+        <!-- Table Wrap -->
+        <div class="table-wrap">
+          <table class="dashboard-table">
+            <thead>
+              <tr>
+                <th>Site LSD Identifier</th>
+                <th>Licensee</th>
+                <th>Classification</th>
+                <th>Median Delta</th>
+                <th>95% Bootstrap CI</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="ledger-table-body"></tbody>
+          </table>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 14px; font-size: 12px; color: var(--slate-500);">
+          <span id="ledger-showing-count">Showing 30 of 99 analysis packets</span>
+          <span>Thresholds: +0.08 recovering, −0.08 stalled/regressing</span>
+        </div>
+
+        <!-- Self-Audit Story Box -->
+        <div class="self-audit-box" style="margin-top: 28px;">
+          <div class="self-audit-text">
+            <h4>"We Publish Our Misses" — The v1 Self-Audit Correction</h4>
+            <p>
+              In our v1 pilot evaluation, our uncorrected model classified all 27 sites as "recovering." That was a phenology artifact caused by mismatched seasonal sampling dates. We caught it, printed the correction, rebuilt the method month-matched, and published the whole thing. Confidence comes from stated limits, not adjectives.
+            </p>
+          </div>
+          <a href="method.html" class="btn-primary-order" style="text-decoration: none; font-size: 12px; padding: 8px 16px;">
+            Read Full Method Walkthrough &rarr;
+          </a>
+        </div>
+      </div>
+    </main>
+
+  </div>
+
+  <!-- Site Detail Inspection Modal -->
+  <div id="site-detail-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-site-title">
+    <div class="modal-dialog">
+      <div class="modal-top">
+        <h3 class="modal-title" id="modal-site-title">Site Detail</h3>
+        <button class="btn-close-modal" aria-label="Close modal">&times;</button>
+      </div>
+      <div id="modal-site-content"></div>
+    </div>
+  </div>
+
+  <footer class="app-footer">
+    <div>
+      © 2026 Reclamation Evidence · Calgary, Alberta · contact@marcusrichards.dev
+    </div>
+    <div class="footer-links">
+      <a href="index.html">Dashboard</a>
+      <a href="order.html">Order Online</a>
+      <a href="projects.html">Projects</a>
+      <a href="method.html">Method</a>
+    </div>
+  </footer>
+
+</body>
+</html>

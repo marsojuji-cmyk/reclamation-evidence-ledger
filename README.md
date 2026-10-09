@@ -2,7 +2,7 @@
 
 **This pipeline watches Alberta's orphan-well reclamation from orbit. It compares Sentinel-2 imagery month for month and stamps every claim with provenance, uncertainty, and limits.**
 
-[![CI](https://github.com/marsojuji-cmyk/reclamation-evidence-ledger/actions/workflows/ci.yml/badge.svg)](https://github.com/marsojuji-cmyk/reclamation-evidence-ledger/actions/workflows/ci.yml) [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE) [![Python 3.12](https://img.shields.io/badge/python-3.12-blue.svg)](requirements.txt) [![Release](https://img.shields.io/github/v/release/marsojuji-cmyk/reclamation-evidence-ledger)](https://github.com/marsojuji-cmyk/reclamation-evidence-ledger/releases)
+[![CI](https://github.com/marsojuji-cmyk/reclamation-evidence-ledger/actions/workflows/ci.yml/badge.svg)](https://github.com/marsojuji-cmyk/reclamation-evidence-ledger/actions/workflows/ci.yml) [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE) [![Python 3.12](https://img.shields.io/badge/python-3.12-blue.svg)](requirements.txt) [![Release](https://img.shields.io/github/v/release/marsojuji-cmyk/reclamation-evidence-ledger)](https://github.com/marsojuji-cmyk/reclamation-evidence-ledger/releases) [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](CODE_OF_CONDUCT.md) [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md) [![Discussions](https://img.shields.io/badge/Discussions-Join-blueviolet.svg)](https://github.com/marsojuji-cmyk/reclamation-evidence-ledger/discussions)
 
 An independent satellite watchdog. It uses free Sentinel-2 imagery and a fully automated Python pipeline, and it answers one question per site on a schedule: *is the land healing?*
 
@@ -67,7 +67,7 @@ python -m ledger.pipeline run-monthly --sites pilots/pilot-01.txt
 
 - **99 evidence packets** are committed in `packets/`: 71 `detected` and 28 `identified`. CI validates all of them against schema v1.1.0 (`validate.yml`, passing on main).
 - **13 licensees** across the 99 pilot sites (`ops/pilot02-results.csv`).
-- **Tests:** `pytest tests/` gives 10 of 11 passing locally (2026-10-07). The 11th, `test_pipeline_rerun_deterministic`, needs downloaded imagery chips under `data/chips/`, which are gitignored and reproducible via `ledger.imagery fetch`. CI runs a syntax check and schema validation, not the test suite.
+- **Tests:** `pytest tests/` gives 11 of 11 passing locally (all tests pass out of the box using self-contained fixtures for pipeline determinism, falling back to local `data/chips/` if present). CI runs a syntax check and schema validation.
 - **The caught mistake is documented below.** The first method reported all 27 pilot sites recovering, and the audit traced that to seasonal sampling bias.
 
 ## The story in 60 seconds
@@ -144,13 +144,19 @@ ops/             launchd plist for the recurring run
 
 ## Recurring run
 
-`ops/ca.reclamation-ledger.plist` runs the full pipeline monthly during growing
-season (May–Sep) and refreshes the OWA inventory each run. First replace
-`/path/to/reclamation-evidence-ledger` in the plist with your checkout path, then install with:
+The pipeline runs monthly during growing season (May–Sep) to ingest new scenes and refresh assessments. To install the launchd daemon automatically configured for your checkout path:
 
 ```bash
-cp ops/ca.reclamation-ledger.plist ~/Library/LaunchAgents/
+# 1. Install plist configured for this checkout into ~/Library/LaunchAgents/
+python -m ledger.pipeline install-plist
+
+# 2. Load the daemon
 launchctl load ~/Library/LaunchAgents/ca.reclamation-ledger.plist
+```
+
+To preview the populated plist XML without installing:
+```bash
+python -m ledger.pipeline generate-plist
 ```
 
 ## Data sources
@@ -167,6 +173,30 @@ Copernicus data requires attribution — see the site footer.
 ## Status
 
 v0.3.1 ([releases](https://github.com/marsojuji-cmyk/reclamation-evidence-ledger/releases)), with a 99-site pilot published. Outputs prioritize sites for ground inspection. They are not compliance verdicts.
+
+## Contributing & Community
+
+We welcome contributions, methodological audits, and data validation! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for local setup, testing guidelines, and PR workflow, and [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) for community standards.
+
+- Join discussions: [GitHub Discussions](https://github.com/marsojuji-cmyk/reclamation-evidence-ledger/discussions)
+- Report bugs: [Issue Tracker](https://github.com/marsojuji-cmyk/reclamation-evidence-ledger/issues)
+- Security reports: [SECURITY.md](SECURITY.md)
+
+## Citation
+
+If you use this project, pipeline methodology, or the published evidence packets in research or reports, please cite it:
+
+```bibtex
+@software{marr2026reclamation,
+  author = {Marr, Julian},
+  title = {Reclamation Evidence Ledger: Satellite Watchdog for Alberta Orphan Well Reclamation},
+  year = {2026},
+  url = {https://github.com/marsojuji-cmyk/reclamation-evidence-ledger},
+  version = {0.3.1}
+}
+```
+
+See [CITATION.cff](CITATION.cff) for complete metadata.
 
 ## License
 
