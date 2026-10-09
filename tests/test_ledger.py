@@ -294,3 +294,22 @@ def test_owa_file_date_parsed_from_filename():
            "2026-10-01%2013.41.42.xlsx")
     assert owa_file_date(url) == "2026-10-01"
     assert owa_file_date("owa_inventory_latest.xlsx") is None
+
+
+def test_footprints_sit_at_their_sites():
+    """Guards the UTM-zone bug: two polygons were once 6 degrees east."""
+    import math
+    g = json.loads((ROOT / "ledger" / "data" / "footprints"
+                    / "pilot5_provisional.geojson").read_text())
+    sites = {}
+    for p in PACKETS:
+        s = json.loads(p.read_text())["site"]
+        sites[s["site_id"]] = (s["latitude"], s["longitude"])
+    for f in g["features"]:
+        lat0, lon0 = sites[f["properties"]["site_id"]]
+        ring = f["geometry"]["coordinates"][0][:-1]
+        lon = sum(c[0] for c in ring) / len(ring)
+        lat = sum(c[1] for c in ring) / len(ring)
+        dx = (lon - lon0) * 111_320 * math.cos(math.radians(lat0))
+        dy = (lat - lat0) * 110_574
+        assert math.hypot(dx, dy) < 1000, f["properties"]["site_id"]
