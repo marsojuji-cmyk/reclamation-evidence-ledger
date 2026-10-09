@@ -100,7 +100,7 @@ def test_delta_is_median_of_deltas():
     assert a.delta == pytest.approx(0.075)
     assert (a.current_ndvi - a.baseline_ndvi) == pytest.approx(0.10)
     assert (a.current_ndvi - a.baseline_ndvi) != pytest.approx(a.delta)
-    assert "Median matched-month" in a.rationale
+    assert "median matched-month" in a.rationale.lower()
 
 
 def test_delta_std_is_spread_of_deltas():
@@ -110,6 +110,45 @@ def test_delta_std_is_spread_of_deltas():
     a = assess("TEST", b, c, "test period")
     deltas = [0.10, 0.12, 0.08, 0.05]
     assert a.delta_std == pytest.approx(float(np.std(deltas)), abs=1e-3)
+
+
+# --- Tier rule ci-gated-v2: identified needs |delta| >= 0.08 AND a CI that
+# excludes zero. v1 ignored the CI and called 28/99 sites "identified".
+
+from ledger.change import STATEMENTS, assign_tier  # noqa: E402
+
+
+def test_identified_requires_ci_excluding_zero():
+    assert assign_tier(0.12, [0.05, 0.20])[0] == "identified"
+    assert assign_tier(-0.12, [-0.20, -0.05])[0] == "identified"
+
+
+def test_large_delta_without_ci_is_detected():
+    tier, direction, key = assign_tier(0.20, None)
+    assert (tier, direction, key) == ("detected", "increase", "no_ci")
+
+
+def test_large_delta_with_ci_straddling_zero_is_detected():
+    assert assign_tier(0.10, [-0.01, 0.20])[:2] == ("detected", "increase")
+    assert assign_tier(-0.10, [-0.20, 0.0])[:2] == ("detected", "decrease")
+
+
+def test_small_delta_is_detected_even_with_tight_ci():
+    assert assign_tier(0.05, [0.04, 0.06]) == ("detected", "none", "none")
+
+
+def test_unit_assess_two_months_never_identified():
+    b, c = _synth([5, 6], [0.30, 0.30], [0.50, 0.50])
+    a = assess("TEST", b, c, "test period")
+    assert a.tier == "detected" and a.direction == "increase"
+
+
+def test_statements_do_not_overclaim():
+    """No tier wording may say reclamation, recovery, healing or stalling:
+    the screen describes NDVI in an analysis square, nothing more."""
+    banned = ("reclam", "recover", "heal", "stalled", "regress", "certif")
+    for text in STATEMENTS.values():
+        assert not any(w in text.lower() for w in banned), text
 
 
 # --- Item 5: determinism ------------------------------------------------------

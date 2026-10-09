@@ -2,13 +2,23 @@
 
 The core interpretive rule, from imagery tradecraft:
 
-    detection    — something changed vs the baseline (a measured delta)
-    identified   — the change is consistent with a reclamation signal
-                   across multiple observations (a hypothesis)
+    detected     — a delta was measured vs the baseline. This includes
+                   deltas beyond the threshold that are NOT supported by a
+                   95% CI (no CI, or a CI that includes zero).
+    identified   — |median delta| >= the threshold AND a bootstrap 95% CI
+                   exists (>= 4 matched months) AND that CI excludes zero.
+                   It says only that the analysis square's NDVI moved in a
+                   stated direction, consistently across matched months. It
+                   is a screening hypothesis about the ~1 km² square around a
+                   DLS centroid, NOT a finding about the pad, its cause, or
+                   its reclamation status. Increases and decreases are worded
+                   separately and neutrally.
     attributed   — a named party is responsible (NEVER emitted by code;
                    requires human review and ground truth)
 
 The pipeline's job ends at "identified", and only with caveats attached.
+It screens; it never certifies. It says nothing about soil, contamination,
+subsurface condition or methane.
 """
 from __future__ import annotations
 
@@ -22,6 +32,53 @@ from .config import DEFAULT, Config
 # distinct values: the interval looks precise and means almost nothing).
 # Below the threshold we report NO interval rather than a misleading one.
 MIN_MATCHED_MONTHS_FOR_CI = 4
+
+# Identifier of the tier rule, recorded in every packet so a re-score is
+# traceable. v1 (pilot-01/02) tiered on |delta| alone and ignored the CI.
+TIER_RULE = "ci-gated-v2"
+TIER_RULE_TEXT = ("identified only if |median matched-month NDVI delta| >= "
+                  "threshold AND a bootstrap 95% CI exists (>= 4 matched "
+                  "months) AND the CI excludes zero; otherwise detected")
+
+STATEMENTS = {
+    "increase": "NDVI higher than baseline in the analysis square (screening signal)",
+    "decrease": "NDVI lower than baseline in the analysis square (screening signal)",
+    "no_ci": "change beyond threshold, not supported: no 95% CI (fewer than 4 matched months)",
+    "ci_includes_zero": "change beyond threshold, not supported: 95% CI includes zero",
+    "none": "no change beyond threshold vs baseline",
+}
+
+SCREENING_CAVEATS = [
+    "Screening only: not legal proof, not a reclamation certification or "
+    "compliance verdict, and not a methane, soil, contamination or "
+    "subsurface measurement.",
+    "The 500 m buffer (~1 km² square) is mostly land around the pad; the NDVI "
+    "change describes that square, not the pad itself, and regional weather "
+    "(e.g. the 2023 drought in the baseline years) moves it too.",
+    "The bootstrap CI resamples matched months drawn from the same two "
+    "baseline and two current years: it measures within-season consistency, "
+    "not year-to-year variability.",
+]
+
+
+def assign_tier(delta: float, ci: list | None, cfg: Config = DEFAULT
+                ) -> tuple[str, str, str]:
+    """(tier, direction, statement_key) under TIER_RULE.
+
+    direction is "increase" | "decrease" | "none" and is reported for every
+    tier so a reader can see which way a not-supported delta pointed."""
+    if delta >= cfg.ndvi_recover_delta:
+        direction = "increase"
+    elif delta <= cfg.ndvi_stall_delta:
+        direction = "decrease"
+    else:
+        return "detected", "none", "none"
+    if ci is None:
+        return "detected", direction, "no_ci"
+    lo, hi = ci
+    if lo <= 0.0 <= hi:
+        return "detected", direction, "ci_includes_zero"
+    return "identified", direction, direction
 
 
 @dataclass
@@ -42,6 +99,7 @@ class Assessment:
     n_current_obs: int
     matched_months: list  # calendar months compared month-for-month
     tier: str              # "detected" | "identified"
+    direction: str         # "increase" | "decrease" | "none"
     statement: str
     rationale: str
     caveats: list
@@ -112,23 +170,28 @@ def assess(site_id: str, baseline_monthly: dict[int, list[float]],
         "Baseline and current periods are compared month-for-month "
         f"(matched months: {matched}) to avoid seasonal sampling bias.",
         ci_caveat,
+        *SCREENING_CAVEATS,
     ]
 
-    if delta >= cfg.ndvi_recover_delta:
-        tier, statement = "identified", "vegetation recovering"
-        rationale = (f"Median matched-month NDVI delta {delta:+.2f} (median of "
-                     f"{len(matched)} matched-month deltas; baseline median "
-                     f"{base:.2f}, current median {current:.2f}; {ci_txt}).")
-    elif delta <= cfg.ndvi_stall_delta:
-        tier, statement = "identified", "vegetation stalled or regressing"
-        rationale = (f"Median matched-month NDVI delta {delta:+.2f} (median of "
-                     f"{len(matched)} matched-month deltas; baseline median "
-                     f"{base:.2f}, current median {current:.2f}; {ci_txt}).")
+    tier, direction, key = assign_tier(delta, ci, cfg)
+    statement = STATEMENTS[key]
+    band = max(cfg.ndvi_recover_delta, abs(cfg.ndvi_stall_delta))
+    numbers = (f"median matched-month NDVI delta {delta:+.2f} (median of "
+               f"{len(matched)} matched-month deltas; baseline median "
+               f"{base:.2f}, current median {current:.2f}; {ci_txt})")
+    if key == "none":
+        rationale = f"The {numbers} is within the ±{band:.2f} threshold."
+    elif key == "no_ci":
+        rationale = (f"The {numbers} is beyond ±{band:.2f}, but with fewer "
+                     f"than {MIN_MATCHED_MONTHS_FOR_CI} matched months no CI "
+                     "is estimated, so the change is not supported.")
+    elif key == "ci_includes_zero":
+        rationale = (f"The {numbers} is beyond ±{band:.2f}, but the 95% CI "
+                     "includes zero, so the change is not supported.")
     else:
-        tier, statement = "detected", "no significant change vs baseline"
-        rationale = (f"Median matched-month delta {delta:+.2f} is within the noise band "
-                     f"(±{max(cfg.ndvi_recover_delta, abs(cfg.ndvi_stall_delta)):.2f}; "
-                     f"baseline median {base:.2f}, current median {current:.2f}; {ci_txt}).")
+        rationale = (f"The {numbers} is beyond ±{band:.2f} and the 95% CI "
+                     "excludes zero. This describes the analysis square, not "
+                     "the pad, and is a screening hypothesis only.")
     # The delta is the median of per-month deltas, NOT the difference of the
     # two displayed medians (median of differences != difference of medians).
     # The rationale states all three numbers so the relationship is exact by
@@ -143,7 +206,8 @@ def assess(site_id: str, baseline_monthly: dict[int, list[float]],
         delta_std=round(std, 4), current_ndvi=round(current, 4),
         delta=round(delta, 4), delta_ci95=ci,
         n_baseline_obs=n_base,
-        n_current_obs=n_cur, matched_months=matched, tier=tier, statement=statement,
+        n_current_obs=n_cur, matched_months=matched, tier=tier,
+        direction=direction, statement=statement,
         rationale=rationale, caveats=caveats, confidence=confidence,
     )
 
@@ -318,7 +382,10 @@ def cmd_assess(args):
                         "seasonal_aggregation": "month-matched median deltas "
                         "(each calendar month compared only to itself)",
                         "recover_delta": DEFAULT.ndvi_recover_delta,
-                        "stall_delta": DEFAULT.ndvi_stall_delta}},
+                        "stall_delta": DEFAULT.ndvi_stall_delta,
+                        "min_matched_months_for_ci": MIN_MATCHED_MONTHS_FOR_CI,
+                        "tier_rule": TIER_RULE,
+                        "tier_rule_text": TIER_RULE_TEXT}},
         {"step": "packet_build", "tool": "ledger.packet.build_packet",
          "parameters": {"schema_version": SCHEMA_VERSION}},
     ]
@@ -360,6 +427,8 @@ def cmd_assess(args):
         transforms=transforms, sources=sources,
     )
     packet["claim"]["caveats"] = caveats
+    packet["claim"]["direction"] = a.direction
+    packet["claim"]["tier_rule"] = TIER_RULE
     packet["provenance"]["owa_inventory_file"] = {
         k: owa_prov.get(k) for k in ("url", "file_name", "file_date", "sha256",
                                      "retrieved_at")}
