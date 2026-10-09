@@ -101,4 +101,4 @@ All deviations are logged with timestamps in [V1-DEV] and [V2-DEV]. The ones tha
 - **Published site and packets:** consider taking down the GitHub Pages site and the published packets, or adding a clear caveat that they measured land about 2.4 km from each well and should not be read as evidence at any well.
 - **Converter bug:** consider fixing `dls_to_latlon`, or at least flagging it publicly (for example in the README or an issue). [DIAG] also notes a related, earlier-reported bug where 2 of 5 hand-drawn pad outlines were exactly 6° of longitude off.
 - **HFI licence:** before publishing anything derived from the ABMI Human Footprint Inventory 2023 (used in the diagnosis), consider confirming its licence terms [DIAG].
-- **This write-up:** decide whether to publish it in the repo. It has not been added there.
+- **This write-up:** decide whether to publish it in the repo. It was added there on Oct 9, 2026.
