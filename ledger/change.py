@@ -323,9 +323,12 @@ def cmd_assess(args):
         "The 500 m analysis buffer absorbs this uncertainty; this is not a "
         "survey of the wellhead.",
         "Sentinel-2's 10 m pixels cannot resolve individual wellheads.",
-        "Chip download used GDAL_HTTP_UNSAFESSL on a TLS-intercepting egress "
-        "proxy; payload integrity rests on S3-hosted COGs, not TLS pinning.",
     ]
+    if DEFAULT.trust_egress_proxy_tls:
+        caveats.append(
+            "Chip download used GDAL_HTTP_UNSAFESSL (TLS verification off) on a "
+            "TLS-intercepting egress proxy; payload integrity rests on the "
+            "recorded per-chip SHA-256 and S3-hosted COGs, not TLS.")
 
     packet = build_packet(
         site={"site_id": str(r["site_id"]), "name": str(r["name"]),
