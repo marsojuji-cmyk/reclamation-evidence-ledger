@@ -1,3 +1,7 @@
+## v0.4.0 (2026-10-09)
+
+- feat: enhance community standards, automated testing, and client portal (#28)
+
 ## v0.3.1 (2026-10-05)
 
 - fix: grant lint-title job pull-requests read permission (#14)
