@@ -1,3 +1,17 @@
+## Unreleased: M1 "Honest Ledger" (2026-10-08)
+
+- fix: tier rule `ci-gated-v2`. `identified` now needs |median delta| >= 0.08 AND a 95% CI (>= 4 matched months) that excludes zero. Neutral wording ("NDVI higher/lower than baseline in the analysis square") replaces "vegetation recovering" / "stalled or regressing".
+- fix: all 99 packets re-tiered offline from their stored observations: identified 28 -> 10, detected 71 -> 89 (6 lacked a CI, 12 had a CI including zero). Public diff in `docs/retier-2026-10.md` / `.csv`.
+- feat: packet schema 1.2.0 (claim.direction, claim.tier_rule, chip scene_id/source_url, provenance.review, owa_inventory_file, owa_recheck, lineage_audit, revisions).
+- fix: removed the unrecorded "human-reviewed before publish" stamp; packets carry an empty review log instead.
+- feat: OWA inventory URL, file date and SHA-256 recorded per run (hardcoded 2026-09-01 removed); run-monthly refreshes the inventory first.
+- chore: radiometric lineage audit re-run over all 273 scenes the packets cite (was 62); 0 anomalies.
+- fix: TLS verification on by default; GDAL_HTTP_UNSAFESSL is opt-in via LEDGER_TRUST_EGRESS_PROXY_TLS=1.
+- feat: run-monthly re-assesses with --force and period-named packets; assess_all no longer hardcodes .venv or years.
+- ci: pytest runs in CI; the chip-dependent determinism test skips without data.
+- fix: two provisional footprints (16-14-018-26W4, 07-30-018-26W4) re-projected from the wrong UTM zone (were 6 degrees east).
+- docs: README and dashboard drop "is the land healing?", "watchdog", the false refusals line and the hand-typed 21,892; Landsat marked not implemented; colophon link fixed to marsojuji-cmyk; screening-only disclaimer and licensee caveat added.
+
 ## v0.3.1 (2026-10-05)
 
 - fix: grant lint-title job pull-requests read permission (#14)
