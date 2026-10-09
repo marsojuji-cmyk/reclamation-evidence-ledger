@@ -144,13 +144,19 @@ ops/             launchd plist for the recurring run
 
 ## Recurring run
 
-`ops/ca.reclamation-ledger.plist` runs the full pipeline monthly during growing
-season (May–Sep) and refreshes the OWA inventory each run. First replace
-`/path/to/reclamation-evidence-ledger` in the plist with your checkout path, then install with:
+The pipeline runs monthly during growing season (May–Sep) to ingest new scenes and refresh assessments. To install the launchd daemon automatically configured for your checkout path:
 
 ```bash
-cp ops/ca.reclamation-ledger.plist ~/Library/LaunchAgents/
+# 1. Install plist configured for this checkout into ~/Library/LaunchAgents/
+python -m ledger.pipeline install-plist
+
+# 2. Load the daemon
 launchctl load ~/Library/LaunchAgents/ca.reclamation-ledger.plist
+```
+
+To preview the populated plist XML without installing:
+```bash
+python -m ledger.pipeline generate-plist
 ```
 
 ## Data sources

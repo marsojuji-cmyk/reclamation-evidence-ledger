@@ -231,3 +231,27 @@ def test_schema_version_pinned():
     for p in PACKETS:
         d = json.loads(p.read_text())
         assert d["schema_version"] == "1.1.0", p.name
+
+
+# --- launchd plist generation -------------------------------------------------
+
+def test_generate_plist_valid():
+    import plistlib
+    from ledger.pipeline import generate_plist
+
+    xml_text = generate_plist(ROOT, Path(sys.executable))
+    data = plistlib.loads(xml_text.encode("utf-8"))
+
+    assert data["Label"] == "ca.reclamation-ledger"
+    args = data["ProgramArguments"]
+    assert args[0] == "/bin/bash"
+    assert args[1] == "-lc"
+    assert f"cd {ROOT}" in args[2]
+    assert str(Path(sys.executable)) in args[2]
+    assert "ledger.pipeline run-monthly" in args[2]
+
+    intervals = data["StartCalendarInterval"]
+    assert len(intervals) == 5
+    months = [item["Month"] for item in intervals]
+    assert months == [5, 6, 7, 8, 9]
+
