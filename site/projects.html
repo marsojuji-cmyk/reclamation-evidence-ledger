@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Services & Screening Pilots — Reclamation Evidence</title>
-  <meta name="description" content="Screening Pilot, Benchmark Engagement, and Portfolio Screening for Western Canadian reclamation programs. Fixed fee from $7,500 CAD.">
+  <title>Project Management & Milestones — Reclamation Evidence</title>
+  <meta name="description" content="Track screening pilots, blind field validations, and deliverables across 4-week milestones.">
   <link rel="stylesheet" href="style.css">
   <script src="ledger.js"></script>
   <script defer src="app.js"></script>
@@ -50,16 +50,20 @@
           <h1 class="brand-title">Reclamation Evidence</h1>
         </a>
       </div>
-      <p class="brand-subtitle">Services · 15-Site Screening Pilots · Fixed Fee from $7,500 CAD</p>
+      <p class="brand-subtitle">Project Management & Milestones · 4-Week Blind Validation Tracking</p>
     </div>
 
     <div class="top-pills-row">
       <div class="pill-badge">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
-        Blind Field Verification
+        4-Week Guaranteed Timeline
+      </div>
+      <div class="pill-badge">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+        Blind Field Comparison
       </div>
       <a href="order.html" class="pill-badge active-cta">
-        + Order Pilot Online ($7,500 CAD)
+        + Order New Pilot ($7,500 CAD)
       </a>
     </div>
   </header>
@@ -80,7 +84,7 @@
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
           <span class="nav-tooltip">Order Screening</span>
         </a>
-        <a href="projects.html" class="nav-item" title="Projects">
+        <a href="projects.html" class="nav-item active" title="Project Kanban">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg>
           <span class="nav-tooltip">Projects</span>
         </a>
@@ -100,78 +104,82 @@
       <div class="panel-card" style="border: none; padding: 0;">
         <div class="panel-header" style="margin-bottom: 24px;">
           <div>
-            <h2 class="greeting-text">Screening Products & Services</h2>
+            <h2 class="greeting-text">Active Screening Pilots & Pipelines</h2>
             <p style="font-size: 13px; color: var(--slate-500); margin-top: 4px;">
-              Fixed-fee screening pilots, blind benchmark checks, and portfolio triage.
+              Live tracking of the 4-week screening lifecycle: pre-registration, Sentinel-2 imagery ingestion, blind field data scoring, and packet delivery.
             </p>
           </div>
           <a href="order.html" class="btn-primary-order" style="text-decoration: none;">
-            Order Online Now &rarr;
+            + New Well Batch
           </a>
         </div>
 
-        <div style="display: flex; flex-direction: column; gap: 24px;">
-          <!-- Service 1: Screening Pilot -->
-          <div style="background: white; border: 1px solid var(--slate-200); border-radius: var(--radius-xl); padding: 28px;">
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px;">
-              <div>
-                <span class="pkg-badge" style="position: static; margin-bottom: 8px; display: inline-block;">Live Service</span>
-                <h3 style="font-size: 20px; font-weight: 800; color: var(--navy);">Screening Pilot (15 Disturbed Sites)</h3>
-                <div style="font-size: 18px; font-weight: 800; color: var(--primary); margin: 6px 0;">Fixed Fee from $7,500 CAD + tax</div>
-                <p style="font-size: 13px; color: var(--slate-600); max-width: 700px; line-height: 1.5;">
-                  Scope: 15 disturbed sites, 4 weeks duration. Pre-registered protocol, validated blind against the client's own confidential field assessment data. Uncertainty quantified, caveats stated in writing.
-                </p>
-              </div>
-              <a href="order.html" class="btn-primary-order" style="text-decoration: none;">
-                Configure & Order Online
-              </a>
+        <!-- Kanban Board Grid -->
+        <div class="kanban-board-grid">
+          <!-- Stage 1 -->
+          <div class="kanban-col">
+            <div class="kanban-col-header">
+              <span class="kanban-col-title">1. Intake & Protocol Lock</span>
+              <span class="count-pill" id="count-intake">1</span>
             </div>
-            <div style="margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--slate-100); display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; font-size: 12px; color: var(--slate-600);">
-              <div>
-                <strong>Deliverables:</strong> Ranked 15-site register, method packet with satellite timestamps, written validation memo.
-              </div>
-              <div>
-                <strong>Terms:</strong> 50% milestone invoice at project kickoff, 50% at deliverable handover.
-              </div>
-            </div>
+            <div class="kanban-cards-stack" id="kanban-col-intake"></div>
           </div>
 
-          <!-- Service 2: Benchmark Engagement -->
-          <div style="background: white; border: 1px solid var(--slate-200); border-radius: var(--radius-xl); padding: 28px;">
-            <span class="pkg-badge" style="background: var(--slate-600); position: static; margin-bottom: 8px; display: inline-block;">Live Service</span>
-            <h3 style="font-size: 20px; font-weight: 800; color: var(--navy);">Benchmark Engagement (15 Sites)</h3>
-            <div style="font-size: 18px; font-weight: 800; color: var(--primary); margin: 6px 0;">$4,800 CAD + tax</div>
-            <p style="font-size: 13px; color: var(--slate-600); max-width: 700px; line-height: 1.5;">
-              For energy firms with in-house geospatial or remote sensing capability. An independent, blind check of their method across 15 shared sites. Peer-to-peer technical framing, published either way, misses included.
-            </p>
-          </div>
-
-          <!-- Service 3: Portfolio Screening -->
-          <div style="background: var(--slate-50); border: 1px solid var(--slate-200); border-radius: var(--radius-xl); padding: 28px;">
-            <span class="pkg-badge" style="background: #0284c7; position: static; margin-bottom: 8px; display: inline-block;">In Development</span>
-            <h3 style="font-size: 20px; font-weight: 800; color: var(--navy);">Portfolio Screening</h3>
-            <div style="font-size: 14px; font-weight: 700; color: var(--slate-500); margin: 6px 0;">Pricing set with lighthouse clients</div>
-            <p style="font-size: 13px; color: var(--slate-600); max-width: 700px; line-height: 1.5;">
-              Ongoing quarterly and annual triage across a client's full closure and suspension inventory. Automated detection of stalls and regressions across multi-year Sentinel-2 passes.
-            </p>
-          </div>
-
-          <!-- What We Don't Do -->
-          <section class="limits-boundary-box">
-            <div class="limits-title">What We Don't Do (Stated Operating Limits)</div>
-            <div class="limits-list">
-              <div class="limit-item">
-                <strong>No compliance or reclamation certification:</strong> We never certify reclamation or replace regulatory filings.
-              </div>
-              <div class="limit-item">
-                <strong>No contamination status:</strong> No contamination status, causation, responsibility, or attribution.
-              </div>
-              <div class="limit-item">
-                <strong>No replacement for field assessment:</strong> Qualified boots on the ground are always required.
-              </div>
+          <!-- Stage 2 -->
+          <div class="kanban-col">
+            <div class="kanban-col-header">
+              <span class="kanban-col-title">2. Sentinel-2 Ingestion</span>
+              <span class="count-pill" id="count-processing">1</span>
             </div>
-          </section>
+            <div class="kanban-cards-stack" id="kanban-col-processing"></div>
+          </div>
+
+          <!-- Stage 3 -->
+          <div class="kanban-col">
+            <div class="kanban-col-header">
+              <span class="kanban-col-title">3. Blind Field Validation</span>
+              <span class="count-pill" id="count-validation">1</span>
+            </div>
+            <div class="kanban-cards-stack" id="kanban-col-validation"></div>
+          </div>
+
+          <!-- Stage 4 -->
+          <div class="kanban-col">
+            <div class="kanban-col-header">
+              <span class="kanban-col-title">4. Deliverables Handover</span>
+              <span class="count-pill" id="count-ready">1</span>
+            </div>
+            <div class="kanban-cards-stack" id="kanban-col-ready"></div>
+          </div>
         </div>
+
+        <!-- Deliverable Package Specifications -->
+        <section style="margin-top: 36px;">
+          <h3 style="font-size: 16px; font-weight: 800; color: var(--navy); margin-bottom: 14px;">
+            Standard Screening Deliverables Handover
+          </h3>
+          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;">
+            <div style="background: var(--slate-50); border: 1px solid var(--slate-200); border-radius: var(--radius-lg); padding: 18px;">
+              <div style="font-size: 14px; font-weight: 700; color: var(--navy); margin-bottom: 6px;">1. Ranked 15-Site Register</div>
+              <p style="font-size: 12px; color: var(--slate-600); line-height: 1.4;">
+                Complete table ordering sites by median-of-deltas signal from Sentinel-2. Directly tells closure managers which sites have recovered and which require priority field inspection.
+              </p>
+            </div>
+            <div style="background: var(--slate-50); border: 1px solid var(--slate-200); border-radius: var(--radius-lg); padding: 18px;">
+              <div style="font-size: 14px; font-weight: 700; color: var(--navy); margin-bottom: 6px;">2. Method Packet</div>
+              <p style="font-size: 12px; color: var(--slate-600); line-height: 1.4;">
+                Full technical provenance: month-matched baseline median, 5-year observation trajectory, 95% bootstrap confidence bounds, and exact satellite overpass timestamps.
+              </p>
+            </div>
+            <div style="background: var(--slate-50); border: 1px solid var(--slate-200); border-radius: var(--radius-lg); padding: 18px;">
+              <div style="font-size: 14px; font-weight: 700; color: var(--navy); margin-bottom: 6px;">3. Written Validation Memo</div>
+              <p style="font-size: 12px; color: var(--slate-600); line-height: 1.4;">
+                Blind correlation analysis against the client's internal field assessments. Stated caveats and transparent documentation of all disagreement cases.
+              </p>
+            </div>
+          </div>
+        </section>
+
       </div>
     </main>
 
@@ -184,7 +192,6 @@
     <div class="footer-links">
       <a href="index.html">Dashboard</a>
       <a href="order.html">Order Online</a>
-      <a href="projects.html">Projects</a>
       <a href="evidence.html">Evidence</a>
       <a href="method.html">Method</a>
     </div>
