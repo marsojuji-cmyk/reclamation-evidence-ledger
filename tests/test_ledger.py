@@ -133,19 +133,77 @@ def _normalize(packet: dict) -> dict:
     return p
 
 
+def _make_synthetic_chips_and_registry(base_dir: Path, site_id: str = "SYNTH-SITE-01"):
+    """Create a minimal, valid set of GeoTIFF chips, manifest, and registry parquet for testing."""
+    import numpy as np
+    import pandas as pd
+    import rasterio
+    from rasterio.transform import from_bounds
+
+    chips_dir = base_dir / "chips"
+    chips_dir.mkdir(parents=True, exist_ok=True)
+
+    dates = [
+        "2023-05-15", "2023-06-15", "2024-05-15", "2024-06-15",
+        "2025-05-15", "2025-06-15", "2026-05-15", "2026-06-15",
+    ]
+    scenes = []
+    tform = from_bounds(0, 0, 100, 100, 4, 4)
+    profile = {
+        "driver": "GTiff", "height": 4, "width": 4, "count": 1,
+        "dtype": "uint16", "crs": "EPSG:3857", "transform": tform,
+    }
+
+    for d in dates:
+        stamp = d.replace("-", "")
+        chip_meta = []
+        for band in ("red", "nir", "swir", "blue", "scl"):
+            fpath = chips_dir / f"{stamp}_{band}.tif"
+            val = 4 if band == "scl" else (2000 if band == "nir" else 1000)
+            arr = np.full((4, 4), val, dtype=np.uint16)
+            with rasterio.open(fpath, "w", **profile) as dst:
+                dst.write(arr, 1)
+            chip_meta.append({"band": band, "path": str(fpath), "sha256": "0" * 64, "shape": [4, 4]})
+        scenes.append({"date": d, "scene_id": f"S2_{stamp}", "chips": chip_meta})
+
+    manifest = {"scenes": scenes, "query": {"synthetic": True}, "rejections": []}
+    (chips_dir / "manifest.json").write_text(json.dumps(manifest))
+
+    reg_df = pd.DataFrame([{
+        "site_id": site_id,
+        "name": "Synthetic Test Site",
+        "latitude": 51.0,
+        "longitude": -114.0,
+        "owa_stage": "reclamation",
+        "geo_method": "synthetic centroid",
+    }])
+    reg_path = base_dir / "sites.parquet"
+    reg_df.to_parquet(reg_path)
+    return chips_dir, reg_path
+
+
 def test_pipeline_rerun_deterministic(tmp_path):
     """Two CLI runs on the same chips must produce byte-identical packets
     apart from run timestamps."""
     site = "07-30-018-26W4 (100)"
     from ledger.imagery import safe_site_id
+    local_chips = ROOT / "data" / "chips" / safe_site_id(site)
+    local_registry = ROOT / "data" / "sites.parquet"
+    if local_chips.exists() and local_registry.exists():
+        chips_path = local_chips
+        registry_path = local_registry
+    else:
+        site = "SYNTH-SITE-01"
+        chips_path, registry_path = _make_synthetic_chips_and_registry(tmp_path / "fixtures", site_id=site)
+
     outs = []
     for i in (1, 2):
         out = tmp_path / f"run{i}"
         r = subprocess.run(
             [sys.executable, "-m", "ledger.change", "assess",
              "--site", site,
-             "--chips", str(ROOT / "data" / "chips" / safe_site_id(site)),
-             "--registry", str(ROOT / "data" / "sites.parquet"),
+             "--chips", str(chips_path),
+             "--registry", str(registry_path),
              "--baseline-start", "2023", "--baseline-end", "2024",
              "--assessment", "2025-2026", "--out", str(out)],
             capture_output=True, text=True, cwd=str(ROOT), timeout=600)

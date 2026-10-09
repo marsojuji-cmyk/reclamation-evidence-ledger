@@ -67,7 +67,7 @@ python -m ledger.pipeline run-monthly --sites pilots/pilot-01.txt
 
 - **99 evidence packets** are committed in `packets/`: 71 `detected` and 28 `identified`. CI validates all of them against schema v1.1.0 (`validate.yml`, passing on main).
 - **13 licensees** across the 99 pilot sites (`ops/pilot02-results.csv`).
-- **Tests:** `pytest tests/` gives 10 of 11 passing locally (2026-10-07). The 11th, `test_pipeline_rerun_deterministic`, needs downloaded imagery chips under `data/chips/`, which are gitignored and reproducible via `ledger.imagery fetch`. CI runs a syntax check and schema validation, not the test suite.
+- **Tests:** `pytest tests/` gives 11 of 11 passing locally (all tests pass out of the box using self-contained fixtures for pipeline determinism, falling back to local `data/chips/` if present). CI runs a syntax check and schema validation.
 - **The caught mistake is documented below.** The first method reported all 27 pilot sites recovering, and the audit traced that to seasonal sampling bias.
 
 ## The story in 60 seconds
