@@ -157,7 +157,9 @@ def assess(site_id: str, baseline_monthly: dict[int, list[float]],
 # ---------------------------------------------------------------------------
 
 OWA_INVENTORY_URL = "https://www.orphanwell.ca/inventory/site-specific-inventory"
-OWA_INVENTORY_MONTH = "2026-09-01"  # file month of the inventory used; recheck live
+# The inventory file month is no longer a constant: it is read from the
+# <registry>.owa_provenance.json record written by `ledger.sites` (file URL,
+# file date, SHA-256) so every packet names the exact file it used.
 EARTH_SEARCH_URL = "https://earth-search.aws.element84.com/v1"
 COPERNICUS_URL = "https://sentiwiki.copernicus.eu/"
 
@@ -247,6 +249,14 @@ def cmd_assess(args):
 
     a = assess(args.site, base_monthly, cur_monthly, period)
 
+    from .sites import provenance_path
+    prov_file = provenance_path(args.registry)
+    if not prov_file.exists():
+        raise SystemExit(
+            f"{prov_file} missing: rebuild the registry with `python -m "
+            "ledger.sites` so the OWA file URL, date and SHA-256 are recorded.")
+    owa_prov = json.loads(prov_file.read_text())
+
     registry = pd.read_parquet(args.registry)
     row = registry[registry.site_id == args.site]
     if len(row) == 0:
@@ -264,8 +274,12 @@ def cmd_assess(args):
     chips = []
     for sc in manifest["scenes"]:
         for c in sc["chips"]:
-            chips.append({"date": sc["date"], "path": c["path"],
-                          "sha256": c["sha256"], "bands": [c["band"]]})
+            chip = {"date": sc["date"], "path": c["path"],
+                    "sha256": c["sha256"], "bands": [c["band"]],
+                    "scene_id": sc["scene_id"]}
+            if c.get("source_url"):
+                chip["source_url"] = c["source_url"]
+            chips.append(chip)
 
     transforms = [
         {"step": "stac_scene_query", "tool": "pystac-client",
@@ -310,8 +324,11 @@ def cmd_assess(args):
     ]
     sources = [
         {"name": "OWA site-specific inventory (Excel)",
-         "url": OWA_INVENTORY_URL, "accessed": date_cls.today().isoformat(),
-         "license_note": "public data; inventory file month 2026-09-01, recheck live"},
+         "url": owa_prov.get("url") or OWA_INVENTORY_URL,
+         "accessed": (owa_prov.get("retrieved_at") or date_cls.today().isoformat())[:10],
+         "license_note": f"public data; inventory file dated "
+                         f"{owa_prov.get('file_date') or 'unknown'}, "
+                         f"sha256 {owa_prov.get('sha256')}"},
         {"name": "Element 84 Earth Search STAC (Sentinel-2 L2A)",
          "url": EARTH_SEARCH_URL, "accessed": date_cls.today().isoformat()},
         {"name": "Copernicus Sentinel-2 (ESA)", "url": COPERNICUS_URL,
@@ -334,7 +351,8 @@ def cmd_assess(args):
         site={"site_id": str(r["site_id"]), "name": str(r["name"]),
               "latitude": float(r["latitude"]), "longitude": float(r["longitude"]),
               "owa_stage": str(r["owa_stage"]),
-              "owa_inventory_date": OWA_INVENTORY_MONTH},
+              **({"owa_inventory_date": owa_prov["file_date"]}
+                 if owa_prov.get("file_date") else {})},
         assessment={"tier": a.tier, "statement": a.statement,
                     "rationale": a.rationale, "confidence": a.confidence,
                     "period": period, "caveats": caveats},
@@ -342,6 +360,9 @@ def cmd_assess(args):
         transforms=transforms, sources=sources,
     )
     packet["claim"]["caveats"] = caveats
+    packet["provenance"]["owa_inventory_file"] = {
+        k: owa_prov.get(k) for k in ("url", "file_name", "file_date", "sha256",
+                                     "retrieved_at")}
     packet["baseline"] = {"period": f"{baseline_years[0]}-{baseline_years[-1]}",
                           "ndvi_median": a.baseline_ndvi,
                           "n_scene_observations": a.n_baseline_obs}
