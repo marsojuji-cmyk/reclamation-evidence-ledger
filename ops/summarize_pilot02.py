@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Summarize pilot-02 assessment results for the run report.
 
-Reads packets/*.json (schema v1.1.0), joins licensee from the registry,
+Reads packets/*.json (schema v1.2.0), joins licensee from the registry,
 prints tier x confidence distribution, licensee breakdown, refusal count,
 and per-licensee delta stats. No claim beyond what packets state.
 """

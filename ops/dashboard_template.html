@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Reclamation Evidence Ledger — Alberta Orphan-Well Satellite Watch</title>
-<meta name="description" content="An independent satellite watchdog for Alberta's orphan wells. 99 sites, month-matched Sentinel-2 change detection, honest claim tiers.">
+<title>Reclamation Evidence Ledger — Alberta Orphan-Well Satellite Screen</title>
+<meta name="description" content="An independent satellite screen for Alberta's orphan well sites. Month-matched Sentinel-2 vegetation change, CI-gated claim tiers. Screening only: not legal proof, not certification, not methane detection.">
 <style>
 /* ============ THE RECLAMATION LEDGER — newspaper graphics desk edition ============
    Monochrome, like the morning paper. Meaning is carried by position, weight,
@@ -151,13 +151,14 @@ svg.chart{width:100%; height:auto; display:block; background:var(--paper); borde
   <h1>Reclamation Evidence Ledger</h1>
   <div class="rule"></div>
   <div class="dateline">CALGARY, ALBERTA &middot; SENTINEL-2 DESK</div>
-  <p class="deck">An independent satellite watchdog for Alberta&rsquo;s orphan wells &mdash;
-  free imagery, an automated pipeline, and one question per site, answered on a schedule:
-  <em>is the land healing?</em></p>
+  <p class="deck">An independent satellite screen for Alberta&rsquo;s orphan well sites &mdash;
+  free imagery, an automated pipeline, and one question per site:
+  <em>did vegetation in the square around the site visibly change against its own earlier seasons?</em></p>
+  <p class="note" style="max-width:660px;margin:12px auto 0;text-align:center"><b>Screening only.</b> Not legal proof, not a reclamation certification or compliance verdict, and not a methane, soil, contamination or subsurface measurement. Each tier describes NDVI in a ~1&nbsp;km&sup2; square that is mostly land around the pad, not the pad itself. No packet has a recorded human review. Tiers were re-scored on 2026-10-08 (<a href="https://github.com/marsojuji-cmyk/reclamation-evidence-ledger/blob/main/docs/retier-2026-10.md">re-tier diff</a>).</p>
   <div class="counters">
     <div class="counter"><div class="n">%%N_SITES%%</div><div class="l">SITES ASSESSED</div></div>
     <div class="counter"><div class="n">%%N_LIC%%</div><div class="l">LICENSEES</div></div>
-    <div class="counter"><div class="n">21,892</div><div class="l">REGISTRY SITES &middot; OWA 2026-09</div></div>
+    <div class="counter"><div class="n">%%N_IDENT%%</div><div class="l">IDENTIFIED &middot; CI-GATED</div></div>
     <div class="counter"><div class="n">10&nbsp;m</div><div class="l">SENTINEL-2 PIXEL</div></div>
     <div class="counter"><div class="n">~5-day</div><div class="l">REVISIT</div></div>
   </div>
@@ -173,7 +174,7 @@ svg.chart{width:100%; height:auto; display:block; background:var(--paper); borde
     <div class="tstep">
       <div class="k">V1 &middot; SEASONAL MEDIANS</div>
       <h3 class="bad">All 27 sites &ldquo;recovering&rdquo;</h3>
-      <p>The first change-detection method compared seasonal vegetation medians and reported that every pilot site was healing. A green dashboard. It was wrong.</p>
+      <p>The first change-detection method compared seasonal vegetation medians and reported that every pilot site was recovering. A green dashboard. It was wrong.</p>
     </div>
     <div class="tstep">
       <div class="k">AUDIT &middot; 2026-09-27</div>
@@ -188,12 +189,13 @@ svg.chart{width:100%; height:auto; display:block; background:var(--paper); borde
   </div>
   <div class="fig-label">Fig. 1 &mdash; Verification suite, run against the rebuilt assessor (2026-09-27)</div>
   <div class="traces">
-    <div class="trace pass"><div class="tn">TRACE A &middot; RECOVERY</div><div class="tv">+0.30</div><div class="to">synthetic greening &rarr; correctly detected as recovery</div></div>
+    <div class="trace pass"><div class="tn">TRACE A &middot; RECOVERY</div><div class="tv">+0.30</div><div class="to">synthetic greening &rarr; correctly detected as an NDVI increase</div></div>
     <div class="trace pass"><div class="tn">TRACE B &middot; NO CHANGE</div><div class="tv">+0.01</div><div class="to">synthetic flatline &rarr; correctly held as no significant change</div></div>
-    <div class="trace pass"><div class="tn">TRACE C &middot; REGRESSION</div><div class="tv">&minus;0.30</div><div class="to">synthetic browning &rarr; correctly detected as stalled / regressing</div></div>
+    <div class="trace pass"><div class="tn">TRACE C &middot; REGRESSION</div><div class="tv">&minus;0.30</div><div class="to">synthetic browning &rarr; correctly detected as an NDVI decrease</div></div>
     <div class="trace refuse"><div class="tn">TRACE D &middot; PHENOLOGY TRAP</div><div class="tv">REFUSED</div><div class="to">no overlapping calendar months &rarr; assessment refused, not guessed</div></div>
   </div>
-  <p class="pull">A watchdog that can&rsquo;t catch its own errors can&rsquo;t be trusted to watch anyone else.</p>
+  <p class="note">Fig. 1 values are typed from the 2026-09-27 verification log, not computed at render time. A second self-audit (2026-10) found the tier rule ignored the confidence interval; 28 &ldquo;identified&rdquo; sites became 10 after re-scoring.</p>
+  <p class="pull">A screen that can&rsquo;t catch its own errors can&rsquo;t be trusted.</p>
 </section>
 
 <!-- ================= PLATE II : FINDINGS ================= -->
@@ -201,21 +203,22 @@ svg.chart{width:100%; height:auto; display:block; background:var(--paper); borde
   <div class="plate-head"><span class="plate-no">PLATE II</span>
     <h2 class="plate-title">Findings &mdash; 99 Sites</h2></div>
   <p class="plate-sub">Pilot-01&rsquo;s 27 Lexin sites plus Pilot-02&rsquo;s expansion to 13 licensees. One honest distribution, not 99 green lights.</p>
+  <p class="note">Licensee names come from the OWA inventory and are listed only so a reader can look a site up. A tier is a screening result about vegetation in a square around a DLS centroid (&plusmn;300&nbsp;m); it is not a finding about any licensee&rsquo;s work or conduct, and grouping by licensee is not attribution.</p>
   <div class="bignums">
     <div class="bignum"><div class="n">%%N_SITES%%</div><div class="l">SITES<br>ASSESSED</div></div>
-    <div class="bignum"><div class="n">%%N_IDENT%%</div><div class="l">IDENTIFIED<br>CHANGE SIGNAL</div></div>
-    <div class="bignum"><div class="n">%%N_DETECT%%</div><div class="l">DETECTED<br>NO SIG. CHANGE</div></div>
+    <div class="bignum"><div class="n">%%N_IDENT%%</div><div class="l">IDENTIFIED<br>CI EXCLUDES ZERO</div></div>
+    <div class="bignum"><div class="n">%%N_DETECT%%</div><div class="l">DETECTED<br>NO SUPPORTED CHANGE</div></div>
     <div class="bignum"><div class="n">%%N_HI%%</div><div class="l">IDENTIFIED<br>HIGH CONFIDENCE</div></div>
     <div class="bignum"><div class="n">%%N_NOCI%%</div><div class="l">SITES WITH<br>NO CI PRINTED</div></div>
   </div>
   <div class="fig-label">Fig. 2 &mdash; Distribution of median matched-month NDVI deltas (&Delta;)</div>
   <div id="hist"></div>
-  <div class="src-line">Ledger pipeline v2 month-matched median &Delta; across all 99 sites; &plusmn;0.08 noise band from the pipeline config. Solid bars carry a signal; hatched bars sit inside the noise.</div>
+  <div class="src-line">Ledger pipeline v2 month-matched median &Delta; across all 99 sites; &plusmn;0.08 noise band from the pipeline config. Solid bars sit outside the &plusmn;0.08 band; hatched bars sit inside it. Outside the band is necessary, not sufficient, for <i>identified</i>.</div>
   <div class="legend">
-    <span><span class="sw solid"></span>|&Delta;| &ge; 0.08 &mdash; outside noise &rarr; <i>identified</i></span>
+    <span><span class="sw solid"></span>|&Delta;| &ge; 0.08 &mdash; <i>identified</i> only if the 95% CI also excludes zero</span>
     <span><span class="sw hatch"></span>|&Delta;| &lt; 0.08 &mdash; noise band &rarr; <i>detected</i></span>
   </div>
-  <p class="note">The tier boundary is the &plusmn;0.08 noise band from the pipeline config: a median matched-month delta outside it is <i>identified</i> (recovering if positive, stalled/regressing if negative); inside it is <i>detected</i> &mdash; something was measured, no signal claimed.</p>
+  <p class="note">Tier rule <i>ci-gated-v2</i>: a site is <i>identified</i> only when its median matched-month delta is outside the &plusmn;0.08 band <b>and</b> a bootstrap 95% CI exists (&ge;4 matched months) <b>and</b> that CI excludes zero. Everything else is <i>detected</i> &mdash; a delta was measured, no supported change claimed. Identified results are worded as &ldquo;NDVI higher/lower than baseline in the analysis square&rdquo;. The CI reflects within-season consistency across matched months, not year-to-year variation, and the baseline years include the 2023 drought.</p>
   <div class="fig-label">Fig. 3 &mdash; Site register (click a row for its dossier)</div>
   <div class="filters">
     <input id="fq" type="search" placeholder="search site or licensee&hellip;" size="28">
@@ -265,12 +268,13 @@ svg.chart{width:100%; height:auto; display:block; background:var(--paper); borde
   <div class="fig-label">Doctrine &mdash; borrowed from imagery interpretation tradecraft</div>
   <div class="doctrine">
     <div class="doc"><h4>Detection</h4><p>Something changed vs the baseline &mdash; a measured delta. The pipeline&rsquo;s lowest claim, and an honest one.</p></div>
-    <div class="doc"><h4>Identification</h4><p>The change is consistent with a reclamation signal across multiple observations &mdash; a hypothesis, caveats attached.</p></div>
+    <div class="doc"><h4>Identification</h4><p>NDVI in the analysis square moved beyond &plusmn;0.08 with a 95% CI that excludes zero &mdash; a screening hypothesis about the square, not the pad, and never a reclamation finding.</p></div>
     <div class="doc forbid"><h4>Attribution</h4><p>A named party is responsible. <b>Never emitted by code.</b> Requires human review and ground truth. The pipeline stops at <i>identified</i>.</p></div>
   </div>
   <div class="fig-label">Honest limits</div>
   <ul class="limits">
-    <li>Sentinel-2&rsquo;s 10&nbsp;m pixels cannot resolve wellheads or prove contamination, legal compliance, causation, or methane emissions.</li>
+    <li>Sentinel-2&rsquo;s 10&nbsp;m pixels cannot resolve wellheads or prove contamination, legal compliance, causation, or methane emissions. This is not a methane detection system.</li>
+    <li>The 500&nbsp;m buffer is a ~1&nbsp;km&sup2; square, mostly land around the pad. In 4 of 5 hand-checked pilot sites no pad was visible at 10&nbsp;m.</li>
     <li>Growing season to growing season only (May&ndash;Sep). Alberta snow makes winter comparisons meaningless; drought years mimic non-recovery.</li>
     <li>Site coordinates are DLS LSD centroids (&plusmn;300&nbsp;m); the 500&nbsp;m analysis buffer absorbs this. This is not a survey of the wellhead.</li>
     <li><b>No interval below four matched months.</b> Bootstrap confidence intervals over matched-month deltas are degenerate at n=2 &mdash; the resampled-median distribution has only three distinct values, so the interval looks precise and means almost nothing. Below four matched months the ledger prints <i>no interval</i> rather than a misleading one.</li>
@@ -282,6 +286,7 @@ svg.chart{width:100%; height:auto; display:block; background:var(--paper); borde
 <section class="plate" id="selfaudit">
   <div class="plate-head"><span class="plate-no">PLATE V</span>
     <h2 class="plate-title">The Ledger Keeps Auditing Itself</h2></div>
+  <p class="note">Plate V figures are typed from the 2026-09-27 BACI probe notes, not computed at render time. No control correction is in the pipeline yet.</p>
   <p class="plate-sub">After the rebuild, the instrument was stress-tested with a before-after-control-impact (BACI) probe: can a paired control parcel separate weather from reclamation? Twin-first &mdash; cheap simulation before any new downloads.</p>
   <div style="margin:8px 0 4px"><span class="verdict">VERDICT &middot; GO &mdash; WITH CHANGES</span></div>
   <p class="note">The probe reproduced the pipeline&rsquo;s month-matched deltas bit-for-bit on four sites, then found five things. Three of them changed the pipeline.</p>
@@ -304,11 +309,12 @@ svg.chart{width:100%; height:auto; display:block; background:var(--paper); borde
     <tr><td>OWA site inventory</td><td>Orphan site list, closure stage (no coordinates in file)</td><td>orphanwell.ca, monthly &middot; free</td></tr>
     <tr><td>DLS geocoding</td><td>LSD-centroid coordinates derived from site names (&plusmn;300&nbsp;m)</td><td>built into the pipeline &middot; free</td></tr>
     <tr><td>Sentinel-2 L2A</td><td>10&nbsp;m multispectral imagery, ~5-day revisit</td><td>AWS / Copernicus Data Space &middot; free</td></tr>
-    <tr><td>Pipeline</td><td><span style="font-family:ui-monospace,monospace">sites &rarr; imagery &rarr; indices &rarr; change &rarr; packet &rarr; render</span>, schema v%%SCHEMA%%</td><td><a href="https://github.com/marcusrichards-dev/reclamation-evidence-ledger">github.com/marcusrichards-dev/reclamation-evidence-ledger</a> &middot; MIT</td></tr>
+    <tr><td>Landsat</td><td>Not yet implemented; no packet uses it</td><td>&mdash;</td></tr>
+    <tr><td>Pipeline</td><td><span style="font-family:ui-monospace,monospace">sites &rarr; imagery &rarr; indices &rarr; change &rarr; packet &rarr; render</span>, schema v%%SCHEMA%%</td><td><a href="https://github.com/marsojuji-cmyk/reclamation-evidence-ledger">github.com/marsojuji-cmyk/reclamation-evidence-ledger</a> &middot; MIT</td></tr>
   </table>
   <hr class="hr-dotted">
-  <p>Contains modified Copernicus Sentinel data (2023&ndash;2026). Per-site evidence packets &mdash; scenes, chips, checksums, transforms, caveats &mdash; are linked from the register above and validated against the schema on every push to main. This dashboard was rendered from the packets themselves; no number on this page was typed by hand.</p>
-  <p class="stamp">RENDERED %%GENERATED%% &middot; RECLAMATION EVIDENCE LEDGER &middot; A WATCHDOG THAT CAUGHT ITSELF</p>
+  <p>Contains modified Copernicus Sentinel data (2023&ndash;2026). Per-site evidence packets &mdash; scenes, chips, checksums, transforms, caveats &mdash; are linked from the register above and validated against the schema on every push to main. Packet-derived numbers on this page (sites, licensees, tiers, deltas, intervals) are computed from the packets at render time; the Plate I verification traces and Plate V probe figures are typed from the 2026-09-27 audit notes. Each packet names its OWA inventory file and every chip&rsquo;s source URL and SHA-256.</p>
+  <p class="stamp">RENDERED %%GENERATED%% &middot; RECLAMATION EVIDENCE LEDGER &middot; SCREENING ONLY &middot; NOT LEGAL PROOF &middot; NOT METHANE DETECTION</p>
 </footer>
 
 </div><!-- /sheet -->

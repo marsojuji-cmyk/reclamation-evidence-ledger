@@ -4,8 +4,10 @@
 Reads packets/*.json + ops/pilot02-results.csv and emits a single-file,
 dependency-free, publish-anywhere dashboard at docs/index.html.
 
-Every number on the dashboard is computed from the packets at render time.
-Nothing is hand-typed. Re-run after any assess/render cycle:
+Every packet-derived number (sites, licensees, tiers, deltas, CIs) is
+computed from the packets at render time. The Plate I verification traces and
+Plate V BACI-probe figures are typed into the template from the 2026-09-27
+audit notes, and the page labels them so. Re-run after any assess/render cycle:
 
     python ops/render_dashboard.py
 """

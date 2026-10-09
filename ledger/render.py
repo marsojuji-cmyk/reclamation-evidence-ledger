@@ -5,7 +5,8 @@ static pages: an index table plus one page per packet. Anything a reader
 needs is in the HTML; the JSON packets sit alongside for verification.
 
 Usage:
-    python -m ledger.render --packets packets/ --out public/
+    python -m ledger.render --packets packets/ --out docs/
+    python ops/render_dashboard.py   # then overwrite docs/index.html
 """
 from __future__ import annotations
 
@@ -36,7 +37,10 @@ code{{background:#f4f4f4;padding:.1rem .3rem}}
 {body}
 <footer><p>{attribution}</p>
 <p>Screening only: these packets prioritize ground inspection. They are not
-compliance verdicts and name no responsible party.</p></footer>
+legal proof, reclamation certifications or compliance verdicts, they do not
+measure methane, soil, contamination or subsurface conditions, and they name
+no responsible party. A tier describes NDVI in a ~1 km² square around a DLS
+centroid, mostly land around the pad, not the pad itself.</p></footer>
 </body></html>"""
 
 
@@ -64,6 +68,28 @@ def render_packet(packet: dict, chart_file: str | None = None) -> str:
         f"(accessed {_esc(s['accessed'])})</li>" for s in packet["provenance"]["sources"]
     )
     s = packet["site"]
+    prov = packet["provenance"]
+    review = prov.get("review") or {}
+    review_txt = ("no human review recorded" if not review.get("log")
+                  else f"{len(review['log'])} review(s) recorded")
+    owa = prov.get("owa_inventory_file") or {}
+    owa_txt = (f"OWA file {_esc(owa.get('file_date'))}, sha256 "
+               f"<code>{_esc(owa.get('sha256'))}</code>" if owa.get("sha256")
+               else _esc(owa.get("note", "OWA inventory file not recorded")))
+    recheck = prov.get("owa_recheck")
+    if recheck:
+        owa_txt += (f"<br>Re-checked against OWA file {_esc(recheck.get('file_date'))} "
+                    f"(sha256 <code>{_esc(recheck.get('sha256'))}</code>) on "
+                    f"{_esc(recheck.get('checked_on'))}: site "
+                    f"{'found' if recheck.get('site_found') else 'NOT found'}, stage "
+                    f"{_esc(recheck.get('owa_stage'))}")
+    n_src = sum(1 for ch in packet.get("chips", []) if ch.get("source_url"))
+    revisions = "".join(
+        f"<li>{_esc(r.get('date'))}: {_esc(r.get('change'))} "
+        f"({_esc(r.get('previous_tier'))} / {_esc(r.get('previous_statement'))} &rarr; "
+        f"{_esc(r.get('new_tier'))} / {_esc(r.get('new_statement'))}; "
+        f"{_esc(r.get('reason'))})</li>" for r in prov.get("revisions", []))
+    revisions_html = (f"<h3>Revisions</h3><ul>{revisions}</ul>" if revisions else "")
     chart_html = (f'<h3>NDVI time series</h3><p><img src="assets/{_esc(chart_file)}" '
                   f'alt="per-scene NDVI time series" style="max-width:100%"></p>'
                   if chart_file else "")
@@ -76,7 +102,8 @@ def render_packet(packet: dict, chart_file: str | None = None) -> str:
 OWA stage: <b>{_esc(s['owa_stage'])}</b> (inventory {_esc(s.get('owa_inventory_date',''))})</p>
 <h3>Claim <span class="tier {c['tier']}">{_esc(c['tier']).upper()}</span></h3>
 <p><b>{_esc(c['statement'])}</b> — {_esc(c['rationale'])}<br>
-Confidence: {_esc(c['confidence'])}</p>
+Confidence: {_esc(c['confidence'])} · Tier rule: {_esc(c.get('tier_rule', 'v1 (CI not used)'))}
+· Review: {review_txt}</p>
 {chart_html}
 {caveats}
 <h3>Observations</h3>
@@ -86,18 +113,21 @@ Confidence: {_esc(c['confidence'])}</p>
 <ol>{transforms}</ol>
 <h3>Sources</h3>
 <ul>{srcs}</ul>
+<p>{owa_txt}</p>
+<p>{n_src} of {len(packet.get('chips', []))} chips cite their source COG URL and
+SHA-256 in the packet JSON.</p>
+{revisions_html}
 <p><a href="index.html">← ledger index</a></p>
 """,
     )
 
 
-def _marker_color(statement: str) -> str:
-    st = (statement or "").lower()
-    if "recovering" in st:
-        return "green"
-    if "stalled" in st or "regressing" in st:
-        return "orange"
-    return "grey"
+def _marker_color(claim: dict) -> str:
+    """Colour only identified results; everything else is grey."""
+    if claim.get("tier") != "identified":
+        return "grey"
+    return {"increase": "#1f6fb2", "decrease": "#b25f1f"}.get(
+        claim.get("direction"), "grey")
 
 
 def render_index_map(packets: list[dict], pages: list[str]) -> str:
@@ -112,7 +142,7 @@ def render_index_map(packets: list[dict], pages: list[str]) -> str:
             "tier": packet["claim"]["tier"],
             "statement": packet["claim"]["statement"],
             "confidence": packet["claim"]["confidence"],
-            "color": _marker_color(packet["claim"]["statement"]),
+            "color": _marker_color(packet["claim"]),
         })
     data_js = json.dumps(pts)
     return f"""
@@ -141,9 +171,9 @@ for (const p of pts) {{
 }}
 if (bounds.length) map.fitBounds(bounds, {{padding: [20, 20]}});
 </script>
-<p><span style="color:green">●</span> recovering
-<span style="color:orange">●</span> stalled / regressing
-<span style="color:grey">●</span> no significant change.
+<p><span style="color:#1f6fb2">●</span> identified: NDVI higher than baseline
+<span style="color:#b25f1f">●</span> identified: NDVI lower than baseline
+<span style="color:grey">●</span> detected (no CI-supported change).
 Coordinates are DLS LSD centroids (±300 m) — markers show screening areas, not wellheads.</p>
 """
 
