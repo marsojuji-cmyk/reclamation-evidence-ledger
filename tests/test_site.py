@@ -5,7 +5,16 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 SITE_DIR = ROOT / "site"
 
-EXPECTED_PAGES = ["index.html", "method.html", "evidence.html", "services.html", "about.html", "contact.html"]
+EXPECTED_PAGES = [
+    "index.html",
+    "method.html",
+    "evidence.html",
+    "services.html",
+    "about.html",
+    "contact.html",
+    "order.html",
+    "projects.html",
+]
 
 
 def test_site_pages_and_links():
