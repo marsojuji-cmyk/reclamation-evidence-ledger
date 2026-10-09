@@ -21,6 +21,16 @@ import jsonschema
 
 SCHEMA = json.loads(Path(__file__).resolve().parent.parent
                     .joinpath("schemas/evidence-packet.schema.json").read_text())
+SCHEMA_VERSION = SCHEMA["properties"]["schema_version"]["const"]
+
+# No packet may claim a human review that is not on record. The pipeline is
+# automated; a review is recorded only by appending an entry (reviewer, date,
+# scope, outcome) to provenance.review.log, and status changes with it.
+GENERATED_BY = "reclamation-ledger pipeline (automated; no human review recorded)"
+
+
+def empty_review() -> dict:
+    return {"status": "not_reviewed", "log": []}
 
 
 def sha256_file(path: Path) -> str:
@@ -37,7 +47,7 @@ def build_packet(site: dict, assessment: dict, observations: list[dict],
     packet_id = f"{site['site_id']}_{assessment['period'].replace(' ', '_')}"
     return {
         "packet_id": packet_id,
-        "schema_version": "1.1.0",
+        "schema_version": SCHEMA_VERSION,
         "site": site,
         "assessment_date": datetime.now(timezone.utc).date().isoformat(),
         "claim": {
@@ -56,7 +66,8 @@ def build_packet(site: dict, assessment: dict, observations: list[dict],
         "provenance": {
             "sources": sources,
             "generated_at": datetime.now(timezone.utc).isoformat(),
-            "generated_by": "reclamation-ledger pipeline (human-reviewed before publish)",
+            "generated_by": GENERATED_BY,
+            "review": empty_review(),
         },
     }
 

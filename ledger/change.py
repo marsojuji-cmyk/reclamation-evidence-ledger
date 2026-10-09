@@ -233,7 +233,7 @@ def cmd_assess(args):
 
     import pandas as pd
 
-    from .packet import build_packet, write_packet
+    from .packet import SCHEMA_VERSION, build_packet, write_packet
 
     chips_dir = Path(args.chips)
     scenes, manifest = _scene_means(chips_dir)
@@ -320,7 +320,7 @@ def cmd_assess(args):
                         "recover_delta": DEFAULT.ndvi_recover_delta,
                         "stall_delta": DEFAULT.ndvi_stall_delta}},
         {"step": "packet_build", "tool": "ledger.packet.build_packet",
-         "parameters": {"schema_version": "1.1.0"}},
+         "parameters": {"schema_version": SCHEMA_VERSION}},
     ]
     sources = [
         {"name": "OWA site-specific inventory (Excel)",
