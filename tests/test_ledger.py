@@ -172,10 +172,24 @@ def _normalize(packet: dict) -> dict:
     return p
 
 
+_DET_SITE = "07-30-018-26W4 (100)"
+
+
+def _det_inputs_present() -> bool:
+    from ledger.imagery import safe_site_id
+    from ledger.sites import provenance_path
+    reg = ROOT / "data" / "sites.parquet"
+    return ((ROOT / "data" / "chips" / safe_site_id(_DET_SITE) / "manifest.json").exists()
+            and reg.exists() and provenance_path(reg).exists())
+
+
+@pytest.mark.skipif(not _det_inputs_present(),
+                    reason="needs gitignored data/chips + data/sites.parquet "
+                           "(+ .owa_provenance.json); fetch them to run")
 def test_pipeline_rerun_deterministic(tmp_path):
     """Two CLI runs on the same chips must produce byte-identical packets
     apart from run timestamps."""
-    site = "07-30-018-26W4 (100)"
+    site = _DET_SITE
     from ledger.imagery import safe_site_id
     outs = []
     for i in (1, 2):
@@ -209,6 +223,74 @@ def test_packets_validate_against_schema():
 
 
 def test_schema_version_pinned():
+    want = SCHEMA["properties"]["schema_version"]["const"]
+    assert want == "1.2.0"
     for p in PACKETS:
         d = json.loads(p.read_text())
-        assert d["schema_version"] == "1.1.0", p.name
+        assert d["schema_version"] == want, p.name
+
+
+# --- M1 Honest Ledger invariants over the committed packets -------------------
+
+def test_every_identified_packet_meets_ci_rule():
+    for p in PACKETS:
+        d = json.loads(p.read_text())
+        det, claim = d["assessment_detail"], d["claim"]
+        tier, _, _ = assign_tier(det["delta_vs_baseline"], det.get("delta_ci95"))
+        assert claim["tier"] == tier, p.name
+        if tier == "identified":
+            lo, hi = det["delta_ci95"]
+            assert abs(det["delta_vs_baseline"]) >= 0.08 and not (lo <= 0 <= hi)
+
+
+def test_no_packet_claims_unrecorded_human_review():
+    for p in PACKETS:
+        d = json.loads(p.read_text())
+        assert "review" not in d["provenance"]["generated_by"].replace(
+            "no human review recorded", ""), p.name
+        assert "human-reviewed" not in json.dumps(d["claim"]), p.name
+        rv = d["provenance"]["review"]
+        assert rv["status"] == ("reviewed" if rv["log"] else "not_reviewed"), p.name
+
+
+def test_every_chip_cites_its_source():
+    for p in PACKETS:
+        d = json.loads(p.read_text())
+        for c in d["chips"]:
+            assert c.get("source_url", "").startswith("https://"), (p.name, c["path"])
+            assert c.get("scene_id"), (p.name, c["path"])
+
+
+def test_lineage_audit_covers_every_cited_scene():
+    lin = json.loads((ROOT / "ledger" / "data" / "radiometric_lineage.json").read_text())
+    audited = {s["scene_id"] for s in lin["scenes"]}
+    assert not lin["anomalies"]
+    for p in PACKETS:
+        d = json.loads(p.read_text())
+        missing = {o["scene_id"] for o in d["observations"]} - audited
+        assert not missing, (p.name, sorted(missing))
+
+
+def test_owa_provenance_recorded():
+    for p in PACKETS:
+        prov = json.loads(p.read_text())["provenance"]
+        f = prov["owa_inventory_file"]
+        assert f["sha256"] or f.get("note"), p.name  # recorded, or says why not
+        if "owa_recheck" in prov:
+            assert len(prov["owa_recheck"]["sha256"]) == 64, p.name
+
+
+def test_tls_verification_on_by_default(monkeypatch):
+    from ledger.config import Config
+    monkeypatch.delenv("LEDGER_TRUST_EGRESS_PROXY_TLS", raising=False)
+    assert Config().trust_egress_proxy_tls is False
+    monkeypatch.setenv("LEDGER_TRUST_EGRESS_PROXY_TLS", "1")
+    assert Config().trust_egress_proxy_tls is True
+
+
+def test_owa_file_date_parsed_from_filename():
+    from ledger.sites import owa_file_date
+    url = ("https://cdn.example/x_Reporting%20-%20Full%20Inventory%20-%20"
+           "2026-10-01%2013.41.42.xlsx")
+    assert owa_file_date(url) == "2026-10-01"
+    assert owa_file_date("owa_inventory_latest.xlsx") is None
