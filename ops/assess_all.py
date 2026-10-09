@@ -1,16 +1,20 @@
 #!/usr/bin/env python3
 """Assess all pilot sites in a pilot manifest, skipping and recording failures.
 
-Usage: .venv/bin/python ops/assess_all.py [--sites pilots/pilot-02.txt]
+Usage: python ops/assess_all.py [--sites pilots/pilot-02.txt] [--force]
+       [--registry data/sites.parquet] [--baseline-start 2023
+       --baseline-end 2024 --assessment 2025-2026]
 Writes packets/*.json and ops/assess_results.json + failures list.
-Safe to rerun: skips sites whose packet already exists (unless --force).
+Safe to rerun: skips sites whose packet for the same assessment period
+already exists, unless --force (the monthly run passes --force so new scenes
+are actually re-assessed). Runs with the interpreter that runs this script.
 """
 import argparse, csv, json, os, re, subprocess, sys, time
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))  # make `ledger` importable when run as a script
-VENV_PY = str(ROOT / ".venv" / "bin" / "python")
+VENV_PY = sys.executable
 
 
 def safe_dir(site_id: str) -> str:
@@ -18,9 +22,17 @@ def safe_dir(site_id: str) -> str:
     return safe_site_id(site_id)
 
 
-def packet_name(site_id: str) -> str:
+def period_label(assessment: str) -> str:
+    """Same period string ledger.change uses in packet_id."""
+    from ledger.change import _parse_years
+    yrs = _parse_years(assessment)
+    return (f"{min(yrs)}-{max(yrs)} growing seasons" if len(yrs) > 1
+            else f"{yrs[0]} growing season")
+
+
+def packet_name(site_id: str, assessment: str = "2025-2026") -> str:
     from ledger.packet import packet_filename
-    return packet_filename(f"{site_id}_2025-2026_growing_seasons")
+    return packet_filename(f"{site_id}_{period_label(assessment).replace(' ', '_')}")
 
 
 def load_sites(manifest: str) -> list[str]:
@@ -37,6 +49,12 @@ def main():
     ap.add_argument("--force", action="store_true", help="re-assess even if packet exists")
     ap.add_argument("--sites", default="pilots/pilot-02.txt",
                     help="pilot manifest (one site_id per line)")
+    ap.add_argument("--registry", default="data/sites.parquet")
+    ap.add_argument("--chips", default="data/chips")
+    ap.add_argument("--packets", default="packets")
+    ap.add_argument("--baseline-start", default="2023")
+    ap.add_argument("--baseline-end", default="2024")
+    ap.add_argument("--assessment", default="2025-2026")
     args = ap.parse_args()
 
     sites = load_sites(args.sites)
@@ -44,9 +62,9 @@ def main():
     t0 = time.time()
     for i, site in enumerate(sites, 1):
         safe = safe_dir(site)
-        chips = ROOT / "data" / "chips" / safe
+        chips = ROOT / args.chips / safe
         tifs = list(chips.glob("*.tif")) if chips.is_dir() else []
-        packet = ROOT / "packets" / packet_name(site)
+        packet = ROOT / args.packets / packet_name(site, args.assessment)
         print(f"[{i}/{len(sites)}] {site}  (chips dir: {chips.name}, tifs={len(tifs)})", flush=True)
         if packet.exists() and not args.force:
             results.append({"site": site, "status": "already_present", "packet": packet.name})
@@ -58,9 +76,11 @@ def main():
             r = subprocess.run(
                 [VENV_PY, "-m", "ledger.change", "assess",
                  "--site", site, "--chips", str(chips),
-                 "--baseline-start", "2023", "--baseline-end", "2024",
-                 "--assessment", "2025-2026",
-                 "--out", str(ROOT / "packets")],
+                 "--registry", str(ROOT / args.registry),
+                 "--baseline-start", args.baseline_start,
+                 "--baseline-end", args.baseline_end,
+                 "--assessment", args.assessment,
+                 "--out", str(ROOT / args.packets)],
                 capture_output=True, text=True, timeout=1800, cwd=str(ROOT))
             if r.returncode != 0:
                 failures.append({"site": site, "reason": f"assess exit {r.returncode}: {r.stderr[-400:]}"})
