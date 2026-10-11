@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-- 360° engineering audit (AUDIT-2026-10-10.md, Ternus lens): P0/P1 findings fixed, P2 parked with reasons
+- 360° engineering audit (AUDIT-2026-10-10.md): P0/P1 findings fixed, P2 parked with reasons
 - fix: withdraw the published-false ±300 m geocoding accuracy claim everywhere it appeared (sites.py docstrings, registry `geo_method`, packet caveats, rendered HTML, README); all now reference NEGATIVE-RESULT-2026-10-09.md
 - feat: `tests/test_geocode.py` — grid-geometry pins (LSD/township/range steps, boustrophedon parity) + xfail work-order test for ground-truth verification of `dls_to_latlon`
 - feat: `pyproject.toml` — `reclamation-ledger` is now pip-installable with console entry points for all 7 CLIs; removed every `sys.path` import hack
