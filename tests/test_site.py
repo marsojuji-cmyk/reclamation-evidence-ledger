@@ -1,4 +1,5 @@
 """Tests for the Reclamation Evidence corporate website."""
+
 import re
 from pathlib import Path
 
@@ -27,11 +28,11 @@ def test_site_pages_and_links():
     for p in SITE_DIR.glob("*.html"):
         content = p.read_text(encoding="utf-8")
         links = link_pattern.findall(content)
-        for l in links:
-            if l.startswith("http") or l.startswith("mailto:") or l.startswith("#"):
+        for link in links:
+            if link.startswith("http") or link.startswith("mailto:") or link.startswith("#"):
                 continue
-            target = SITE_DIR / l
-            assert target.exists(), f"Dead link in {p.name}: {l}"
+            target = SITE_DIR / link
+            assert target.exists(), f"Dead link in {p.name}: {link}"
 
 
 def test_site_numbers_match_evidence_base():

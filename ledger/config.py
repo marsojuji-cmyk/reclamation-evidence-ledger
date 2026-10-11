@@ -1,4 +1,5 @@
 """Single source of pipeline defaults. Override via environment or CLI flags."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field

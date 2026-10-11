@@ -6,8 +6,8 @@ fix the cause, not the test.
 
 Run: .venv/bin/python -m pytest tests/ -q
 """
+
 import json
-import re
 import subprocess
 import sys
 from dataclasses import asdict
@@ -16,7 +16,6 @@ from pathlib import Path
 import pytest
 
 ROOT = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(ROOT))
 
 from ledger.change import MIN_MATCHED_MONTHS_FOR_CI, assess  # noqa: E402
 
@@ -24,14 +23,25 @@ SCHEMA = json.loads((ROOT / "schemas" / "evidence-packet.schema.json").read_text
 PACKETS = sorted((ROOT / "packets").glob("*.json"))
 
 
+def _packet_period_years(packet: dict) -> tuple[set[int], set[int]]:
+    """Baseline/assessment years from the packet's own baseline_assessment
+    transform — never hardcoded, so the test survives new periods."""
+    for t in packet.get("transforms", []):
+        if t.get("step") == "baseline_assessment":
+            p = t.get("parameters", {})
+            return set(p.get("baseline_years", [])), set(p.get("assessment_years", []))
+    raise AssertionError("packet has no baseline_assessment transform")
+
+
 def _synth(months, base_vals, cur_vals):
     """Synthetic month -> [scene means] inputs for assess()."""
-    b = {m: [v] * 3 for m, v in zip(months, base_vals)}
-    c = {m: [v] * 3 for m, v in zip(months, cur_vals)}
+    b = {m: [v] * 3 for m, v in zip(months, base_vals, strict=True)}
+    c = {m: [v] * 3 for m, v in zip(months, cur_vals, strict=True)}
     return b, c
 
 
 # --- Item 1: the degenerate-CI guard ---------------------------------------
+
 
 def test_ci_omitted_below_threshold_unit():
     """assess() must not emit delta_ci95 with <4 matched months."""
@@ -70,23 +80,31 @@ def test_caveat_does_not_claim_wide_interval():
 
 # --- Item 3: observation-count labels mean one thing -------------------------
 
+
 def test_observation_count_definitions():
     """n_scene_observations == recomputed count of scene means in matched
     months with usable NDVI — separately for each period. One label, one
-    definition, everywhere."""
-    base_years, cur_years = {2023, 2024}, {2025, 2026}
+    definition, everywhere. Period years come from each packet's own
+    baseline_assessment transform, so this test survives new seasons."""
     for p in PACKETS:
         d = json.loads(p.read_text())
+        base_years, cur_years = _packet_period_years(d)
         matched = set(d["assessment_detail"]["matched_months"])
         obs = d["observations"]
-        n_base = sum(1 for o in obs
-                     if int(o["date"][:4]) in base_years
-                     and int(o["date"][5:7]) in matched
-                     and o["ndvi_mean"] is not None)
-        n_cur = sum(1 for o in obs
-                    if int(o["date"][:4]) in cur_years
-                    and int(o["date"][5:7]) in matched
-                    and o["ndvi_mean"] is not None)
+        n_base = sum(
+            1
+            for o in obs
+            if int(o["date"][:4]) in base_years
+            and int(o["date"][5:7]) in matched
+            and o["ndvi_mean"] is not None
+        )
+        n_cur = sum(
+            1
+            for o in obs
+            if int(o["date"][:4]) in cur_years
+            and int(o["date"][5:7]) in matched
+            and o["ndvi_mean"] is not None
+        )
         assert d["baseline"]["n_scene_observations"] == n_base, p.name
         assert d["assessment_detail"]["n_scene_observations"] == n_cur, p.name
 
@@ -106,6 +124,7 @@ def test_delta_is_median_of_deltas():
 def test_delta_std_is_spread_of_deltas():
     """delta_std must be the std of matched-month deltas (not baseline var)."""
     import numpy as np
+
     b, c = _synth([5, 6, 7, 8], [0.20, 0.30, 0.40, 0.50], [0.30, 0.42, 0.48, 0.55])
     a = assess("TEST", b, c, "test period")
     deltas = [0.10, 0.12, 0.08, 0.05]
@@ -113,6 +132,7 @@ def test_delta_std_is_spread_of_deltas():
 
 
 # --- Item 5: determinism ------------------------------------------------------
+
 
 def test_assess_deterministic_unit():
     b, c = _synth([5, 6, 7, 8], [0.30, 0.31, 0.29, 0.33], [0.40, 0.41, 0.39, 0.43])
@@ -144,14 +164,25 @@ def _make_synthetic_chips_and_registry(base_dir: Path, site_id: str = "SYNTH-SIT
     chips_dir.mkdir(parents=True, exist_ok=True)
 
     dates = [
-        "2023-05-15", "2023-06-15", "2024-05-15", "2024-06-15",
-        "2025-05-15", "2025-06-15", "2026-05-15", "2026-06-15",
+        "2023-05-15",
+        "2023-06-15",
+        "2024-05-15",
+        "2024-06-15",
+        "2025-05-15",
+        "2025-06-15",
+        "2026-05-15",
+        "2026-06-15",
     ]
     scenes = []
     tform = from_bounds(0, 0, 100, 100, 4, 4)
     profile = {
-        "driver": "GTiff", "height": 4, "width": 4, "count": 1,
-        "dtype": "uint16", "crs": "EPSG:3857", "transform": tform,
+        "driver": "GTiff",
+        "height": 4,
+        "width": 4,
+        "count": 1,
+        "dtype": "uint16",
+        "crs": "EPSG:3857",
+        "transform": tform,
     }
 
     for d in dates:
@@ -163,20 +194,26 @@ def _make_synthetic_chips_and_registry(base_dir: Path, site_id: str = "SYNTH-SIT
             arr = np.full((4, 4), val, dtype=np.uint16)
             with rasterio.open(fpath, "w", **profile) as dst:
                 dst.write(arr, 1)
-            chip_meta.append({"band": band, "path": str(fpath), "sha256": "0" * 64, "shape": [4, 4]})
+            chip_meta.append(
+                {"band": band, "path": str(fpath), "sha256": "0" * 64, "shape": [4, 4]}
+            )
         scenes.append({"date": d, "scene_id": f"S2_{stamp}", "chips": chip_meta})
 
     manifest = {"scenes": scenes, "query": {"synthetic": True}, "rejections": []}
     (chips_dir / "manifest.json").write_text(json.dumps(manifest))
 
-    reg_df = pd.DataFrame([{
-        "site_id": site_id,
-        "name": "Synthetic Test Site",
-        "latitude": 51.0,
-        "longitude": -114.0,
-        "owa_stage": "reclamation",
-        "geo_method": "synthetic centroid",
-    }])
+    reg_df = pd.DataFrame(
+        [
+            {
+                "site_id": site_id,
+                "name": "Synthetic Test Site",
+                "latitude": 51.0,
+                "longitude": -114.0,
+                "owa_stage": "reclamation",
+                "geo_method": "synthetic centroid",
+            }
+        ]
+    )
     reg_path = base_dir / "sites.parquet"
     reg_df.to_parquet(reg_path)
     return chips_dir, reg_path
@@ -187,6 +224,7 @@ def test_pipeline_rerun_deterministic(tmp_path):
     apart from run timestamps."""
     site = "07-30-018-26W4 (100)"
     from ledger.imagery import safe_site_id
+
     local_chips = ROOT / "data" / "chips" / safe_site_id(site)
     local_registry = ROOT / "data" / "sites.parquet"
     if local_chips.exists() and local_registry.exists():
@@ -194,19 +232,39 @@ def test_pipeline_rerun_deterministic(tmp_path):
         registry_path = local_registry
     else:
         site = "SYNTH-SITE-01"
-        chips_path, registry_path = _make_synthetic_chips_and_registry(tmp_path / "fixtures", site_id=site)
+        chips_path, registry_path = _make_synthetic_chips_and_registry(
+            tmp_path / "fixtures", site_id=site
+        )
 
     outs = []
     for i in (1, 2):
         out = tmp_path / f"run{i}"
         r = subprocess.run(
-            [sys.executable, "-m", "ledger.change", "assess",
-             "--site", site,
-             "--chips", str(chips_path),
-             "--registry", str(registry_path),
-             "--baseline-start", "2023", "--baseline-end", "2024",
-             "--assessment", "2025-2026", "--out", str(out)],
-            capture_output=True, text=True, cwd=str(ROOT), timeout=600)
+            [
+                sys.executable,
+                "-m",
+                "ledger.change",
+                "assess",
+                "--site",
+                site,
+                "--chips",
+                str(chips_path),
+                "--registry",
+                str(registry_path),
+                "--baseline-start",
+                "2023",
+                "--baseline-end",
+                "2024",
+                "--assessment",
+                "2025-2026",
+                "--out",
+                str(out),
+            ],
+            capture_output=True,
+            text=True,
+            cwd=str(ROOT),
+            timeout=600,
+        )
         assert r.returncode == 0, r.stderr[-500:]
         outs.append(next(out.glob("*.json")))
     p1 = _normalize(json.loads(outs[0].read_text()))
@@ -216,8 +274,10 @@ def test_pipeline_rerun_deterministic(tmp_path):
 
 # --- schema contract ----------------------------------------------------------
 
+
 def test_packets_validate_against_schema():
     import jsonschema
+
     bad = []
     for p in PACKETS:
         try:
@@ -235,8 +295,10 @@ def test_schema_version_pinned():
 
 # --- launchd plist generation -------------------------------------------------
 
+
 def test_generate_plist_valid():
     import plistlib
+
     from ledger.pipeline import generate_plist
 
     xml_text = generate_plist(ROOT, Path(sys.executable))
@@ -254,4 +316,3 @@ def test_generate_plist_valid():
     assert len(intervals) == 5
     months = [item["Month"] for item in intervals]
     assert months == [5, 6, 7, 8, 9]
-

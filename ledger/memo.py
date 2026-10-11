@@ -4,12 +4,13 @@ Transforms a collection of schema-validated evidence packets into a client
 deliverable: a ranked site register, methodology packet, and written validation
 memo for screening pilots and portfolio triage.
 """
+
 from __future__ import annotations
 
 import argparse
 import json
 import sys
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 
@@ -28,7 +29,9 @@ def build_validation_memo(packets: list[dict], title: str = "Screening Validatio
     total_sites = len(packets)
     detected_count = sum(1 for p in packets if p.get("claim", {}).get("tier") == "detected")
     identified_count = sum(1 for p in packets if p.get("claim", {}).get("tier") == "identified")
-    refused_count = sum(1 for p in packets if p.get("assessment_detail", {}).get("delta_vs_baseline") is None)
+    refused_count = sum(
+        1 for p in packets if p.get("assessment_detail", {}).get("delta_vs_baseline") is None
+    )
 
     # Sort packets: lowest delta first (regressed sites at the top of the walk register)
     def sort_key(p: dict):
@@ -41,7 +44,7 @@ def build_validation_memo(packets: list[dict], title: str = "Screening Validatio
         f"# {title}",
         "",
         "**Reclamation Evidence** · Calgary, Alberta · `contact@marcusrichards.dev`  ",
-        f"**Date:** {datetime.now(timezone.utc).strftime('%Y-%m-%d')} | **Protocol:** Month-Matched Median-of-Deltas (Sentinel-2 L2A)  ",
+        f"**Date:** {datetime.now(UTC).strftime('%Y-%m-%d')} | **Protocol:** Month-Matched Median-of-Deltas (Sentinel-2 L2A)  ",
         "",
         "---",
         "",
@@ -93,34 +96,36 @@ def build_validation_memo(packets: list[dict], title: str = "Screening Validatio
             f"| {rank} | `{site_id}` | {name} | {stage} | {delta_str} | {ci_str} | {tier} | {conf} | {action} |"
         )
 
-    lines.extend([
-        "",
-        "---",
-        "",
-        "## Methodology & Provenance",
-        "",
-        "1. **Month-Matched Sampling:** To eliminate seasonal phenology artifacts (summer is greener than spring),",
-        "   every observation is compared strictly against baseline scenes from the exact same calendar month.",
-        "   A minimum of 2 matched months is required to report an assessment; otherwise the site is honestly refused.",
-        "2. **Uncertainty Quantification:** For sites with at least 4 matched months, a 95% bootstrap confidence interval",
-        "   is calculated on the median delta. If fewer than 4 matched months exist, the interval is omitted rather",
-        "   than reported deceptively.",
-        "3. **Claim Tiers:**",
-        "   - **Detected:** Statistically significant vegetation index delta vs baseline.",
-        "   - **Identified:** Delta >= +0.08 sustained across multiple observations without crossing zero.",
-        "   - **Attributed:** Never emitted by automated systems; requires qualified human ground truth.",
-        "",
-        "---",
-        "",
-        "## Limits & Caveats",
-        "",
-        "- **Spatial Resolution:** Sentinel-2 multispectral resolution is 10 m per pixel. It cannot resolve wellheads, piping, or point-source leaks.",
-        "- **Atmospheric & Snow Rejection:** Winter scenes (November–March) are excluded. Alberta snow cover obscures ground conditions.",
-        "- **Drought & Regional Variation:** Regional moisture anomalies affect baseline comparisons; ground confirmation is essential.",
-        "",
-        "---",
-        "© 2026 Reclamation Evidence · Calgary, Alberta · contact@marcusrichards.dev",
-    ])
+    lines.extend(
+        [
+            "",
+            "---",
+            "",
+            "## Methodology & Provenance",
+            "",
+            "1. **Month-Matched Sampling:** To eliminate seasonal phenology artifacts (summer is greener than spring),",
+            "   every observation is compared strictly against baseline scenes from the exact same calendar month.",
+            "   A minimum of 2 matched months is required to report an assessment; otherwise the site is honestly refused.",
+            "2. **Uncertainty Quantification:** For sites with at least 4 matched months, a 95% bootstrap confidence interval",
+            "   is calculated on the median delta. If fewer than 4 matched months exist, the interval is omitted rather",
+            "   than reported deceptively.",
+            "3. **Claim Tiers:**",
+            "   - **Detected:** Statistically significant vegetation index delta vs baseline.",
+            "   - **Identified:** Delta >= +0.08 sustained across multiple observations without crossing zero.",
+            "   - **Attributed:** Never emitted by automated systems; requires qualified human ground truth.",
+            "",
+            "---",
+            "",
+            "## Limits & Caveats",
+            "",
+            "- **Spatial Resolution:** Sentinel-2 multispectral resolution is 10 m per pixel. It cannot resolve wellheads, piping, or point-source leaks.",
+            "- **Atmospheric & Snow Rejection:** Winter scenes (November–March) are excluded. Alberta snow cover obscures ground conditions.",
+            "- **Drought & Regional Variation:** Regional moisture anomalies affect baseline comparisons; ground confirmation is essential.",
+            "",
+            "---",
+            "© 2026 Reclamation Evidence · Calgary, Alberta · contact@marcusrichards.dev",
+        ]
+    )
 
     return "\n".join(lines)
 

@@ -15,7 +15,9 @@ Design (2026-09-27):
 Writes pilots/pilot-02.txt (99 site_ids, full manifest) and
 pilots/pilot-02-new.txt (72 new site_ids, for imagery fetch).
 """
+
 import re
+
 import numpy as np
 import pandas as pd
 
@@ -78,33 +80,40 @@ def main() -> None:
             if i > PER_LICENSEE * len(twps) + len(twps):
                 break  # every site of this licensee is taken
         new_sites.extend(chosen)
-        picks_log.append(f"{lic}: {len(chosen)} sites, {len({township(c) for c in chosen})} townships")
+        picks_log.append(
+            f"{lic}: {len(chosen)} sites, {len({township(c) for c in chosen})} townships"
+        )
 
-    p1 = [ln.strip() for ln in open("pilots/pilot-01.txt")
-          if ln.strip() and not ln.startswith("#")]
+    p1 = [ln.strip() for ln in open("pilots/pilot-01.txt") if ln.strip() and not ln.startswith("#")]
     assert not (set(new_sites) & set(p1)), "overlap with pilot-01"
     assert len(new_sites) == len(set(new_sites)), "duplicate new sites"
 
-    header = [
-        "# Pilot 02 — 2026-09-27",
-        "# Goal: expand to ~100 sites with licensee diversity (pilot-01 was Lexin-only).",
-        f"# Carry-over: 27 pilot-01 sites (LEXIN RESOURCES LTD; 3 townships SW Calgary).",
-        f"# New: {len(new_sites)} sites — up to {PER_LICENSEE} each from 12 new licensees,",
-        "# OWA stage=reclamation, component=Well & Access Road, within 150 km of Calgary",
-        "# (51.05,-114.07), coords via DLS LSD centroid (~+/-300 m). Within-licensee:",
-        "# round-robin across distinct townships, median sorted site_id per township —",
-        "# deterministic, avoids pad clustering. LR PROCESSING had 0 qualifying sites,",
-        "# replaced by TERRA ENERGY CORP.",
-        "# Per-licensee picks:",
-    ] + [f"#   {l}" for l in picks_log] + [f"# Total: {len(p1) + len(new_sites)} sites"]
+    header = (
+        [
+            "# Pilot 02 — 2026-09-27",
+            "# Goal: expand to ~100 sites with licensee diversity (pilot-01 was Lexin-only).",
+            "# Carry-over: 27 pilot-01 sites (LEXIN RESOURCES LTD; 3 townships SW Calgary).",
+            f"# New: {len(new_sites)} sites — up to {PER_LICENSEE} each from 12 new licensees,",
+            "# OWA stage=reclamation, component=Well & Access Road, within 150 km of Calgary",
+            "# (51.05,-114.07), coords via DLS LSD centroid (accuracy withdrawn 2026-10-09).",
+            "# round-robin across distinct townships, median sorted site_id per township —",
+            "# deterministic, avoids pad clustering. LR PROCESSING had 0 qualifying sites,",
+            "# replaced by TERRA ENERGY CORP.",
+            "# Per-licensee picks:",
+        ]
+        + [f"#   {pick}" for pick in picks_log]
+        + [f"# Total: {len(p1) + len(new_sites)} sites"]
+    )
     with open("pilots/pilot-02.txt", "w") as f:
         f.write("\n".join(header) + "\n" + "\n".join(p1 + new_sites) + "\n")
     with open("pilots/pilot-02-new.txt", "w") as f:
         f.write("\n".join(new_sites) + "\n")
-    print(f"wrote pilots/pilot-02.txt ({len(p1)+len(new_sites)} sites), "
-          f"pilots/pilot-02-new.txt ({len(new_sites)} new)")
-    for l in picks_log:
-        print(" ", l)
+    print(
+        f"wrote pilots/pilot-02.txt ({len(p1) + len(new_sites)} sites), "
+        f"pilots/pilot-02-new.txt ({len(new_sites)} new)"
+    )
+    for pick in picks_log:
+        print(" ", pick)
 
 
 if __name__ == "__main__":

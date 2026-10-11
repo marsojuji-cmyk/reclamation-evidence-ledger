@@ -1,13 +1,11 @@
 """Tests for automated validation memo and triage register generation."""
+
 import json
 import subprocess
 import sys
 from pathlib import Path
 
-import pytest
-
 ROOT = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(ROOT))
 
 PACKETS = sorted((ROOT / "packets").glob("*.json"))
 
@@ -29,12 +27,22 @@ def test_memo_generation_unit():
 
 def test_memo_cli_execution(tmp_path):
     out_file = tmp_path / "validation_memo.md"
-    r = subprocess.run([
-        sys.executable, "-m", "ledger.memo",
-        "--packets", str(ROOT / "packets"),
-        "--out", str(out_file),
-        "--title", "99-Site Pilot Validation Memo"
-    ], capture_output=True, text=True, cwd=str(ROOT))
+    r = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "ledger.memo",
+            "--packets",
+            str(ROOT / "packets"),
+            "--out",
+            str(out_file),
+            "--title",
+            "99-Site Pilot Validation Memo",
+        ],
+        capture_output=True,
+        text=True,
+        cwd=str(ROOT),
+    )
 
     assert r.returncode == 0, r.stderr
     assert out_file.exists()
