@@ -78,9 +78,47 @@ def packet_filename(packet_id: str) -> str:
     return re.sub(r"[\\/]", "_", packet_id) + ".json"
 
 
-def write_packet(packet: dict, out_dir: str | Path) -> Path:
+def archive_previous(existing: Path, out_dir: Path) -> Path:
+    """Copy an existing packet to <out_dir>/history/<site>/<assessment_date>.json
+    (suffixing _2, _3... if that name is taken). Never overwrites history."""
+    old = json.loads(existing.read_text())
+    site = re.sub(r"[\\/]", "_", old["site"]["site_id"])
+    hdir = out_dir / "history" / site
+    hdir.mkdir(parents=True, exist_ok=True)
+    stem = old.get("assessment_date", "undated")
+    dest, n = hdir / f"{stem}.json", 1
+    while dest.exists():
+        n += 1
+        dest = hdir / f"{stem}_{n}.json"
+    dest.write_text(existing.read_text())
+    return dest
+
+
+def write_packet(packet: dict, out_dir: str | Path,
+                 preserve_history: bool = True) -> Path:
+    """Validate and write a packet. If a packet with the same id already
+    exists it is archived under history/ first, and its revisions list is
+    carried into the new packet with an entry pointing at the archive, so a
+    re-assessment never silently overwrites a published packet."""
+    jsonschema.validate(packet, SCHEMA)  # fail before touching anything on disk
+    out_dir = Path(out_dir)
+    out = out_dir / packet_filename(packet["packet_id"])
+    if preserve_history and out.exists():
+        old = json.loads(out.read_text())
+        archived = archive_previous(out, out_dir)
+        revs = list(old.get("provenance", {}).get("revisions", []))
+        revs.append({
+            "date": packet["assessment_date"],
+            "change": "re-assessed; previous packet archived",
+            "archived_packet": archived.relative_to(out_dir).as_posix(),
+            "previous_assessment_date": old.get("assessment_date"),
+            "previous_tier": old.get("claim", {}).get("tier"),
+            "previous_statement": old.get("claim", {}).get("statement"),
+            "new_tier": packet["claim"]["tier"],
+            "new_statement": packet["claim"]["statement"],
+        })
+        packet["provenance"]["revisions"] = revs
     jsonschema.validate(packet, SCHEMA)
-    out = Path(out_dir) / packet_filename(packet["packet_id"])
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(packet, indent=2))
     return out
