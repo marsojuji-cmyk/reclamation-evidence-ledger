@@ -90,6 +90,8 @@ select#sitesel{font-family:Georgia,serif; font-size:16px; padding:8px 12px; back
 .claimbox .rat{font-size:14.5px; color:var(--ink-soft); margin-top:8px}
 .caveats{font-size:13.5px; color:var(--ink-soft); margin:12px 0; padding-left:20px}
 .caveats li{margin-bottom:5px}
+.holdbanner{border:3px solid var(--ink); background:var(--paper); padding:12px 18px; margin:0 0 18px; text-align:center; font-family:ui-monospace,'SF Mono',Menlo,monospace; font-size:14px; letter-spacing:.04em}
+.holdbanner b{letter-spacing:.12em}
 .honest{border:2px dashed var(--ink); padding:14px 18px; margin:14px 0; font-style:italic}
 .honest b{font-style:normal; letter-spacing:.08em}
 svg.chart{width:100%; height:auto; display:block; background:var(--paper); border:1px solid var(--rule); margin:10px 0}
@@ -144,6 +146,7 @@ svg.chart{width:100%; height:auto; display:block; background:var(--paper); borde
 </head>
 <body>
 <div class="sheet">
+<div class="holdbanner" role="status"><b>RE-SCORING IN PROGRESS (OCT 2026)</b> &mdash; site-level calls are withheld pending a surrounding-land baseline. Every site is published as <i>detected &ndash; screening only</i>. Why: no-well control points still produced 3/100 &ldquo;identified&rdquo; under the current rule (Seedling Lab, 2026-10-08).</div>
 
 <!-- ================= MASTHEAD ================= -->
 <header class="plate masthead">
@@ -154,11 +157,10 @@ svg.chart{width:100%; height:auto; display:block; background:var(--paper); borde
   <p class="deck">An independent satellite screen for Alberta&rsquo;s orphan well sites &mdash;
   free imagery, an automated pipeline, and one question per site:
   <em>did vegetation in the square around the site visibly change against its own earlier seasons?</em></p>
-  <p class="note" style="max-width:660px;margin:12px auto 0;text-align:center"><b>Screening only.</b> Not legal proof, not a reclamation certification or compliance verdict, and not a methane, soil, contamination or subsurface measurement. Each tier describes NDVI in a ~1&nbsp;km&sup2; square that is mostly land around the pad, not the pad itself. No packet has a recorded human review. Tiers were re-scored on 2026-10-08 (<a href="https://github.com/marsojuji-cmyk/reclamation-evidence-ledger/blob/main/docs/retier-2026-10.md">re-tier diff</a>).</p>
+  <p class="note" style="max-width:660px;margin:12px auto 0;text-align:center"><b>Screening only.</b> Not legal proof, not a reclamation certification or compliance verdict, and not a methane, soil, contamination or subsurface measurement. Each tier describes NDVI in a ~1&nbsp;km&sup2; square that is mostly land around the pad, not the pad itself. No packet has a recorded human review. Tiers were re-scored on 2026-10-08 and site-level calls withheld on 2026-10-10 (<a href="https://github.com/marsojuji-cmyk/reclamation-evidence-ledger/blob/main/docs/retier-2026-10.md">re-tier diff</a>).</p>
   <div class="counters">
     <div class="counter"><div class="n">%%N_SITES%%</div><div class="l">SITES ASSESSED</div></div>
-    <div class="counter"><div class="n">%%N_LIC%%</div><div class="l">LICENSEES</div></div>
-    <div class="counter"><div class="n">%%N_IDENT%%</div><div class="l">IDENTIFIED &middot; CI-GATED</div></div>
+    <div class="counter"><div class="n">0</div><div class="l">SITE-LEVEL CALLS PUBLISHED</div></div>
     <div class="counter"><div class="n">10&nbsp;m</div><div class="l">SENTINEL-2 PIXEL</div></div>
     <div class="counter"><div class="n">~5-day</div><div class="l">REVISIT</div></div>
   </div>
@@ -194,7 +196,7 @@ svg.chart{width:100%; height:auto; display:block; background:var(--paper); borde
     <div class="trace pass"><div class="tn">TRACE C &middot; REGRESSION</div><div class="tv">&minus;0.30</div><div class="to">synthetic browning &rarr; correctly detected as an NDVI decrease</div></div>
     <div class="trace refuse"><div class="tn">TRACE D &middot; PHENOLOGY TRAP</div><div class="tv">REFUSED</div><div class="to">no overlapping calendar months &rarr; assessment refused, not guessed</div></div>
   </div>
-  <p class="note">Fig. 1 values are typed from the 2026-09-27 verification log, not computed at render time. A second self-audit (2026-10) found the tier rule ignored the confidence interval; 28 &ldquo;identified&rdquo; sites became 10 after re-scoring.</p>
+  <p class="note">Fig. 1 values are typed from the 2026-09-27 verification log, not computed at render time. A second self-audit (2026-10) found the tier rule ignored the confidence interval: 18 of the 28 &ldquo;identified&rdquo; calls had no CI or a CI including zero. A no-well control test then showed the corrected rule still fires at 3/100 points with no well, so all site-level calls are withheld until a surrounding-land baseline exists.</p>
   <p class="pull">A screen that can&rsquo;t catch its own errors can&rsquo;t be trusted.</p>
 </section>
 
@@ -202,34 +204,32 @@ svg.chart{width:100%; height:auto; display:block; background:var(--paper); borde
 <section class="plate" id="findings">
   <div class="plate-head"><span class="plate-no">PLATE II</span>
     <h2 class="plate-title">Findings &mdash; 99 Sites</h2></div>
-  <p class="plate-sub">Pilot-01&rsquo;s 27 Lexin sites plus Pilot-02&rsquo;s expansion to 13 licensees. One honest distribution, not 99 green lights.</p>
-  <p class="note">Licensee names come from the OWA inventory and are listed only so a reader can look a site up. A tier is a screening result about vegetation in a square around a DLS centroid (&plusmn;300&nbsp;m); it is not a finding about any licensee&rsquo;s work or conduct, and grouping by licensee is not attribution.</p>
+  <p class="plate-sub">Pilot-01&rsquo;s 27 sites plus Pilot-02&rsquo;s expansion to 99. One honest distribution, not 99 green lights.</p>
+  <p class="note">Operator names are not published. Each row is a screening measurement of vegetation in a square around a DLS centroid (&plusmn;300&nbsp;m); it is not a finding about any operator&rsquo;s work or conduct.</p>
   <div class="bignums">
     <div class="bignum"><div class="n">%%N_SITES%%</div><div class="l">SITES<br>ASSESSED</div></div>
-    <div class="bignum"><div class="n">%%N_IDENT%%</div><div class="l">IDENTIFIED<br>CI EXCLUDES ZERO</div></div>
-    <div class="bignum"><div class="n">%%N_DETECT%%</div><div class="l">DETECTED<br>NO SUPPORTED CHANGE</div></div>
-    <div class="bignum"><div class="n">%%N_HI%%</div><div class="l">IDENTIFIED<br>HIGH CONFIDENCE</div></div>
+    <div class="bignum"><div class="n">%%N_DETECT%%</div><div class="l">DETECTED<br>SCREENING ONLY</div></div>
+    <div class="bignum"><div class="n">0</div><div class="l">SITE-LEVEL CALLS<br>PUBLISHED</div></div>
     <div class="bignum"><div class="n">%%N_NOCI%%</div><div class="l">SITES WITH<br>NO CI PRINTED</div></div>
   </div>
   <div class="fig-label">Fig. 2 &mdash; Distribution of median matched-month NDVI deltas (&Delta;)</div>
   <div id="hist"></div>
-  <div class="src-line">Ledger pipeline v2 month-matched median &Delta; across all 99 sites; &plusmn;0.08 noise band from the pipeline config. Solid bars sit outside the &plusmn;0.08 band; hatched bars sit inside it. Outside the band is necessary, not sufficient, for <i>identified</i>.</div>
+  <div class="src-line">Ledger pipeline v2 month-matched median &Delta; across all 99 sites; &plusmn;0.08 noise band from the pipeline config. Solid bars sit outside the &plusmn;0.08 band; hatched bars sit inside it. Being outside the band is not a site-level call.</div>
   <div class="legend">
-    <span><span class="sw solid"></span>|&Delta;| &ge; 0.08 &mdash; <i>identified</i> only if the 95% CI also excludes zero</span>
+    <span><span class="sw solid"></span>|&Delta;| &ge; 0.08 &mdash; outside the band (no site-level call published)</span>
     <span><span class="sw hatch"></span>|&Delta;| &lt; 0.08 &mdash; noise band &rarr; <i>detected</i></span>
   </div>
-  <p class="note">Tier rule <i>ci-gated-v2</i>: a site is <i>identified</i> only when its median matched-month delta is outside the &plusmn;0.08 band <b>and</b> a bootstrap 95% CI exists (&ge;4 matched months) <b>and</b> that CI excludes zero. Everything else is <i>detected</i> &mdash; a delta was measured, no supported change claimed. Identified results are worded as &ldquo;NDVI higher/lower than baseline in the analysis square&rdquo;. The CI reflects within-season consistency across matched months, not year-to-year variation, and the baseline years include the 2023 drought.</p>
+  <p class="note"><b>Published tier: <i>detected &ndash; screening only</i> for every site.</b> The pipeline still computes a CI-gated screen (|&Delta;| &ge; 0.08, a bootstrap 95% CI from &ge;4 matched months, CI excluding zero) and keeps it in each packet for internal tracking, but no site-level call is published until a surrounding-land (pad-vs-ring) baseline exists, because no-well control points still produced 3/100 &ldquo;identified&rdquo; under that rule. The CI reflects within-season consistency across matched months, not year-to-year variation, and the baseline years include the 2023 drought.</p>
   <div class="fig-label">Fig. 3 &mdash; Site register (click a row for its dossier)</div>
   <div class="filters">
-    <input id="fq" type="search" placeholder="search site or licensee&hellip;" size="28">
-    <select id="ftier"><option value="">all tiers</option><option value="identified">identified</option><option value="detected">detected</option></select>
+    <input id="fq" type="search" placeholder="search site&hellip;" size="28">
+    <select id="ftier" hidden><option value="">all tiers</option></select>
     <select id="fconf"><option value="">all confidence</option><option value="high">high</option><option value="medium">medium</option><option value="low">low</option></select>
-    <select id="flic"><option value="">all licensees</option></select>
     <span class="count" id="fcount"></span>
   </div>
   <div class="tblwrap"><table id="sites">
     <thead><tr>
-      <th data-k="id">Site &#8597;</th><th data-k="lic">Licensee &#8597;</th><th data-k="tier">Tier &#8597;</th>
+      <th data-k="id">Site &#8597;</th><th data-k="tier">Published tier</th>
       <th data-k="conf">Conf. &#8597;</th><th data-k="delta" class="num">&Delta; NDVI &#8597;</th>
       <th class="num">95% CI</th><th class="num">Matched mo.</th><th>Packet</th>
     </tr></thead>
@@ -268,7 +268,7 @@ svg.chart{width:100%; height:auto; display:block; background:var(--paper); borde
   <div class="fig-label">Doctrine &mdash; borrowed from imagery interpretation tradecraft</div>
   <div class="doctrine">
     <div class="doc"><h4>Detection</h4><p>Something changed vs the baseline &mdash; a measured delta. The pipeline&rsquo;s lowest claim, and an honest one.</p></div>
-    <div class="doc"><h4>Identification</h4><p>NDVI in the analysis square moved beyond &plusmn;0.08 with a 95% CI that excludes zero &mdash; a screening hypothesis about the square, not the pad, and never a reclamation finding.</p></div>
+    <div class="doc"><h4>Identification</h4><p><b>Withheld (Oct 2026).</b> Would mean NDVI in the analysis square moved beyond &plusmn;0.08 with a 95% CI excluding zero &mdash; a screening hypothesis about the square, never a reclamation finding. Not published until a surrounding-land baseline passes a no-well control test.</p></div>
     <div class="doc forbid"><h4>Attribution</h4><p>A named party is responsible. <b>Never emitted by code.</b> Requires human review and ground truth. The pipeline stops at <i>identified</i>.</p></div>
   </div>
   <div class="fig-label">Honest limits</div>
@@ -313,7 +313,7 @@ svg.chart{width:100%; height:auto; display:block; background:var(--paper); borde
     <tr><td>Pipeline</td><td><span style="font-family:ui-monospace,monospace">sites &rarr; imagery &rarr; indices &rarr; change &rarr; packet &rarr; render</span>, schema v%%SCHEMA%%</td><td><a href="https://github.com/marsojuji-cmyk/reclamation-evidence-ledger">github.com/marsojuji-cmyk/reclamation-evidence-ledger</a> &middot; MIT</td></tr>
   </table>
   <hr class="hr-dotted">
-  <p>Contains modified Copernicus Sentinel data (2023&ndash;2026). Per-site evidence packets &mdash; scenes, chips, checksums, transforms, caveats &mdash; are linked from the register above and validated against the schema on every push to main. Packet-derived numbers on this page (sites, licensees, tiers, deltas, intervals) are computed from the packets at render time; the Plate I verification traces and Plate V probe figures are typed from the 2026-09-27 audit notes. Each packet names its OWA inventory file and every chip&rsquo;s source URL and SHA-256.</p>
+  <p>Contains modified Copernicus Sentinel data (2023&ndash;2026). Per-site evidence packets &mdash; scenes, chips, checksums, transforms, caveats &mdash; are linked from the register above and validated against the schema on every push to main. Packet-derived numbers on this page (sites, published tiers, deltas, intervals) are computed from the packets at render time; the Plate I verification traces and Plate V probe figures are typed from the 2026-09-27 audit notes. Each packet names its OWA inventory file and every chip&rsquo;s source URL and SHA-256.</p>
   <p class="stamp">RENDERED %%GENERATED%% &middot; RECLAMATION EVIDENCE LEDGER &middot; SCREENING ONLY &middot; NOT LEGAL PROOF &middot; NOT METHANE DETECTION</p>
 </footer>
 
@@ -397,11 +397,10 @@ var sortK='delta', sortDir=1;
 function filtered(){
   var q=document.getElementById('fq').value.toLowerCase(),
       t=document.getElementById('ftier').value,
-      c=document.getElementById('fconf').value,
-      l=document.getElementById('flic').value;
+      c=document.getElementById('fconf').value;
   var rows=sites.filter(function(s){
-    return (!q || s.id.toLowerCase().indexOf(q)>=0 || s.lic.toLowerCase().indexOf(q)>=0)
-        && (!t || s.tier===t) && (!c || s.conf===c) && (!l || s.lic===l);
+    return (!q || s.id.toLowerCase().indexOf(q)>=0)
+        && (!t || s.tier===t) && (!c || s.conf===c);
   });
   rows.sort(function(a,b){
     var va=a[sortK], vb=b[sortK];
@@ -417,8 +416,8 @@ function renderTable(){
   rows.forEach(function(s){
     var tr=document.createElement('tr'); tr.className='rowh';
     tr.innerHTML =
-      '<td><b>'+esc(s.id)+'</b></td><td>'+esc(s.lic)+'</td>'+
-      '<td><span class="badge '+s.tier+'">'+s.tier.toUpperCase()+'</span></td>'+
+      '<td><b>'+esc(s.id)+'</b></td>'+
+      '<td><span class="badge '+s.tier+'">'+esc(s.stmt).toUpperCase()+'</span></td>'+
       '<td><span class="conf">'+s.conf+'</span></td>'+
       '<td class="num">'+fmtD(s.delta)+'</td>'+
       '<td class="num">'+esc(ciStr(s.ci))+'</td>'+
@@ -440,14 +439,9 @@ document.querySelectorAll('#sites th[data-k]').forEach(function(th){
     renderTable();
   });
 });
-['fq','ftier','fconf','flic'].forEach(function(id){
+['fq','ftier','fconf'].forEach(function(id){
   document.getElementById(id).addEventListener('input', renderTable);
 });
-(function(){
-  var sel=document.getElementById('flic');
-  var lics=[...new Set(sites.map(function(s){return s.lic;}))].sort();
-  lics.forEach(function(l){ var o=document.createElement('option'); o.value=l; o.textContent=l; sel.appendChild(o); });
-})();
 
 /* ---------- dossier ---------- */
 var MONTHS={1:'Jan',2:'Feb',3:'Mar',4:'Apr',5:'May',6:'Jun',7:'Jul',8:'Aug',9:'Sep',10:'Oct',11:'Nov',12:'Dec'};
@@ -462,7 +456,7 @@ function renderDossier(s){
     '<span class="conf">confidence: '+s.conf+' &middot; '+esc(s.stmt)+'</span>';
   host.appendChild(h);
   var dm=document.createElement('div'); dm.className='dmeta';
-  dm.innerHTML='<span>'+esc(s.lic)+'</span><span>'+s.lat+', '+s.lon+'</span>'+
+  dm.innerHTML='<span>'+s.lat+', '+s.lon+'</span>'+
     '<span>'+s.nobs+' scenes</span><span>'+s.nchips+' chips</span>'+
     '<span>matched months: '+s.mm.map(function(m){return MONTHS[m];}).join(', ')+'</span>'+
     '<span><a href="'+s.page+'" target="_blank" rel="noopener">full evidence packet \u2197</a></span>';

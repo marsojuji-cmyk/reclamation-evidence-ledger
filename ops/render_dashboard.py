@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Render the Reclamation Evidence Ledger dashboard.
 
-Reads packets/*.json + ops/pilot02-results.csv and emits a single-file,
+Reads packets/*.json and emits a single-file,
 dependency-free, publish-anywhere dashboard at docs/index.html.
 
 Every packet-derived number (sites, licensees, tiers, deltas, CIs) is
@@ -13,7 +13,6 @@ audit notes, and the page labels them so. Re-run after any assess/render cycle:
 """
 from __future__ import annotations
 
-import csv
 import datetime as dt
 import glob
 import json
@@ -24,19 +23,10 @@ from urllib.parse import quote
 
 ROOT = Path(__file__).resolve().parent.parent
 PACKETS = sorted(ROOT.glob("packets/*.json"))
-CSV = ROOT / "ops" / "pilot02-results.csv"
 OUT = ROOT / "docs" / "index.html"
 
 BASE_YEARS = (2023, 2024)
 CUR_YEARS = (2025, 2026)
-
-
-def load_licensees() -> dict[str, str]:
-    lic = {}
-    with open(CSV, newline="") as f:
-        for row in csv.DictReader(f):
-            lic[row["site_id"].strip()] = row["licensee"].strip()
-    return lic
 
 
 def period_years(packet: dict) -> tuple[list[int], list[int]]:
@@ -48,7 +38,10 @@ def period_years(packet: dict) -> tuple[list[int], list[int]]:
     return (list(BASE_YEARS), list(CUR_YEARS))
 
 
-def build_site(packet: dict, licensees: dict[str, str], packet_file: Path) -> dict:
+def build_site(packet: dict, packet_file: Path) -> dict:
+    """Public dashboard row. Only the PUBLISHED claim is used; the internal
+    screen tier (claim.screen_tier_internal) and licensee names are never
+    placed in the page."""
     site = packet["site"]
     claim = packet["claim"]
     det = packet["assessment_detail"]
@@ -69,7 +62,6 @@ def build_site(packet: dict, licensees: dict[str, str], packet_file: Path) -> di
     sid = site["site_id"]
     return {
         "id": sid,
-        "lic": licensees.get(sid, "—"),
         "tier": claim["tier"],
         "conf": claim["confidence"],
         "stmt": claim["statement"],
@@ -90,11 +82,10 @@ def build_site(packet: dict, licensees: dict[str, str], packet_file: Path) -> di
 
 
 def main() -> None:
-    licensees = load_licensees()
     sites = []
     for f in PACKETS:
         packet = json.loads(f.read_text())
-        sites.append(build_site(packet, licensees, f))
+        sites.append(build_site(packet, f))
     sites.sort(key=lambda s: s["id"].lower())
 
     tiers = {}
@@ -110,7 +101,6 @@ def main() -> None:
 
     agg = {
         "n_sites": len(sites),
-        "n_licensees": len(set(s["lic"] for s in sites if s["lic"] != "—")),
         "tiers": tiers,
         "confs": confs,
         "n_noci": n_noci,
@@ -127,7 +117,6 @@ def main() -> None:
     html = html.replace("%%GENERATED%%", agg["generated"])
     html = html.replace("%%SCHEMA%%", str(schema_v))
     html = html.replace("%%N_SITES%%", str(agg["n_sites"]))
-    html = html.replace("%%N_LIC%%", str(agg["n_licensees"]))
     html = html.replace("%%N_IDENT%%", str(tiers.get("identified", 0)))
     html = html.replace("%%N_DETECT%%", str(tiers.get("detected", 0)))
     html = html.replace("%%N_HI%%", str(hi_ident))

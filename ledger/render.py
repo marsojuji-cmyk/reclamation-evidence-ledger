@@ -28,11 +28,13 @@ body{{font-family:system-ui,sans-serif;max-width:70ch;margin:2rem auto;padding:0
 .tier{{display:inline-block;padding:.2rem .6rem;border-radius:4px;font-weight:600}}
 .detected{{background:#fff3cd}} .identified{{background:#d1ecf1}}
 table{{border-collapse:collapse;width:100%}} th,td{{border:1px solid #ccc;padding:.4rem;text-align:left}}
+.hold{{border:3px solid #222;padding:.6rem 1rem;margin:0 0 1rem;font-weight:600}}
 .caveat{{background:#f8f9fa;border-left:4px solid #999;padding:.5rem 1rem;margin:.5rem 0}}
 footer{{margin-top:3rem;font-size:.85rem;color:#555;border-top:1px solid #ccc;padding-top:1rem}}
 code{{background:#f4f4f4;padding:.1rem .3rem}}
 </style></head>
 <body>
+{banner}
 <h1>Reclamation Evidence Ledger</h1>
 {body}
 <footer><p>{attribution}</p>
@@ -46,6 +48,16 @@ centroid, mostly land around the pad, not the pad itself.</p></footer>
 
 def _esc(v) -> str:
     return html.escape(str(v))
+
+
+def _banner() -> str:
+    from .change import PUBLICATION_HOLD
+    if not PUBLICATION_HOLD.get("active"):
+        return ""
+    return ('<div class="hold" role="status">Re-scoring in progress (Oct 2026): '
+            'site-level calls are withheld pending a surrounding-land baseline. '
+            'Every site is published as "detected – screening only". '
+            f'{_esc(PUBLICATION_HOLD["reason"])}</div>')
 
 
 def render_packet(packet: dict, chart_file: str | None = None) -> str:
@@ -84,25 +96,27 @@ def render_packet(packet: dict, chart_file: str | None = None) -> str:
                     f"{'found' if recheck.get('site_found') else 'NOT found'}, stage "
                     f"{_esc(recheck.get('owa_stage'))}")
     n_src = sum(1 for ch in packet.get("chips", []) if ch.get("source_url"))
+    # Date and change only: while the publication hold is active, pages do
+    # not restate intermediate (internal) tiers. The packet JSON keeps them.
     revisions = "".join(
-        f"<li>{_esc(r.get('date'))}: {_esc(r.get('change'))} "
-        f"({_esc(r.get('previous_tier'))} / {_esc(r.get('previous_statement'))} &rarr; "
-        f"{_esc(r.get('new_tier'))} / {_esc(r.get('new_statement'))}; "
-        f"{_esc(r.get('reason'))})</li>" for r in prov.get("revisions", []))
+        f"<li>{_esc(r.get('date'))}: {_esc(r.get('change'))}"
+        + (f" (previous packet archived at <code>{_esc(r['archived_packet'])}</code>)"
+           if r.get("archived_packet") else "") + "</li>"
+        for r in prov.get("revisions", []))
     revisions_html = (f"<h3>Revisions</h3><ul>{revisions}</ul>" if revisions else "")
     chart_html = (f'<h3>NDVI time series</h3><p><img src="assets/{_esc(chart_file)}" '
                   f'alt="per-scene NDVI time series" style="max-width:100%"></p>'
                   if chart_file else "")
     return PAGE_TMPL.format(
         title=_esc(packet["packet_id"]),
-        attribution=ATTRIBUTION,
+        attribution=ATTRIBUTION, banner=_banner(),
         body=f"""
 <h2>Site {_esc(s['site_id'])}</h2>
 <p>{_esc(s.get('name',''))} — {_esc(s['latitude'])}, {_esc(s['longitude'])}<br>
 OWA stage: <b>{_esc(s['owa_stage'])}</b> (inventory {_esc(s.get('owa_inventory_date',''))})</p>
 <h3>Claim <span class="tier {c['tier']}">{_esc(c['tier']).upper()}</span></h3>
 <p><b>{_esc(c['statement'])}</b> — {_esc(c['rationale'])}<br>
-Confidence: {_esc(c['confidence'])} · Tier rule: {_esc(c.get('tier_rule', 'v1 (CI not used)'))}
+Confidence: {_esc(c['confidence'])}
 · Review: {review_txt}</p>
 {chart_html}
 {caveats}
@@ -123,7 +137,8 @@ SHA-256 in the packet JSON.</p>
 
 
 def _marker_color(claim: dict) -> str:
-    """Colour only identified results; everything else is grey."""
+    """Colour only published identified results; everything else is grey.
+    (While the publication hold is active nothing is identified.)"""
     if claim.get("tier") != "identified":
         return "grey"
     return {"increase": "#1f6fb2", "decrease": "#b25f1f"}.get(
@@ -215,7 +230,7 @@ def main() -> None:
         objs.append(packet)
 
     index = PAGE_TMPL.format(
-        title="Index", attribution=ATTRIBUTION,
+        title="Index", attribution=ATTRIBUTION, banner=_banner(),
         body=f"<h2>{len(packets)} evidence packets</h2>"
              + render_index_map(objs, pages) +
              "<table><tr><th>Packet</th><th>Tier</th><th>Finding</th><th>Confidence</th></tr>"
