@@ -22,6 +22,7 @@ offset semantics differ) is reported loudly, not smoothed over.
 
 Usage: python ops/audit_lineage.py
 """
+
 import json
 import sys
 import time
@@ -66,23 +67,23 @@ def audit() -> dict:
             baseline = p.get("s2:processing_baseline")
             boa = p.get("earthsearch:boa_offset_applied")
         except Exception as e:  # noqa: BLE001
-            anomalies.append({"scene_id": sid, "date": date,
-                              "anomaly": f"STAC fetch failed: {e}"})
+            anomalies.append({"scene_id": sid, "date": date, "anomaly": f"STAC fetch failed: {e}"})
             print(f"[{i}/{len(scenes)}] {sid}: FETCH FAILED", flush=True)
             continue
-        rec = {"scene_id": sid, "date": date,
-               "processing_baseline": baseline,
-               "boa_offset_applied": boa,
-               "stac_item": f"{STAC_URL}/collections/{COLLECTION}/items/{sid}",
-               "assets": {k: item.assets[k].href for k in ASSET_KEYS
-                          if k in item.assets}}
+        rec = {
+            "scene_id": sid,
+            "date": date,
+            "processing_baseline": baseline,
+            "boa_offset_applied": boa,
+            "stac_item": f"{STAC_URL}/collections/{COLLECTION}/items/{sid}",
+            "assets": {k: item.assets[k].href for k in ASSET_KEYS if k in item.assets},
+        }
         records.append(rec)
         flag = ""
         if boa is not True:
             flag = "  <-- ANOMALY: boa_offset_applied is not True"
             anomalies.append({**rec, "anomaly": "boa_offset_applied is not True"})
-        print(f"[{i}/{len(scenes)}] {sid} baseline={baseline} boa_offset={boa}{flag}",
-              flush=True)
+        print(f"[{i}/{len(scenes)}] {sid} baseline={baseline} boa_offset={boa}{flag}", flush=True)
         time.sleep(0.2)  # be polite to the STAC API
 
     baselines = sorted({r["processing_baseline"] for r in records})
@@ -93,12 +94,12 @@ def audit() -> dict:
         "n_unique_scenes": len(scenes),
         "n_audited": len(records),
         "processing_baselines_observed": baselines,
-        "boa_offset_applied_uniform_true": all(
-            r["boa_offset_applied"] is True for r in records),
+        "boa_offset_applied_uniform_true": all(r["boa_offset_applied"] is True for r in records),
         "chip_level_dn_check": (
             "The chip-level DN-minimum check was run on the chips audited "
             "2026-09-27; it needs downloaded chips and is not re-run by this "
-            "metadata audit. The per-scene boa_offset_applied flag is."),
+            "metadata audit. The per-scene boa_offset_applied flag is."
+        ),
         "scale_justification": (
             "DN/10000. Per-scene STAC records show earthsearch:boa_offset_applied=True "
             "for every audited scene: the data provider removed the +1000 DN radiometric "

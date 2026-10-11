@@ -20,12 +20,12 @@ The pipeline's job ends at "identified", and only with caveats attached.
 It screens; it never certifies. It says nothing about soil, contamination,
 subsurface condition or methane.
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass
 
 from .config import DEFAULT, Config
-
 
 # Bootstrap CIs over matched-month deltas are degenerate below this many
 # matched months (with n=2 the resampled-median distribution has only 3
@@ -36,9 +36,11 @@ MIN_MATCHED_MONTHS_FOR_CI = 4
 # Identifier of the tier rule, recorded in every packet so a re-score is
 # traceable. v1 (pilot-01/02) tiered on |delta| alone and ignored the CI.
 TIER_RULE = "ci-gated-v2"
-TIER_RULE_TEXT = ("identified only if |median matched-month NDVI delta| >= "
-                  "threshold AND a bootstrap 95% CI exists (>= 4 matched "
-                  "months) AND the CI excludes zero; otherwise detected")
+TIER_RULE_TEXT = (
+    "identified only if |median matched-month NDVI delta| >= "
+    "threshold AND a bootstrap 95% CI exists (>= 4 matched "
+    "months) AND the CI excludes zero; otherwise detected"
+)
 
 STATEMENTS = {
     "increase": "NDVI higher than baseline in the analysis square (screening signal)",
@@ -71,48 +73,64 @@ PUBLICATION_HOLD = {
     "active": True,
     "since": "2026-10-10",
     "published_statement": "detected – screening only",
-    "reason": ("Site-level 'identified' calls are withheld pending a "
-               "surrounding-land (pad-vs-ring) baseline: no-well control "
-               "points still produced 3/100 'identified' under the current "
-               "rule (Seedling Lab no-well test, 2026-10-08)."),
+    "reason": (
+        "Site-level 'identified' calls are withheld pending a "
+        "surrounding-land (pad-vs-ring) baseline: no-well control "
+        "points still produced 3/100 'identified' under the current "
+        "rule (Seedling Lab no-well test, 2026-10-08)."
+    ),
 }
 
 
 def _numbers_text(a) -> str:
     """The measured numbers only, with no tier verdict."""
-    ci = (f"95% CI [{a.delta_ci95[0]:+.3f}, {a.delta_ci95[1]:+.3f}]"
-          if a.delta_ci95 is not None else
-          f"no CI (fewer than {MIN_MATCHED_MONTHS_FOR_CI} matched months)")
-    return (f"Median matched-month NDVI delta {a.delta:+.3f} in the analysis "
-            f"square (median of {len(a.matched_months)} matched-month deltas; "
-            f"baseline median {a.baseline_ndvi:.2f}, current median "
-            f"{a.current_ndvi:.2f}; {ci}).")
+    ci = (
+        f"95% CI [{a.delta_ci95[0]:+.3f}, {a.delta_ci95[1]:+.3f}]"
+        if a.delta_ci95 is not None
+        else f"no CI (fewer than {MIN_MATCHED_MONTHS_FOR_CI} matched months)"
+    )
+    return (
+        f"Median matched-month NDVI delta {a.delta:+.3f} in the analysis "
+        f"square (median of {len(a.matched_months)} matched-month deltas; "
+        f"baseline median {a.baseline_ndvi:.2f}, current median "
+        f"{a.current_ndvi:.2f}; {ci})."
+    )
 
 
 def published_claim(a, caveats: list, hold: dict = PUBLICATION_HOLD) -> dict:
     """Public claim for an Assessment. With the hold active the published
     tier is always 'detected'; the CI-gated result is kept internally."""
-    internal = {"tier": a.tier, "direction": a.direction,
-                "statement": a.statement, "rationale": a.rationale,
-                "rule": TIER_RULE}
-    claim = {"tier": a.tier, "direction": a.direction,
-             "statement": a.statement, "rationale": a.rationale,
-             "confidence": a.confidence, "tier_rule": TIER_RULE,
-             "caveats": list(caveats)}
+    internal = {
+        "tier": a.tier,
+        "direction": a.direction,
+        "statement": a.statement,
+        "rationale": a.rationale,
+        "rule": TIER_RULE,
+    }
+    claim = {
+        "tier": a.tier,
+        "direction": a.direction,
+        "statement": a.statement,
+        "rationale": a.rationale,
+        "confidence": a.confidence,
+        "tier_rule": TIER_RULE,
+        "caveats": list(caveats),
+    }
     if hold and hold.get("active"):
-        claim.update({
-            "tier": "detected",
-            "statement": hold["published_statement"],
-            "rationale": f"{_numbers_text(a)} {hold['reason']}",
-            "publication_hold": {k: hold[k] for k in ("active", "since", "reason")},
-        })
+        claim.update(
+            {
+                "tier": "detected",
+                "statement": hold["published_statement"],
+                "rationale": f"{_numbers_text(a)} {hold['reason']}",
+                "publication_hold": {k: hold[k] for k in ("active", "since", "reason")},
+            }
+        )
         claim["caveats"] = [hold["reason"]] + claim["caveats"]
     claim["screen_tier_internal"] = internal
     return claim
 
 
-def assign_tier(delta: float, ci: list | None, cfg: Config = DEFAULT
-                ) -> tuple[str, str, str]:
+def assign_tier(delta: float, ci: list | None, cfg: Config = DEFAULT) -> tuple[str, str, str]:
     """(tier, direction, statement_key) under TIER_RULE.
 
     direction is "increase" | "decrease" | "none" and is reported for every
@@ -134,31 +152,35 @@ def assign_tier(delta: float, ci: list | None, cfg: Config = DEFAULT
 @dataclass
 class Assessment:
     site_id: str
-    period: str            # e.g. "2026 growing season"
-    baseline_ndvi: float   # median of per-month baseline medians (context only)
-    delta_std: float       # std dev of the matched-month DELTAS — NOT baseline
-                          # variation. Named for what it is: spread of the
-                          # month-for-month differences the delta summarizes.
-    current_ndvi: float    # median of per-month current medians (context only)
+    period: str  # e.g. "2026 growing season"
+    baseline_ndvi: float  # median of per-month baseline medians (context only)
+    delta_std: float  # std dev of the matched-month DELTAS — NOT baseline
+    # variation. Named for what it is: spread of the
+    # month-for-month differences the delta summarizes.
+    current_ndvi: float  # median of per-month current medians (context only)
     delta: float
     delta_ci95: list | None  # [lo, hi]: bootstrap 95% CI on the median
-                             # matched-month delta (1000 resamples, fixed
-                             # seed); None when len(matched_months) < 4 —
-                             # an interval there would be degenerate, not wide
+    # matched-month delta (1000 resamples, fixed
+    # seed); None when len(matched_months) < 4 —
+    # an interval there would be degenerate, not wide
     n_baseline_obs: int
     n_current_obs: int
     matched_months: list  # calendar months compared month-for-month
-    tier: str              # "detected" | "identified"
-    direction: str         # "increase" | "decrease" | "none"
+    tier: str  # "detected" | "identified"
+    direction: str  # "increase" | "decrease" | "none"
     statement: str
     rationale: str
     caveats: list
-    confidence: str        # "low" | "medium" | "high" (evidence-volume heuristic)
+    confidence: str  # "low" | "medium" | "high" (evidence-volume heuristic)
 
 
-def assess(site_id: str, baseline_monthly: dict[int, list[float]],
-           current_monthly: dict[int, list[float]], period: str,
-           cfg: Config = DEFAULT) -> Assessment:
+def assess(
+    site_id: str,
+    baseline_monthly: dict[int, list[float]],
+    current_monthly: dict[int, list[float]],
+    period: str,
+    cfg: Config = DEFAULT,
+) -> Assessment:
     """Month-matched baseline diff.
 
     baseline_monthly / current_monthly map calendar month -> list of scene
@@ -172,8 +194,8 @@ def assess(site_id: str, baseline_monthly: dict[int, list[float]],
     matched = sorted(set(baseline_monthly) & set(current_monthly))
     if len(matched) < 2:
         raise ValueError(
-            f"{site_id}: need >=2 month-matched baseline/current months, "
-            f"got {matched}")
+            f"{site_id}: need >=2 month-matched baseline/current months, got {matched}"
+        )
     month_deltas = []
     n_base = n_cur = 0
     for m in matched:
@@ -198,21 +220,23 @@ def assess(site_id: str, baseline_monthly: dict[int, list[float]],
     if len(matched) >= MIN_MATCHED_MONTHS_FOR_CI:
         rng = np.random.default_rng(20260927)
         d = np.asarray(month_deltas, dtype=float)
-        boots = [float(np.median(rng.choice(d, size=d.size, replace=True)))
-                 for _ in range(1000)]
+        boots = [float(np.median(rng.choice(d, size=d.size, replace=True))) for _ in range(1000)]
         ci_lo, ci_hi = float(np.percentile(boots, 2.5)), float(np.percentile(boots, 97.5))
         ci = [round(ci_lo, 4), round(ci_hi, 4)]
         ci_txt = f"95% CI [{ci_lo:+.3f}, {ci_hi:+.3f}]"
-        ci_caveat = (f"Uncertainty is a bootstrap 95% CI over {len(matched)} "
-                     "matched-month deltas.")
+        ci_caveat = f"Uncertainty is a bootstrap 95% CI over {len(matched)} matched-month deltas."
     else:
         ci = None
-        ci_txt = (f"interval not estimated (only {len(matched)} matched months; "
-                  f"a bootstrap CI needs >= {MIN_MATCHED_MONTHS_FOR_CI})")
-        ci_caveat = (f"No uncertainty interval is reported: {len(matched)} "
-                     f"matched months is below the {MIN_MATCHED_MONTHS_FOR_CI} "
-                     "needed for a non-degenerate bootstrap CI. The delta "
-                     "below is a point estimate only.")
+        ci_txt = (
+            f"interval not estimated (only {len(matched)} matched months; "
+            f"a bootstrap CI needs >= {MIN_MATCHED_MONTHS_FOR_CI})"
+        )
+        ci_caveat = (
+            f"No uncertainty interval is reported: {len(matched)} "
+            f"matched months is below the {MIN_MATCHED_MONTHS_FOR_CI} "
+            "needed for a non-degenerate bootstrap CI. The delta "
+            "below is a point estimate only."
+        )
 
     caveats = [
         "10 m pixels cannot resolve wellheads; this is a vegetation screen, not a compliance verdict.",
@@ -226,22 +250,30 @@ def assess(site_id: str, baseline_monthly: dict[int, list[float]],
     tier, direction, key = assign_tier(delta, ci, cfg)
     statement = STATEMENTS[key]
     band = max(cfg.ndvi_recover_delta, abs(cfg.ndvi_stall_delta))
-    numbers = (f"median matched-month NDVI delta {delta:+.2f} (median of "
-               f"{len(matched)} matched-month deltas; baseline median "
-               f"{base:.2f}, current median {current:.2f}; {ci_txt})")
+    numbers = (
+        f"median matched-month NDVI delta {delta:+.2f} (median of "
+        f"{len(matched)} matched-month deltas; baseline median "
+        f"{base:.2f}, current median {current:.2f}; {ci_txt})"
+    )
     if key == "none":
         rationale = f"The {numbers} is within the ±{band:.2f} threshold."
     elif key == "no_ci":
-        rationale = (f"The {numbers} is beyond ±{band:.2f}, but with fewer "
-                     f"than {MIN_MATCHED_MONTHS_FOR_CI} matched months no CI "
-                     "is estimated, so the change is not supported.")
+        rationale = (
+            f"The {numbers} is beyond ±{band:.2f}, but with fewer "
+            f"than {MIN_MATCHED_MONTHS_FOR_CI} matched months no CI "
+            "is estimated, so the change is not supported."
+        )
     elif key == "ci_includes_zero":
-        rationale = (f"The {numbers} is beyond ±{band:.2f}, but the 95% CI "
-                     "includes zero, so the change is not supported.")
+        rationale = (
+            f"The {numbers} is beyond ±{band:.2f}, but the 95% CI "
+            "includes zero, so the change is not supported."
+        )
     else:
-        rationale = (f"The {numbers} is beyond ±{band:.2f} and the 95% CI "
-                     "excludes zero. This describes the analysis square, not "
-                     "the pad, and is a screening hypothesis only.")
+        rationale = (
+            f"The {numbers} is beyond ±{band:.2f} and the 95% CI "
+            "excludes zero. This describes the analysis square, not "
+            "the pad, and is a screening hypothesis only."
+        )
     # The delta is the median of per-month deltas, NOT the difference of the
     # two displayed medians (median of differences != difference of medians).
     # The rationale states all three numbers so the relationship is exact by
@@ -252,13 +284,22 @@ def assess(site_id: str, baseline_monthly: dict[int, list[float]],
     confidence = "high" if n >= 24 else "medium" if n >= 12 else "low"
 
     return Assessment(
-        site_id=site_id, period=period, baseline_ndvi=round(base, 4),
-        delta_std=round(std, 4), current_ndvi=round(current, 4),
-        delta=round(delta, 4), delta_ci95=ci,
+        site_id=site_id,
+        period=period,
+        baseline_ndvi=round(base, 4),
+        delta_std=round(std, 4),
+        current_ndvi=round(current, 4),
+        delta=round(delta, 4),
+        delta_ci95=ci,
         n_baseline_obs=n_base,
-        n_current_obs=n_cur, matched_months=matched, tier=tier,
-        direction=direction, statement=statement,
-        rationale=rationale, caveats=caveats, confidence=confidence,
+        n_current_obs=n_cur,
+        matched_months=matched,
+        tier=tier,
+        direction=direction,
+        statement=statement,
+        rationale=rationale,
+        caveats=caveats,
+        confidence=confidence,
     )
 
 
@@ -291,8 +332,10 @@ def _parse_years(spec: str) -> list[int]:
 def _scene_means(chips_dir, cfg: Config = DEFAULT):
     """Per-scene index means from chip GeoTIFFs. Returns (scenes, manifest)."""
     import json
+
     import numpy as np
     import rasterio
+
     from . import indices
 
     manifest = json.loads((chips_dir / "manifest.json").read_text())
@@ -308,25 +351,26 @@ def _scene_means(chips_dir, cfg: Config = DEFAULT):
             p = chips_dir / f"{stamp}_{band}.tif"
             with rasterio.open(p) as ds:
                 bands[band] = ds.read(1)
-        refl = {b: bands[b].astype(float) / 10000.0
-                for b in ("red", "nir", "swir", "blue")}
+        refl = {b: bands[b].astype(float) / 10000.0 for b in ("red", "nir", "swir", "blue")}
         scl = bands["scl"].astype(np.int16)
         clear = (scl != 0) & ~np.isin(scl, list(cfg.scl_mask_values))
-        clear &= (bands["red"] > 0)  # nodata guard
-        out.append({
-            "date": sc["date"],
-            "scene_id": sc["scene_id"],
-            "ndvi_mean": indices.mean_or_nan(indices.ndvi(refl["nir"], refl["red"], clear)),
-            "ndmi_mean": indices.mean_or_nan(indices.ndmi(refl["nir"], refl["swir"], clear)),
-            "bare_soil_mean": indices.mean_or_nan(
-                indices.bare_soil_index(refl["swir"], refl["red"],
-                                        refl["nir"], refl["blue"], clear)),
-            "savi_mean": indices.mean_or_nan(
-                indices.savi(refl["nir"], refl["red"], clear)),
-            "msavi_mean": indices.mean_or_nan(
-                indices.msavi(refl["nir"], refl["red"], clear)),
-            "clear_pixel_fraction": round(indices.clear_fraction(clear), 4),
-        })
+        clear &= bands["red"] > 0  # nodata guard
+        out.append(
+            {
+                "date": sc["date"],
+                "scene_id": sc["scene_id"],
+                "ndvi_mean": indices.mean_or_nan(indices.ndvi(refl["nir"], refl["red"], clear)),
+                "ndmi_mean": indices.mean_or_nan(indices.ndmi(refl["nir"], refl["swir"], clear)),
+                "bare_soil_mean": indices.mean_or_nan(
+                    indices.bare_soil_index(
+                        refl["swir"], refl["red"], refl["nir"], refl["blue"], clear
+                    )
+                ),
+                "savi_mean": indices.mean_or_nan(indices.savi(refl["nir"], refl["red"], clear)),
+                "msavi_mean": indices.mean_or_nan(indices.msavi(refl["nir"], refl["red"], clear)),
+                "clear_pixel_fraction": round(indices.clear_fraction(clear), 4),
+            }
+        )
     return out, manifest
 
 
@@ -358,17 +402,22 @@ def cmd_assess(args):
     current_years = _parse_years(args.assessment)
     base_monthly = _monthly_medians(scenes, baseline_years)
     cur_monthly = _monthly_medians(scenes, current_years)
-    period = (f"{min(current_years)}-{max(current_years)} growing seasons"
-              if len(current_years) > 1 else f"{current_years[0]} growing season")
+    period = (
+        f"{min(current_years)}-{max(current_years)} growing seasons"
+        if len(current_years) > 1
+        else f"{current_years[0]} growing season"
+    )
 
     a = assess(args.site, base_monthly, cur_monthly, period)
 
     from .sites import provenance_path
+
     prov_file = provenance_path(args.registry)
     if not prov_file.exists():
         raise SystemExit(
             f"{prov_file} missing: rebuild the registry with `python -m "
-            "ledger.sites` so the OWA file URL, date and SHA-256 are recorded.")
+            "ledger.sites` so the OWA file URL, date and SHA-256 are recorded."
+        )
     owa_prov = json.loads(prov_file.read_text())
 
     registry = pd.read_parquet(args.registry)
@@ -378,113 +427,166 @@ def cmd_assess(args):
     r = row.iloc[0]
 
     observations = [
-        {"date": s["date"], "scene_id": s["scene_id"],
-         "ndvi_mean": s["ndvi_mean"], "ndmi_mean": s["ndmi_mean"],
-         "bare_soil_mean": s["bare_soil_mean"],
-         "savi_mean": s["savi_mean"], "msavi_mean": s["msavi_mean"],
-         "clear_pixel_fraction": s["clear_pixel_fraction"]}
+        {
+            "date": s["date"],
+            "scene_id": s["scene_id"],
+            "ndvi_mean": s["ndvi_mean"],
+            "ndmi_mean": s["ndmi_mean"],
+            "bare_soil_mean": s["bare_soil_mean"],
+            "savi_mean": s["savi_mean"],
+            "msavi_mean": s["msavi_mean"],
+            "clear_pixel_fraction": s["clear_pixel_fraction"],
+        }
         for s in scenes
     ]
     chips = []
     for sc in manifest["scenes"]:
         for c in sc["chips"]:
-            chip = {"date": sc["date"], "path": c["path"],
-                    "sha256": c["sha256"], "bands": [c["band"]],
-                    "scene_id": sc["scene_id"]}
+            chip = {
+                "date": sc["date"],
+                "path": c["path"],
+                "sha256": c["sha256"],
+                "bands": [c["band"]],
+                "scene_id": sc["scene_id"],
+            }
             if c.get("source_url"):
                 chip["source_url"] = c["source_url"]
             chips.append(chip)
 
     transforms = [
-        {"step": "stac_scene_query", "tool": "pystac-client",
-         "parameters": manifest["query"]},
-        {"step": "chip_download_windowed",
-         "tool": "rasterio windowed read over HTTPS (/vsicurl)",
-         "parameters": {"buffer_m": 500.0,
-                        "bands": ["B04", "B08", "B11", "B02", "SCL"],
-                        "resampling": {"10m": "bilinear", "SCL": "nearest"},
-                        "reference_grid": "red band (10 m)",
-                        "note": "chips stored as written; DN = reflectance*10000"}},
-        {"step": "cloud_mask", "tool": "Sentinel-2 SCL classification",
-         "parameters": {"masked_classes": list(DEFAULT.scl_mask_values),
-                        "min_clear_fraction": DEFAULT.min_clear_fraction,
-                        "rejected_scenes": manifest["rejections"]}},
-        {"step": "index_computation", "tool": "ledger.indices (numpy)",
-         "parameters": {"ndvi": "(nir-red)/(nir+red)",
-                        "ndmi": "(nir-swir)/(nir+swir)",
-                        "bare_soil": "((swir+red)-(nir+blue))/((swir+red)+(nir+blue))",
-                        "savi": "((nir-red)*(1+L))/(nir+red+L), L=0.5 "
-                                "(soil-adjusted; supporting evidence only)",
-                        "msavi": "(2*nir+1-sqrt((2*nir+1)^2-8*(nir-red)))/2 "
-                                 "(self-adjusting; supporting evidence only)",
-                        "primary_signal": "ndvi",
-                        "scale": "DN/10000",
-                        "scale_justification": "ledger/data/radiometric_lineage.json: "
-                        "per-scene STAC audit (processing baseline + "
-                        "earthsearch:boa_offset_applied per scene); the data "
-                        "provider removed the PB>=04.00 +1000 DN offset when "
-                        "generating these COGs, confirmed by chip-level DN "
-                        "minima ~1. Not assumed — recorded.",
-                        "mask": "clear pixels only"}},
-        {"step": "baseline_assessment", "tool": "ledger.change.assess",
-         "parameters": {"baseline_years": baseline_years,
-                        "assessment_years": current_years,
-                        "seasonal_aggregation": "month-matched median deltas "
-                        "(each calendar month compared only to itself)",
-                        "recover_delta": DEFAULT.ndvi_recover_delta,
-                        "stall_delta": DEFAULT.ndvi_stall_delta,
-                        "min_matched_months_for_ci": MIN_MATCHED_MONTHS_FOR_CI,
-                        "tier_rule": TIER_RULE,
-                        "tier_rule_text": TIER_RULE_TEXT}},
-        {"step": "packet_build", "tool": "ledger.packet.build_packet",
-         "parameters": {"schema_version": SCHEMA_VERSION}},
+        {"step": "stac_scene_query", "tool": "pystac-client", "parameters": manifest["query"]},
+        {
+            "step": "chip_download_windowed",
+            "tool": "rasterio windowed read over HTTPS (/vsicurl)",
+            "parameters": {
+                "buffer_m": 500.0,
+                "bands": ["B04", "B08", "B11", "B02", "SCL"],
+                "resampling": {"10m": "bilinear", "SCL": "nearest"},
+                "reference_grid": "red band (10 m)",
+                "note": "chips stored as written; DN = reflectance*10000",
+            },
+        },
+        {
+            "step": "cloud_mask",
+            "tool": "Sentinel-2 SCL classification",
+            "parameters": {
+                "masked_classes": list(DEFAULT.scl_mask_values),
+                "min_clear_fraction": DEFAULT.min_clear_fraction,
+                "rejected_scenes": manifest["rejections"],
+            },
+        },
+        {
+            "step": "index_computation",
+            "tool": "ledger.indices (numpy)",
+            "parameters": {
+                "ndvi": "(nir-red)/(nir+red)",
+                "ndmi": "(nir-swir)/(nir+swir)",
+                "bare_soil": "((swir+red)-(nir+blue))/((swir+red)+(nir+blue))",
+                "savi": "((nir-red)*(1+L))/(nir+red+L), L=0.5 "
+                "(soil-adjusted; supporting evidence only)",
+                "msavi": "(2*nir+1-sqrt((2*nir+1)^2-8*(nir-red)))/2 "
+                "(self-adjusting; supporting evidence only)",
+                "primary_signal": "ndvi",
+                "scale": "DN/10000",
+                "scale_justification": "ledger/data/radiometric_lineage.json: "
+                "per-scene STAC audit (processing baseline + "
+                "earthsearch:boa_offset_applied per scene); the data "
+                "provider removed the PB>=04.00 +1000 DN offset when "
+                "generating these COGs, confirmed by chip-level DN "
+                "minima ~1. Not assumed — recorded.",
+                "mask": "clear pixels only",
+            },
+        },
+        {
+            "step": "baseline_assessment",
+            "tool": "ledger.change.assess",
+            "parameters": {
+                "baseline_years": baseline_years,
+                "assessment_years": current_years,
+                "seasonal_aggregation": "month-matched median deltas "
+                "(each calendar month compared only to itself)",
+                "recover_delta": DEFAULT.ndvi_recover_delta,
+                "stall_delta": DEFAULT.ndvi_stall_delta,
+                "min_matched_months_for_ci": MIN_MATCHED_MONTHS_FOR_CI,
+                "tier_rule": TIER_RULE,
+                "tier_rule_text": TIER_RULE_TEXT,
+            },
+        },
+        {
+            "step": "packet_build",
+            "tool": "ledger.packet.build_packet",
+            "parameters": {"schema_version": SCHEMA_VERSION},
+        },
     ]
     sources = [
-        {"name": "OWA site-specific inventory (Excel)",
-         "url": owa_prov.get("url") or OWA_INVENTORY_URL,
-         "accessed": (owa_prov.get("retrieved_at") or date_cls.today().isoformat())[:10],
-         "license_note": f"public data; inventory file dated "
-                         f"{owa_prov.get('file_date') or 'unknown'}, "
-                         f"sha256 {owa_prov.get('sha256')}"},
-        {"name": "Element 84 Earth Search STAC (Sentinel-2 L2A)",
-         "url": EARTH_SEARCH_URL, "accessed": date_cls.today().isoformat()},
-        {"name": "Copernicus Sentinel-2 (ESA)", "url": COPERNICUS_URL,
-         "accessed": date_cls.today().isoformat(),
-         "license_note": "Contains modified Copernicus Sentinel data."},
+        {
+            "name": "OWA site-specific inventory (Excel)",
+            "url": owa_prov.get("url") or OWA_INVENTORY_URL,
+            "accessed": (owa_prov.get("retrieved_at") or date_cls.today().isoformat())[:10],
+            "license_note": f"public data; inventory file dated "
+            f"{owa_prov.get('file_date') or 'unknown'}, "
+            f"sha256 {owa_prov.get('sha256')}",
+        },
+        {
+            "name": "Element 84 Earth Search STAC (Sentinel-2 L2A)",
+            "url": EARTH_SEARCH_URL,
+            "accessed": date_cls.today().isoformat(),
+        },
+        {
+            "name": "Copernicus Sentinel-2 (ESA)",
+            "url": COPERNICUS_URL,
+            "accessed": date_cls.today().isoformat(),
+            "license_note": "Contains modified Copernicus Sentinel data.",
+        },
     ]
     caveats = list(a.caveats) + [
-        f"Site coordinates are DLS LSD centroids (~±300 m; {r['geo_method']}). "
-        "The 500 m analysis buffer absorbs this uncertainty; this is not a "
-        "survey of the wellhead.",
+        f"Site coordinates: {r['geo_method']}. Coordinate accuracy was "
+        "withdrawn 2026-10-09 after a published diagnosis measured a median "
+        "error of 2,658 m (NEGATIVE-RESULT-2026-10-09.md). Do not screen on "
+        "these positions.",
         "Sentinel-2's 10 m pixels cannot resolve individual wellheads.",
     ]
     if DEFAULT.trust_egress_proxy_tls:
         caveats.append(
             "Chip download used GDAL_HTTP_UNSAFESSL (TLS verification off) on a "
             "TLS-intercepting egress proxy; payload integrity rests on the "
-            "recorded per-chip SHA-256 and S3-hosted COGs, not TLS.")
+            "recorded per-chip SHA-256 and S3-hosted COGs, not TLS."
+        )
 
     packet = build_packet(
-        site={"site_id": str(r["site_id"]), "name": str(r["name"]),
-              "latitude": float(r["latitude"]), "longitude": float(r["longitude"]),
-              "owa_stage": str(r["owa_stage"]),
-              **({"owa_inventory_date": owa_prov["file_date"]}
-                 if owa_prov.get("file_date") else {})},
-        assessment={"tier": a.tier, "statement": a.statement,
-                    "rationale": a.rationale, "confidence": a.confidence,
-                    "period": period, "caveats": caveats},
-        observations=observations, chips=chips,
-        transforms=transforms, sources=sources,
+        site={
+            "site_id": str(r["site_id"]),
+            "name": str(r["name"]),
+            "latitude": float(r["latitude"]),
+            "longitude": float(r["longitude"]),
+            "owa_stage": str(r["owa_stage"]),
+            **({"owa_inventory_date": owa_prov["file_date"]} if owa_prov.get("file_date") else {}),
+        },
+        assessment={
+            "tier": a.tier,
+            "statement": a.statement,
+            "rationale": a.rationale,
+            "confidence": a.confidence,
+            "period": period,
+            "caveats": caveats,
+        },
+        observations=observations,
+        chips=chips,
+        transforms=transforms,
+        sources=sources,
     )
     packet["claim"] = published_claim(a, caveats)
     packet["provenance"]["owa_inventory_file"] = {
-        k: owa_prov.get(k) for k in ("url", "file_name", "file_date", "sha256",
-                                     "retrieved_at")}
-    packet["baseline"] = {"period": f"{baseline_years[0]}-{baseline_years[-1]}",
-                          "ndvi_median": a.baseline_ndvi,
-                          "n_scene_observations": a.n_baseline_obs}
+        k: owa_prov.get(k) for k in ("url", "file_name", "file_date", "sha256", "retrieved_at")
+    }
+    packet["baseline"] = {
+        "period": f"{baseline_years[0]}-{baseline_years[-1]}",
+        "ndvi_median": a.baseline_ndvi,
+        "n_scene_observations": a.n_baseline_obs,
+    }
     packet["assessment_detail"] = {
-        "period": period, "ndvi_median": a.current_ndvi,
+        "period": period,
+        "ndvi_median": a.current_ndvi,
         "n_scene_observations": a.n_current_obs,
         "delta_vs_baseline": a.delta,
         "delta_std": a.delta_std,
@@ -494,8 +596,10 @@ def cmd_assess(args):
             "delta_vs_baseline is the median of per-month "
             "(current-median minus baseline-median) deltas over matched "
             "months; it is not the difference of baseline.ndvi_median and "
-            "assessment_detail.ndvi_median."),
-        "matched_months": a.matched_months}
+            "assessment_detail.ndvi_median."
+        ),
+        "matched_months": a.matched_months,
+    }
     if a.delta_ci95 is not None:
         # Omitted (not null) below MIN_MATCHED_MONTHS_FOR_CI matched months:
         # the schema keeps the field optional so absence is the honest signal.
@@ -503,11 +607,13 @@ def cmd_assess(args):
 
     out = write_packet(packet, args.out)
     pub = packet["claim"]
-    print(f"{args.site}: published {pub['tier'].upper()} — {pub['statement']}; "
-          f"internal screen {a.tier} — {a.statement} "
-          f"(delta {a.delta:+.3f} = median of {len(a.matched_months)} matched-month deltas; "
-          f"baseline median {a.baseline_ndvi:.3f}, current median {a.current_ndvi:.3f}, "
-          f"confidence {a.confidence})")
+    print(
+        f"{args.site}: published {pub['tier'].upper()} — {pub['statement']}; "
+        f"internal screen {a.tier} — {a.statement} "
+        f"(delta {a.delta:+.3f} = median of {len(a.matched_months)} matched-month deltas; "
+        f"baseline median {a.baseline_ndvi:.3f}, current median {a.current_ndvi:.3f}, "
+        f"confidence {a.confidence})"
+    )
     print(f"  packet: {out}")
     return out
 
@@ -523,8 +629,9 @@ def main() -> None:
     a.add_argument("--registry", default="data/sites.parquet")
     a.add_argument("--baseline-start", type=int, default=2023)
     a.add_argument("--baseline-end", type=int, default=2024)
-    a.add_argument("--assessment", default="2025-2026",
-                   help="'2025-2026' range or '2025,2026' list")
+    a.add_argument(
+        "--assessment", default="2025-2026", help="'2025-2026' range or '2025,2026' list"
+    )
     a.add_argument("--out", default="packets")
     args = ap.parse_args()
     if args.cmd == "assess":

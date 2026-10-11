@@ -7,6 +7,7 @@ and per-licensee delta stats to the console (internal use only). The CSV it
 writes, ops/pilot02-results.csv, carries NO licensee names: the repo is
 public and licensee names are not published.
 """
+
 import glob
 import json
 from collections import Counter
@@ -33,8 +34,9 @@ for path in packets:
     if delta is None:
         refusals.append(site_id)
     lic = reg.loc[site_id, "licensee"] if site_id in reg.index else "?"
-    rows.append({"site_id": site_id, "licensee": lic, "tier": tier,
-                 "confidence": conf, "delta": delta})
+    rows.append(
+        {"site_id": site_id, "licensee": lic, "tier": tier, "confidence": conf, "delta": delta}
+    )
 
 df = pd.DataFrame(rows)
 print(f"packets: {len(packets)}")
@@ -48,10 +50,17 @@ print(f"\n== honest refusals (no delta): {len(refusals)} ==")
 for s in refusals:
     print("  ", s)
 print("\n== licensee breakdown ==")
-print(df.groupby("licensee").agg(sites=("site_id", "count"),
-      detected=("tier", lambda s: (s == "detected").sum()),
-      identified=("tier", lambda s: (s == "identified").sum()),
-      refused=("delta", lambda s: s.isna().sum()),
-      median_delta=("delta", "median")).round(3).to_string())
+print(
+    df.groupby("licensee")
+    .agg(
+        sites=("site_id", "count"),
+        detected=("tier", lambda s: (s == "detected").sum()),
+        identified=("tier", lambda s: (s == "identified").sum()),
+        refused=("delta", lambda s: s.isna().sum()),
+        median_delta=("delta", "median"),
+    )
+    .round(3)
+    .to_string()
+)
 df.drop(columns=["licensee"]).to_csv("ops/pilot02-results.csv", index=False)
 print("\nwrote ops/pilot02-results.csv")

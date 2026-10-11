@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Methodology & Scientific Provenance — Reclamation Evidence</title>
+  <meta name="description" content="Technical walkthrough of month-matched Sentinel-2 median-of-deltas vegetation screening. Stated limits and self-audit correction.">
+  <link rel="stylesheet" href="style.css">
+  <script src="ledger.js"></script>
+  <script defer src="app.js"></script>
+</head>
+<body>
+
+  <!-- Institutional Telemetry Command Header Bar -->
+  <aside class="top-command-bar" aria-label="System Telemetry">
+    <div class="telemetry-strip">
+      <div class="telemetry-item">
+        <span class="telemetry-dot"></span>
+        <span>Sensor: <strong>ESA Sentinel-2 MSI (10m Resolution)</strong></span>
+      </div>
+      <div class="telemetry-item">
+        <span>Coverage: <strong>Western Canadian Sedimentary Basin</strong></span>
+      </div>
+      <div class="telemetry-item">
+        <span>Framework: <strong>AER Directive 088 / Area-Based Closure Aligned</strong></span>
+      </div>
+    </div>
+    <div class="telemetry-strip">
+      <div class="telemetry-item">
+        <span>Public Ledger: <strong>99 Cryptographically Verifiable Packets</strong></span>
+      </div>
+      <a href="https://marsojuji-cmyk.github.io/reclamation-evidence-ledger/" target="_blank" rel="noopener" class="telemetry-link">
+        View Raw Git Ledger &rarr;
+      </a>
+    </div>
+  </aside>
+
+  <!-- Top Hero Header Bar -->
+  <header class="top-hero-banner">
+    <div class="brand-intro">
+      <div class="brand-title-wrap">
+        <a href="index.html" style="text-decoration: none; display: flex; align-items: center; gap: 12px;">
+          <div class="brand-logo-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+              <polyline points="2 17 12 22 22 17"></polyline>
+              <polyline points="2 12 12 17 22 12"></polyline>
+            </svg>
+          </div>
+          <h1 class="brand-title">Reclamation Evidence</h1>
+        </a>
+      </div>
+      <p class="brand-subtitle">Methodology & Limits · Calgary, Alberta · Sentinel-2 Month-Matched Screening</p>
+    </div>
+
+    <div class="top-pills-row">
+      <div class="pill-badge">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+        Pre-registered Protocol
+      </div>
+      <div class="pill-badge">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+        Synthetic Refutation Tested
+      </div>
+      <a href="order.html" class="pill-badge active-cta">
+        + Order 15-Site Pilot ($7,500 CAD)
+      </a>
+    </div>
+  </header>
+
+  <div class="app-container">
+
+    <!-- Sidebar Navigation -->
+    <aside class="app-sidebar">
+      <a href="index.html" class="sidebar-logo" title="Dashboard">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path><path d="M2 12h20"></path></svg>
+      </a>
+      <nav class="sidebar-nav">
+        <a href="index.html" class="nav-item" title="Dashboard Overview">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+          <span class="nav-tooltip">Dashboard Overview</span>
+        </a>
+        <a href="order.html" class="nav-item" title="Order Screening">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+          <span class="nav-tooltip">Order Screening</span>
+        </a>
+        <a href="projects.html" class="nav-item" title="Projects">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg>
+          <span class="nav-tooltip">Projects</span>
+        </a>
+        <a href="evidence.html" class="nav-item" title="Evidence Ledger">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+          <span class="nav-tooltip">Evidence Register</span>
+        </a>
+        <a href="method.html" class="nav-item active" title="Method & Limits">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+          <span class="nav-tooltip">Method & Limits</span>
+        </a>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="app-main">
+      <div class="panel-card" style="border: none; padding: 0;">
+        <div class="panel-header" style="margin-bottom: 24px;">
+          <div>
+            <h2 class="greeting-text">Methodology & Analytical Integrity</h2>
+            <p style="font-size: 13px; color: var(--slate-500); margin-top: 4px;">
+              Screening and triage only — we never certify reclamation, prove contamination, or replace field assessment. Every claim is published alongside its misses.
+            </p>
+          </div>
+          <span class="status-live-pill" style="background: var(--primary-light); color: var(--primary);">Pre-registered Protocol</span>
+        </div>
+
+        <!-- The Labeled Triad -->
+        <section style="margin-bottom: 28px;">
+          <h3 style="font-size: 15px; font-weight: 800; color: var(--navy); margin-bottom: 12px;">
+            The Analytical Triad: Detection &ne; Identification &ne; Attribution
+          </h3>
+          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;">
+            <div style="background: var(--slate-50); border: 1px solid var(--slate-200); border-radius: var(--radius-lg); padding: 20px;">
+              <span class="tier-badge detected" style="margin-bottom: 8px;">1. Detection</span>
+              <h4 style="font-size: 14px; font-weight: 700; color: var(--navy); margin-bottom: 6px;">Statistical Signal</h4>
+              <p style="font-size: 12px; color: var(--slate-600); line-height: 1.4;">
+                We detect whether the month-matched median vegetation recovery delta from Sentinel-2 exceeds the &plusmn;0.08 noise band over the 5-year baseline.
+              </p>
+            </div>
+            <div style="background: var(--slate-50); border: 1px solid var(--slate-200); border-radius: var(--radius-lg); padding: 20px;">
+              <span class="tier-badge identified" style="margin-bottom: 8px;">2. Identification</span>
+              <h4 style="font-size: 14px; font-weight: 700; color: var(--navy); margin-bottom: 6px;">Artifact Filtering</h4>
+              <p style="font-size: 12px; color: var(--slate-600); line-height: 1.4;">
+                We isolate true trajectory shifts from phenology artifacts, regional agricultural cycles, and multi-year drought trends across identical calendar months.
+              </p>
+            </div>
+            <div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: var(--radius-lg); padding: 20px;">
+              <span class="trend-badge" style="background: #fee2e2; color: #991b1b; margin-bottom: 8px;">3. Attribution (Refused)</span>
+              <h4 style="font-size: 14px; font-weight: 700; color: #991b1b; margin-bottom: 6px;">Causation Out of Scope</h4>
+              <p style="font-size: 12px; color: #7f1d1d; line-height: 1.4;">
+                We strictly refuse to attribute causation, contamination status, or regulatory liability. Determining physical cause requires boots on the ground.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Plain Language Walkthrough -->
+        <section style="margin-bottom: 28px; background: white; border: 1px solid var(--slate-200); border-radius: var(--radius-xl); padding: 24px;">
+          <h3 style="font-size: 15px; font-weight: 800; color: var(--navy); margin-bottom: 12px;">
+            Month-Matched Sentinel-2 Screening Architecture
+          </h3>
+          <p style="font-size: 13px; color: var(--slate-700); line-height: 1.6; margin-bottom: 16px;">
+            Standard NDVI changes are notoriously vulnerable to false positives. Comparing an August satellite capture against a June baseline produces artificial "recovery" spikes simply because prairie crops and grasses peak later in the season.
+          </p>
+          <div style="background: var(--slate-50); border: 1px solid var(--slate-200); border-radius: var(--radius-lg); padding: 18px; font-family: var(--font-mono); font-size: 12px; color: var(--slate-800); line-height: 1.6;">
+            <strong>Month-Matched Median Formula:</strong><br>
+            Delta = Median[ NDVI_current(m) - NDVI_baseline(m) ] for matched months m &isin; {May, Jun, Jul, Aug, Sep}<br>
+            Thresholds: Delta &gt; +0.08 &rarr; Recovering | Delta &lt; -0.08 &rarr; Stalled / Regressing | Inside [-0.08, +0.08] &rarr; Noise band
+          </div>
+        </section>
+
+        <!-- Uncertainty Quantification -->
+        <section style="margin-bottom: 28px;">
+          <h3 style="font-size: 15px; font-weight: 800; color: var(--navy); margin-bottom: 12px;">
+            Uncertainty Quantification & Honest Missing Intervals
+          </h3>
+          <p style="font-size: 13px; color: var(--slate-700); line-height: 1.6;">
+            Every delta calculation is backed by a 95% bootstrap confidence interval over matched-month deltas. We do not hide gaps: in our 99-site ledger, exactly <strong>12 sites carry no confidence interval</strong> due to cloud-cover constraints during specific baseline passes. We document this candidly in the register.
+          </p>
+        </section>
+
+        <!-- The Self-Audit Story -->
+        <div class="self-audit-box" style="margin-bottom: 28px;">
+          <div class="self-audit-text">
+            <h4>The Self-Audit Story in Full</h4>
+            <p>
+              When we tested our initial v1 screening protocol across 27 pilot sites, our algorithm reported that all 27 were "recovering." That result was too neat. Closer inspection revealed a severe phenology artifact: dry spring baselines compared against wet mid-summer observations. Rather than conceal the flaw, we retracted the run, rebuilt our ingestion pipeline around month-matching, validated synthetic test traces (+0.30, +0.01, -0.30) that correctly rejected the trap, and published our methodology along with our misses in the public ledger.
+            </p>
+          </div>
+        </div>
+
+        <!-- What We Don't Do Full Section -->
+        <section class="limits-boundary-box">
+          <div class="limits-title">What We Don't Do · Stated Operating Boundaries in Full</div>
+          <div class="limits-list">
+            <div class="limit-item">
+              <strong>No Compliance / Certification:</strong> We never certify reclamation, issue regulatory approvals, or replace AER filings.
+            </div>
+            <div class="limit-item">
+              <strong>No Contamination Attribution:</strong> We never determine contamination, assign causation, or declare liability.
+            </div>
+            <div class="limit-item">
+              <strong>No Field Assessment Replacement:</strong> We screen and triage to prioritize field visits. Field professional judgment is irreplaceable.
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </main>
+
+  </div>
+
+  <footer class="app-footer">
+    <div>
+      © 2026 Reclamation Evidence · Calgary, Alberta · contact@marcusrichards.dev
+    </div>
+    <div class="footer-links">
+      <a href="index.html">Dashboard</a>
+      <a href="order.html">Order Online</a>
+      <a href="projects.html">Projects</a>
+      <a href="evidence.html">Evidence</a>
+    </div>
+  </footer>
+
+</body>
+</html>

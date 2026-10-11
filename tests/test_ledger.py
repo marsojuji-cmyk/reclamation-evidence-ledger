@@ -6,6 +6,7 @@ fix the cause, not the test.
 
 Run: .venv/bin/python -m pytest tests/ -q
 """
+
 import json
 import re
 import subprocess
@@ -16,7 +17,6 @@ from pathlib import Path
 import pytest
 
 ROOT = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(ROOT))
 
 from ledger.change import MIN_MATCHED_MONTHS_FOR_CI, assess  # noqa: E402
 
@@ -24,14 +24,25 @@ SCHEMA = json.loads((ROOT / "schemas" / "evidence-packet.schema.json").read_text
 PACKETS = sorted((ROOT / "packets").glob("*.json"))
 
 
+def _packet_period_years(packet: dict) -> tuple[set[int], set[int]]:
+    """Baseline/assessment years from the packet's own baseline_assessment
+    transform — never hardcoded, so the test survives new periods."""
+    for t in packet.get("transforms", []):
+        if t.get("step") == "baseline_assessment":
+            p = t.get("parameters", {})
+            return set(p.get("baseline_years", [])), set(p.get("assessment_years", []))
+    raise AssertionError("packet has no baseline_assessment transform")
+
+
 def _synth(months, base_vals, cur_vals):
     """Synthetic month -> [scene means] inputs for assess()."""
-    b = {m: [v] * 3 for m, v in zip(months, base_vals)}
-    c = {m: [v] * 3 for m, v in zip(months, cur_vals)}
+    b = {m: [v] * 3 for m, v in zip(months, base_vals, strict=True)}
+    c = {m: [v] * 3 for m, v in zip(months, cur_vals, strict=True)}
     return b, c
 
 
 # --- Item 1: the degenerate-CI guard ---------------------------------------
+
 
 def test_ci_omitted_below_threshold_unit():
     """assess() must not emit delta_ci95 with <4 matched months."""
@@ -70,23 +81,30 @@ def test_caveat_does_not_claim_wide_interval():
 
 # --- Item 3: observation-count labels mean one thing -------------------------
 
+
 def test_observation_count_definitions():
     """n_scene_observations == recomputed count of scene means in matched
     months with usable NDVI — separately for each period. One label, one
     definition, everywhere."""
-    base_years, cur_years = {2023, 2024}, {2025, 2026}
     for p in PACKETS:
         d = json.loads(p.read_text())
+        base_years, cur_years = _packet_period_years(d)
         matched = set(d["assessment_detail"]["matched_months"])
         obs = d["observations"]
-        n_base = sum(1 for o in obs
-                     if int(o["date"][:4]) in base_years
-                     and int(o["date"][5:7]) in matched
-                     and o["ndvi_mean"] is not None)
-        n_cur = sum(1 for o in obs
-                    if int(o["date"][:4]) in cur_years
-                    and int(o["date"][5:7]) in matched
-                    and o["ndvi_mean"] is not None)
+        n_base = sum(
+            1
+            for o in obs
+            if int(o["date"][:4]) in base_years
+            and int(o["date"][5:7]) in matched
+            and o["ndvi_mean"] is not None
+        )
+        n_cur = sum(
+            1
+            for o in obs
+            if int(o["date"][:4]) in cur_years
+            and int(o["date"][5:7]) in matched
+            and o["ndvi_mean"] is not None
+        )
         assert d["baseline"]["n_scene_observations"] == n_base, p.name
         assert d["assessment_detail"]["n_scene_observations"] == n_cur, p.name
 
@@ -106,6 +124,7 @@ def test_delta_is_median_of_deltas():
 def test_delta_std_is_spread_of_deltas():
     """delta_std must be the std of matched-month deltas (not baseline var)."""
     import numpy as np
+
     b, c = _synth([5, 6, 7, 8], [0.20, 0.30, 0.40, 0.50], [0.30, 0.42, 0.48, 0.55])
     a = assess("TEST", b, c, "test period")
     deltas = [0.10, 0.12, 0.08, 0.05]
@@ -153,6 +172,7 @@ def test_statements_do_not_overclaim():
 
 # --- Item 5: determinism ------------------------------------------------------
 
+
 def test_assess_deterministic_unit():
     b, c = _synth([5, 6, 7, 8], [0.30, 0.31, 0.29, 0.33], [0.40, 0.41, 0.39, 0.43])
     a1 = asdict(assess("TEST", b, c, "test period"))
@@ -178,30 +198,139 @@ _DET_SITE = "07-30-018-26W4 (100)"
 def _det_inputs_present() -> bool:
     from ledger.imagery import safe_site_id
     from ledger.sites import provenance_path
+
     reg = ROOT / "data" / "sites.parquet"
-    return ((ROOT / "data" / "chips" / safe_site_id(_DET_SITE) / "manifest.json").exists()
-            and reg.exists() and provenance_path(reg).exists())
+    return (
+        (ROOT / "data" / "chips" / safe_site_id(_DET_SITE) / "manifest.json").exists()
+        and reg.exists()
+        and provenance_path(reg).exists()
+    )
 
 
-@pytest.mark.skipif(not _det_inputs_present(),
-                    reason="needs gitignored data/chips + data/sites.parquet "
-                           "(+ .owa_provenance.json); fetch them to run")
+def _make_synthetic_chips_and_registry(base_dir: Path, site_id: str = "SYNTH-SITE-01"):
+    """Create a minimal, valid set of GeoTIFF chips, manifest, and registry parquet for testing."""
+    import numpy as np
+    import pandas as pd
+    import rasterio
+    from rasterio.transform import from_bounds
+
+    chips_dir = base_dir / "chips"
+    chips_dir.mkdir(parents=True, exist_ok=True)
+
+    dates = [
+        "2023-05-15",
+        "2023-06-15",
+        "2024-05-15",
+        "2024-06-15",
+        "2025-05-15",
+        "2025-06-15",
+        "2026-05-15",
+        "2026-06-15",
+    ]
+    scenes = []
+    tform = from_bounds(0, 0, 100, 100, 4, 4)
+    profile = {
+        "driver": "GTiff",
+        "height": 4,
+        "width": 4,
+        "count": 1,
+        "dtype": "uint16",
+        "crs": "EPSG:3857",
+        "transform": tform,
+    }
+
+    for d in dates:
+        stamp = d.replace("-", "")
+        chip_meta = []
+        for band in ("red", "nir", "swir", "blue", "scl"):
+            fpath = chips_dir / f"{stamp}_{band}.tif"
+            val = 4 if band == "scl" else (2000 if band == "nir" else 1000)
+            arr = np.full((4, 4), val, dtype=np.uint16)
+            with rasterio.open(fpath, "w", **profile) as dst:
+                dst.write(arr, 1)
+            chip_meta.append(
+                {"band": band, "path": str(fpath), "sha256": "0" * 64, "shape": [4, 4]}
+            )
+        scenes.append({"date": d, "scene_id": f"S2_{stamp}", "chips": chip_meta})
+
+    manifest = {"scenes": scenes, "query": {"synthetic": True}, "rejections": []}
+    (chips_dir / "manifest.json").write_text(json.dumps(manifest))
+
+    reg_df = pd.DataFrame(
+        [
+            {
+                "site_id": site_id,
+                "name": "Synthetic Test Site",
+                "latitude": 51.0,
+                "longitude": -114.0,
+                "owa_stage": "reclamation",
+                "geo_method": "synthetic centroid",
+            }
+        ]
+    )
+    reg_path = base_dir / "sites.parquet"
+    reg_df.to_parquet(reg_path)
+    from ledger.sites import provenance_path
+
+    provenance_path(reg_path).write_text(
+        json.dumps(
+            {
+                "url": "https://example.invalid/synthetic.xlsx",
+                "file_name": "synthetic.xlsx",
+                "file_date": "2026-10-01",
+                "sha256": "0" * 64,
+                "retrieved_at": "2026-10-01T00:00:00+00:00",
+            }
+        )
+    )
+    return chips_dir, reg_path
+
+
 def test_pipeline_rerun_deterministic(tmp_path):
     """Two CLI runs on the same chips must produce byte-identical packets
-    apart from run timestamps."""
-    site = _DET_SITE
+    apart from run timestamps. Uses the gitignored local pilot chips when
+    present, otherwise a self-contained synthetic fixture."""
     from ledger.imagery import safe_site_id
+
+    site = _DET_SITE
+    if _det_inputs_present():
+        chips_path = ROOT / "data" / "chips" / safe_site_id(site)
+        registry_path = ROOT / "data" / "sites.parquet"
+    else:
+        site = "SYNTH-SITE-01"
+        chips_path, registry_path = _make_synthetic_chips_and_registry(
+            tmp_path / "fixtures", site_id=site
+        )
+
     outs = []
     for i in (1, 2):
         out = tmp_path / f"run{i}"
         r = subprocess.run(
-            [sys.executable, "-m", "ledger.change", "assess",
-             "--site", site,
-             "--chips", str(ROOT / "data" / "chips" / safe_site_id(site)),
-             "--registry", str(ROOT / "data" / "sites.parquet"),
-             "--baseline-start", "2023", "--baseline-end", "2024",
-             "--assessment", "2025-2026", "--out", str(out)],
-            capture_output=True, text=True, cwd=str(ROOT), timeout=600)
+            [
+                sys.executable,
+                "-m",
+                "ledger.change",
+                "assess",
+                "--site",
+                site,
+                "--chips",
+                str(chips_path),
+                "--registry",
+                str(registry_path),
+                "--baseline-start",
+                "2023",
+                "--baseline-end",
+                "2024",
+                "--assessment",
+                "2025-2026",
+                "--out",
+                str(out),
+            ],
+            capture_output=True,
+            text=True,
+            cwd=str(ROOT),
+            timeout=600,
+        )
         assert r.returncode == 0, r.stderr[-500:]
         outs.append(next(out.glob("*.json")))
     p1 = _normalize(json.loads(outs[0].read_text()))
@@ -211,8 +340,10 @@ def test_pipeline_rerun_deterministic(tmp_path):
 
 # --- schema contract ----------------------------------------------------------
 
+
 def test_packets_validate_against_schema():
     import jsonschema
+
     bad = []
     for p in PACKETS:
         try:
@@ -232,6 +363,7 @@ def test_schema_version_pinned():
 
 # --- M1 Honest Ledger invariants over the committed packets -------------------
 
+
 def test_internal_screen_tier_meets_ci_rule():
     """The CI-gated result is kept internally in every packet."""
     n_internal = 0
@@ -248,6 +380,7 @@ def test_publication_hold_publishes_detected_only():
     """Decision 2026-10-10: no site-level 'identified' is published until a
     surrounding-land baseline exists."""
     from ledger.change import PUBLICATION_HOLD
+
     assert PUBLICATION_HOLD["active"]
     for p in PACKETS:
         claim = json.loads(p.read_text())["claim"]
@@ -259,7 +392,9 @@ def test_publication_hold_publishes_detected_only():
 
 def test_schema_rejects_identified_under_hold():
     import copy
+
     import jsonschema
+
     d = copy.deepcopy(json.loads(PACKETS[0].read_text()))
     d["claim"]["tier"] = "identified"
     with pytest.raises(jsonschema.ValidationError):
@@ -268,6 +403,7 @@ def test_schema_rejects_identified_under_hold():
 
 def test_published_claim_unit():
     from ledger.change import published_claim
+
     b, c = _synth([5, 6, 7, 8], [0.30] * 4, [0.40, 0.42, 0.41, 0.39])
     a = assess("TEST", b, c, "test period")
     assert a.tier == "identified"
@@ -280,6 +416,7 @@ def test_published_claim_unit():
 def test_rewrite_archives_previous_packet(tmp_path):
     """A re-assessment must archive the old packet and carry its revisions."""
     from ledger.packet import packet_filename, write_packet
+
     first = json.loads(PACKETS[0].read_text())
     write_packet(json.loads(json.dumps(first)), tmp_path)
     second = json.loads(json.dumps(first))
@@ -299,13 +436,23 @@ def test_rewrite_archives_previous_packet(tmp_path):
 
 
 def test_no_licensee_names_in_public_pages():
-    sys.path.insert(0, str(ROOT / "ops"))
-    from select_pilot02 import LICENSEES
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location(
+        "select_pilot02", ROOT / "ops" / "select_pilot02.py"
+    )
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    LICENSEES = mod.LICENSEES
     names = [n.lower() for n in LICENSEES] + ["lexin"]
-    public = [ROOT / "README.md", ROOT / "ops" / "pilot02-results.csv",
-              *sorted((ROOT / "docs").glob("*.html")),
-              *sorted((ROOT / "docs").glob("*.md")),
-              *sorted((ROOT / "docs").glob("*.csv")), *PACKETS]
+    public = [
+        ROOT / "README.md",
+        ROOT / "ops" / "pilot02-results.csv",
+        *sorted((ROOT / "docs").glob("*.html")),
+        *sorted((ROOT / "docs").glob("*.md")),
+        *sorted((ROOT / "docs").glob("*.csv")),
+        *PACKETS,
+    ]
     for f in public:
         text = f.read_text().lower()
         hit = [n for n in names if n in text]
@@ -316,7 +463,8 @@ def test_no_packet_claims_unrecorded_human_review():
     for p in PACKETS:
         d = json.loads(p.read_text())
         assert "review" not in d["provenance"]["generated_by"].replace(
-            "no human review recorded", ""), p.name
+            "no human review recorded", ""
+        ), p.name
         assert "human-reviewed" not in json.dumps(d["claim"]), p.name
         rv = d["provenance"]["review"]
         assert rv["status"] == ("reviewed" if rv["log"] else "not_reviewed"), p.name
@@ -351,6 +499,7 @@ def test_owa_provenance_recorded():
 
 def test_tls_verification_on_by_default(monkeypatch):
     from ledger.config import Config
+
     monkeypatch.delenv("LEDGER_TRUST_EGRESS_PROXY_TLS", raising=False)
     assert Config().trust_egress_proxy_tls is False
     monkeypatch.setenv("LEDGER_TRUST_EGRESS_PROXY_TLS", "1")
@@ -359,8 +508,8 @@ def test_tls_verification_on_by_default(monkeypatch):
 
 def test_owa_file_date_parsed_from_filename():
     from ledger.sites import owa_file_date
-    url = ("https://cdn.example/x_Reporting%20-%20Full%20Inventory%20-%20"
-           "2026-10-01%2013.41.42.xlsx")
+
+    url = "https://cdn.example/x_Reporting%20-%20Full%20Inventory%20-%202026-10-01%2013.41.42.xlsx"
     assert owa_file_date(url) == "2026-10-01"
     assert owa_file_date("owa_inventory_latest.xlsx") is None
 
@@ -368,8 +517,10 @@ def test_owa_file_date_parsed_from_filename():
 def test_footprints_sit_at_their_sites():
     """Guards the UTM-zone bug: two polygons were once 6 degrees east."""
     import math
-    g = json.loads((ROOT / "ledger" / "data" / "footprints"
-                    / "pilot5_provisional.geojson").read_text())
+
+    g = json.loads(
+        (ROOT / "ledger" / "data" / "footprints" / "pilot5_provisional.geojson").read_text()
+    )
     sites = {}
     for p in PACKETS:
         s = json.loads(p.read_text())["site"]
@@ -382,3 +533,28 @@ def test_footprints_sit_at_their_sites():
         dx = (lon - lon0) * 111_320 * math.cos(math.radians(lat0))
         dy = (lat - lat0) * 110_574
         assert math.hypot(dx, dy) < 1000, f["properties"]["site_id"]
+
+
+# --- launchd plist generation -------------------------------------------------
+
+
+def test_generate_plist_valid():
+    import plistlib
+
+    from ledger.pipeline import generate_plist
+
+    xml_text = generate_plist(ROOT, Path(sys.executable))
+    data = plistlib.loads(xml_text.encode("utf-8"))
+
+    assert data["Label"] == "ca.reclamation-ledger"
+    args = data["ProgramArguments"]
+    assert args[0] == "/bin/bash"
+    assert args[1] == "-lc"
+    assert f"cd {ROOT}" in args[2]
+    assert str(Path(sys.executable)) in args[2]
+    assert "ledger.pipeline run-monthly" in args[2]
+
+    intervals = data["StartCalendarInterval"]
+    assert len(intervals) == 5
+    months = [item["Month"] for item in intervals]
+    assert months == [5, 6, 7, 8, 9]

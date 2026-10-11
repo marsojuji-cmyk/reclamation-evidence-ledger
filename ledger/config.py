@@ -1,4 +1,5 @@
 """Single source of pipeline defaults. Override via environment or CLI flags."""
+
 from __future__ import annotations
 
 import os
@@ -40,7 +41,8 @@ class Config:
     # say so in their caveats; packets built with it off do not carry that
     # caveat. Only public satellite pixels transit this path.
     trust_egress_proxy_tls: bool = field(
-        default_factory=lambda: _env_flag("LEDGER_TRUST_EGRESS_PROXY_TLS"))
+        default_factory=lambda: _env_flag("LEDGER_TRUST_EGRESS_PROXY_TLS")
+    )
 
     data_dir: str = "data"
     packets_dir: str = "packets"

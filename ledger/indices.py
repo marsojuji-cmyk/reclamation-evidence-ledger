@@ -4,6 +4,7 @@ All functions accept float arrays in surface reflectance (0..1) and a boolean
 clear-mask (True = usable pixel). They return per-pixel index arrays with NaN
 where the input is unusable, so downstream code can average honestly.
 """
+
 from __future__ import annotations
 
 import numpy as np
@@ -32,27 +33,24 @@ def ndmi(nir: np.ndarray, swir: np.ndarray, clear: np.ndarray) -> np.ndarray:
     return _apply_mask(_safe_divide(nir - swir, nir + swir), clear)
 
 
-def bare_soil_index(swir: np.ndarray, red: np.ndarray,
-                    nir: np.ndarray, blue: np.ndarray,
-                    clear: np.ndarray) -> np.ndarray:
+def bare_soil_index(
+    swir: np.ndarray, red: np.ndarray, nir: np.ndarray, blue: np.ndarray, clear: np.ndarray
+) -> np.ndarray:
     """Bare-soil signal. High values = exposed earth, the reclamation enemy."""
     num = (swir + red) - (nir + blue)
     den = (swir + red) + (nir + blue)
     return _apply_mask(_safe_divide(num, den), clear)
 
 
-def savi(nir: np.ndarray, red: np.ndarray, clear: np.ndarray,
-         L: float = 0.5) -> np.ndarray:
+def savi(nir: np.ndarray, red: np.ndarray, clear: np.ndarray, L: float = 0.5) -> np.ndarray:
     """Soil-Adjusted Vegetation Index (Huete 1988). L=0.5 is the standard
     compromise for intermediate cover; dampens soil-brightness bias that
     inflates NDVI over sparse vegetation — the exact regime of a
     recovering well pad."""
-    return _apply_mask(
-        _safe_divide((nir - red) * (1.0 + L), nir + red + L), clear)
+    return _apply_mask(_safe_divide((nir - red) * (1.0 + L), nir + red + L), clear)
 
 
-def msavi(nir: np.ndarray, red: np.ndarray,
-          clear: np.ndarray) -> np.ndarray:
+def msavi(nir: np.ndarray, red: np.ndarray, clear: np.ndarray) -> np.ndarray:
     """Modified SAVI (Qi et al. 1994). Replaces the fixed L with a
     self-adjusting factor, so it stays honest from bare soil to full canopy
     without a hand-tuned parameter."""

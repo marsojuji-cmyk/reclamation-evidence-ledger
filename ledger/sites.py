@@ -5,8 +5,11 @@ Site Names are Dominion Land Survey locations, e.g. "01-01-002-19W4 (100)"
 = LSD 01, Section 01, Township 002, Range 19 West of the 4th meridian.
 We geocode the LSD centroid directly — no AER join needed for the pilot.
 
-Accuracy: LSD centroid, road allowances ignored => ~+/-300 m. Honest enough
-for 500 m-buffer screening; NOT a legal survey position. Documented per site.
+Accuracy: WITHDRAWN 2026-10-09. The published diagnosis
+(NEGATIVE-RESULT-2026-10-09.md) measured a median error of 2,658 m across
+20,000 wells, with 0.0% inside the previously documented +/-300 m. Do not
+use these coordinates for screening until dls_to_latlon is verified against
+independent ground truth (see tests/test_geocode.py).
 
 Usage:
     python -m ledger.sites --out data/sites.parquet
@@ -16,6 +19,7 @@ Every run also writes <out stem>.owa_provenance.json next to the registry:
 the inventory file's URL, file date (from its OWA filename), SHA-256 and
 retrieval time. Packets cite that record instead of a hardcoded month.
 """
+
 from __future__ import annotations
 
 import argparse
@@ -25,7 +29,7 @@ import math
 import re
 import urllib.parse
 import urllib.request
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 import pandas as pd
@@ -93,7 +97,7 @@ def owa_provenance(path: str | Path, url: str | None = None) -> dict:
         "file_name": urllib.parse.unquote(url.rsplit("/", 1)[-1]) if url else path.name,
         "file_date": owa_file_date(url or "") or owa_file_date(path.name),
         "sha256": h,
-        "retrieved_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        "retrieved_at": datetime.now(UTC).isoformat(timespec="seconds"),
     }
 
 
@@ -108,13 +112,19 @@ def parse_dls(name: str) -> tuple[int, int, int, int, str] | None:
     m = DLS_RE.match(str(name).strip())
     if not m:
         return None
-    return (int(m.group(1)), int(m.group(2)), int(m.group(3)),
-            int(m.group(4)), m.group(5))
+    return (int(m.group(1)), int(m.group(2)), int(m.group(3)), int(m.group(4)), m.group(5))
 
 
 def dls_to_latlon(lsd: int, sec: int, twp: int, rng: int, mer: str) -> tuple[float, float]:
     """Centroid of the LSD. Boustrophedon section/LSD numbering; road
-    allowances ignored (~+/-300 m). Returns (lat, lon)."""
+    allowances ignored. Returns (lat, lon).
+
+    ACCURACY WITHDRAWN 2026-10-09 (NEGATIVE-RESULT-2026-10-09.md): the
+    published diagnosis measured a median error of 2,658 m on 20,000 wells.
+    The grid arithmetic is self-consistent (see tests/test_geocode.py) —
+    the defect is in a convention assumption, not the arithmetic. Do not
+    adjust the formula by intuition; verify against ground truth first.
+    """
     # Section position within township (1-36, boustrophedon from SE corner)
     row_s = (sec - 1) // 6
     if row_s % 2 == 0:
@@ -178,26 +188,36 @@ def load_owa(path: str | Path) -> pd.DataFrame:
     geo = parsed.dropna().map(lambda t: dls_to_latlon(*t))
     df.loc[geo.index, "latitude"] = geo.map(lambda t: t[0])
     df.loc[geo.index, "longitude"] = geo.map(lambda t: t[1])
-    df["owa_stage"] = [normalize_stage(d, p) for d, p in
-                       zip(df.get("Responsible Department"), df.get("Current Project Type"))]
+    df["owa_stage"] = [
+        normalize_stage(d, p)
+        for d, p in zip(
+            df.get("Responsible Department"), df.get("Current Project Type"), strict=True
+        )
+    ]
 
     # One row per site: keep the first component row, count components.
     df["n_components"] = df.groupby("Site Name")["Site Name"].transform("size")
     sites = df.drop_duplicates(subset=["Site Name"], keep="first")
 
-    out = pd.DataFrame({
-        "site_id": sites["Site Name"].astype(str),
-        "name": sites["Site Name"].astype(str),
-        "licensee": sites["Licensee"].astype(str) if "Licensee" in sites else "",
-        "license_number": sites["License Number"].astype(str) if "License Number" in sites else "",
-        "component_type": sites["Component Type"].astype(str) if "Component Type" in sites else "",
-        "n_components": sites["n_components"].astype(int),
-        "dls_parsed": sites["dls"].notna(),
-        "latitude": pd.to_numeric(sites["latitude"], errors="coerce"),
-        "longitude": pd.to_numeric(sites["longitude"], errors="coerce"),
-        "owa_stage": sites["owa_stage"],
-        "geo_method": "DLS LSD centroid (~+/-300 m; road allowances ignored)",
-    })
+    out = pd.DataFrame(
+        {
+            "site_id": sites["Site Name"].astype(str),
+            "name": sites["Site Name"].astype(str),
+            "licensee": sites["Licensee"].astype(str) if "Licensee" in sites else "",
+            "license_number": sites["License Number"].astype(str)
+            if "License Number" in sites
+            else "",
+            "component_type": sites["Component Type"].astype(str)
+            if "Component Type" in sites
+            else "",
+            "n_components": sites["n_components"].astype(int),
+            "dls_parsed": sites["dls"].notna(),
+            "latitude": pd.to_numeric(sites["latitude"], errors="coerce"),
+            "longitude": pd.to_numeric(sites["longitude"], errors="coerce"),
+            "owa_stage": sites["owa_stage"],
+            "geo_method": "DLS LSD centroid — accuracy withdrawn 2026-10-09 (NEGATIVE-RESULT-2026-10-09.md)",
+        }
+    )
     # Keep only geocoded rows inside Alberta bounds.
     out = out.dropna(subset=["latitude", "longitude"])
     out = out[(out.latitude.between(49, 60)) & (out.longitude.between(-121, -109))]
@@ -206,12 +226,18 @@ def load_owa(path: str | Path) -> pd.DataFrame:
 
 def main() -> None:
     ap = argparse.ArgumentParser(description="Build the normalized site registry.")
-    ap.add_argument("--owa", required=False, default=None,
-                    help="path to OWA monthly inventory file "
-                         "(omit to download the current one automatically)")
-    ap.add_argument("--owa-url", default=None,
-                    help="URL the --owa file was downloaded from (recorded in "
-                         "provenance; omit only if genuinely unknown)")
+    ap.add_argument(
+        "--owa",
+        required=False,
+        default=None,
+        help="path to OWA monthly inventory file (omit to download the current one automatically)",
+    )
+    ap.add_argument(
+        "--owa-url",
+        default=None,
+        help="URL the --owa file was downloaded from (recorded in "
+        "provenance; omit only if genuinely unknown)",
+    )
     ap.add_argument("--out", required=True, help="output parquet path")
     args = ap.parse_args()
 
@@ -228,8 +254,10 @@ def main() -> None:
     prov["n_geocoded_sites"] = int(len(sites))
     provenance_path(out).write_text(json.dumps(prov, indent=2))
     print(f"wrote {out}")
-    print(f"wrote {provenance_path(out)} (file_date {prov['file_date']}, "
-          f"sha256 {prov['sha256'][:12]}...)")
+    print(
+        f"wrote {provenance_path(out)} (file_date {prov['file_date']}, "
+        f"sha256 {prov['sha256'][:12]}...)"
+    )
 
 
 if __name__ == "__main__":

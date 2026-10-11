@@ -26,32 +26,37 @@ Usage:
     python ops/audit_lineage.py
     python ops/retier_packets.py --tag 2026-10 --date 2026-10-08
 """
+
 from __future__ import annotations
 
 import argparse
 import csv
 import json
 import subprocess
-import sys
 from datetime import date
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(ROOT))
 
-from ledger.change import (MIN_MATCHED_MONTHS_FOR_CI,  # noqa: E402
-                           PUBLICATION_HOLD, TIER_RULE, TIER_RULE_TEXT,
-                           _monthly_medians, assess, published_claim)
+from ledger.change import (  # noqa: E402
+    MIN_MATCHED_MONTHS_FOR_CI,
+    PUBLICATION_HOLD,
+    TIER_RULE,
+    TIER_RULE_TEXT,
+    _monthly_medians,
+    assess,
+    published_claim,
+)
 from ledger.imagery import BAND_ASSETS  # noqa: E402
-from ledger.packet import (GENERATED_BY, SCHEMA, SCHEMA_VERSION,  # noqa: E402
-                           empty_review)
+from ledger.packet import GENERATED_BY, SCHEMA, SCHEMA_VERSION, empty_review  # noqa: E402
 
 LINEAGE = ROOT / "ledger" / "data" / "radiometric_lineage.json"
 UNSAFESSL_V1 = "Chip download used GDAL_HTTP_UNSAFESSL"
 UNSAFESSL_HISTORIC = (
     "Chips for this packet were downloaded with GDAL_HTTP_UNSAFESSL (TLS "
     "verification off) on a TLS-intercepting egress proxy; integrity rests on "
-    "the recorded per-chip SHA-256 and the cited source_url, not TLS.")
+    "the recorded per-chip SHA-256 and the cited source_url, not TLS."
+)
 
 
 def _years(packet: dict) -> tuple[list[int], list[int]]:
@@ -64,13 +69,14 @@ def _years(packet: dict) -> tuple[list[int], list[int]]:
 
 def _reason(a) -> str:
     d = f"{a.delta:+.3f}"
-    ci = (f"[{a.delta_ci95[0]:+.3f}, {a.delta_ci95[1]:+.3f}]"
-          if a.delta_ci95 is not None else None)
+    ci = f"[{a.delta_ci95[0]:+.3f}, {a.delta_ci95[1]:+.3f}]" if a.delta_ci95 is not None else None
     if a.direction == "none":
         return f"|delta| {d} below ±0.08"
     if ci is None:
-        return (f"delta {d} beyond ±0.08 but no CI "
-                f"({len(a.matched_months)} matched months < {MIN_MATCHED_MONTHS_FOR_CI})")
+        return (
+            f"delta {d} beyond ±0.08 but no CI "
+            f"({len(a.matched_months)} matched months < {MIN_MATCHED_MONTHS_FOR_CI})"
+        )
     if a.tier == "detected":
         return f"delta {d} beyond ±0.08 but 95% CI {ci} includes zero"
     return f"delta {d} beyond ±0.08 and 95% CI {ci} excludes zero"
@@ -78,21 +84,25 @@ def _reason(a) -> str:
 
 def _git_head() -> str | None:
     try:
-        return subprocess.run(["git", "rev-parse", "HEAD"], cwd=ROOT,
-                              capture_output=True, text=True,
-                              check=True).stdout.strip()
+        return subprocess.run(
+            ["git", "rev-parse", "HEAD"], cwd=ROOT, capture_output=True, text=True, check=True
+        ).stdout.strip()
     except Exception:  # noqa: BLE001
         return None
 
 
-def retier(packet: dict, lineage: dict, owa_recheck: dict | None,
-           registry, run_date: str, head: str | None) -> tuple[dict, dict]:
+def retier(
+    packet: dict, lineage: dict, owa_recheck: dict | None, registry, run_date: str, head: str | None
+) -> tuple[dict, dict]:
     pid = packet["packet_id"]
     base_years, cur_years = _years(packet)
     scenes = packet["observations"]
-    a = assess(packet["site"]["site_id"], _monthly_medians(scenes, base_years),
-               _monthly_medians(scenes, cur_years),
-               packet["assessment_detail"]["period"])
+    a = assess(
+        packet["site"]["site_id"],
+        _monthly_medians(scenes, base_years),
+        _monthly_medians(scenes, cur_years),
+        packet["assessment_detail"]["period"],
+    )
 
     # --- reproduce before touching anything ---------------------------------
     det, base = packet["assessment_detail"], packet["baseline"]
@@ -114,20 +124,25 @@ def retier(packet: dict, lineage: dict, owa_recheck: dict | None,
     before = {"tier": old["tier"], "statement": old["statement"]}
 
     # --- claim ----------------------------------------------------------------
-    site_caveats = [c for c in old["caveats"]
-                    if c.startswith("Site coordinates are DLS")
-                    or c.startswith("Sentinel-2's 10 m pixels")]
+    site_caveats = [
+        c
+        for c in old["caveats"]
+        if c.startswith("Site coordinates are DLS") or c.startswith("Sentinel-2's 10 m pixels")
+    ]
     caveats = list(a.caveats) + site_caveats
-    if any(c.startswith(UNSAFESSL_V1) or c == UNSAFESSL_HISTORIC
-           for c in old["caveats"]):
+    if any(c.startswith(UNSAFESSL_V1) or c == UNSAFESSL_HISTORIC for c in old["caveats"]):
         caveats.append(UNSAFESSL_HISTORIC)
     packet["claim"] = published_claim(a, caveats)
     packet["schema_version"] = SCHEMA_VERSION
     for t in packet["transforms"]:
         if t["step"] == "baseline_assessment":
-            t["parameters"].update({
-                "min_matched_months_for_ci": MIN_MATCHED_MONTHS_FOR_CI,
-                "tier_rule": TIER_RULE, "tier_rule_text": TIER_RULE_TEXT})
+            t["parameters"].update(
+                {
+                    "min_matched_months_for_ci": MIN_MATCHED_MONTHS_FOR_CI,
+                    "tier_rule": TIER_RULE,
+                    "tier_rule_text": TIER_RULE_TEXT,
+                }
+            )
         if t["step"] == "packet_build":
             t["parameters"]["schema_version"] = SCHEMA_VERSION
 
@@ -154,14 +169,21 @@ def retier(packet: dict, lineage: dict, owa_recheck: dict | None,
         "scenes_in_packet": len(used),
         "scenes_audited": sum(1 for s in used if s in lineage),
     }
-    prov.setdefault("owa_inventory_file", {
-        "url": None, "file_name": None,
-        "file_date": packet["site"].get("owa_inventory_date"),
-        "sha256": None, "retrieved_at": None,
-        "note": ("Not recorded at assessment time: the pre-M1 pipeline used a "
-                 "hardcoded file month and kept no URL or checksum, so the "
-                 "exact file cannot be verified. See owa_recheck."),
-    })
+    prov.setdefault(
+        "owa_inventory_file",
+        {
+            "url": None,
+            "file_name": None,
+            "file_date": packet["site"].get("owa_inventory_date"),
+            "sha256": None,
+            "retrieved_at": None,
+            "note": (
+                "Not recorded at assessment time: the pre-M1 pipeline used a "
+                "hardcoded file month and kept no URL or checksum, so the "
+                "exact file cannot be verified. See owa_recheck."
+            ),
+        },
+    )
     if owa_recheck is not None:
         sid = packet["site"]["site_id"]
         row = registry[registry.site_id == sid]
@@ -174,47 +196,72 @@ def retier(packet: dict, lineage: dict, owa_recheck: dict | None,
             "coordinates_match": bool(
                 found
                 and abs(float(row.iloc[0].latitude) - packet["site"]["latitude"]) < 1e-5
-                and abs(float(row.iloc[0].longitude) - packet["site"]["longitude"]) < 1e-5),
+                and abs(float(row.iloc[0].longitude) - packet["site"]["longitude"]) < 1e-5
+            ),
         }
-    after = {"tier": packet["claim"]["tier"],
-             "statement": packet["claim"]["statement"]}
+    after = {"tier": packet["claim"]["tier"], "statement": packet["claim"]["statement"]}
     revs = prov.get("revisions", [])
-    v1 = ({"tier": revs[0]["previous_tier"], "statement": revs[0]["previous_statement"]}
-          if revs else before)
+    v1 = (
+        {"tier": revs[0]["previous_tier"], "statement": revs[0]["previous_statement"]}
+        if revs
+        else before
+    )
     change = {
-        "packet_id": pid, "site_id": packet["site"]["site_id"],
-        "old_tier": v1["tier"], "old_statement": v1["statement"],
+        "packet_id": pid,
+        "site_id": packet["site"]["site_id"],
+        "old_tier": v1["tier"],
+        "old_statement": v1["statement"],
         "internal_tier": a.tier,
-        "new_tier": after["tier"], "new_statement": after["statement"],
-        "direction": a.direction, "delta": a.delta,
-        "ci95": a.delta_ci95, "matched_months": len(a.matched_months),
-        "confidence": a.confidence, "reason": _reason(a),
+        "new_tier": after["tier"],
+        "new_statement": after["statement"],
+        "direction": a.direction,
+        "delta": a.delta,
+        "ci95": a.delta_ci95,
+        "matched_months": len(a.matched_months),
+        "confidence": a.confidence,
+        "reason": _reason(a),
     }
     new_rule = old.get("tier_rule") != TIER_RULE
-    hold_now = (packet["claim"].get("publication_hold")
-                != old.get("publication_hold"))
+    hold_now = packet["claim"].get("publication_hold") != old.get("publication_hold")
     if new_rule or hold_now or before != after:  # idempotent re-runs
-      what = []
-      if new_rule:
-          what.append(f"re-tiered under {TIER_RULE}; provenance fields added; "
-                      "unrecorded 'human-reviewed' stamp removed")
-      if hold_now:
-          what.append("publication hold applied: published tier set to "
-                      "'detected – screening only'; CI-gated result kept in "
-                      "claim.screen_tier_internal")
-      prov.setdefault("revisions", []).append({
-        "date": run_date, "tool": "ops/retier_packets.py", "code_commit": head,
-        "change": "; ".join(what) or "claim re-derived",
-        "previous_tier": before["tier"], "previous_statement": before["statement"],
-        "new_tier": after["tier"], "new_statement": after["statement"],
-        "reason": (PUBLICATION_HOLD["reason"] if hold_now and not new_rule
-                   else change["reason"]),
-      })
+        what = []
+        if new_rule:
+            what.append(
+                f"re-tiered under {TIER_RULE}; provenance fields added; "
+                "unrecorded 'human-reviewed' stamp removed"
+            )
+        if hold_now:
+            what.append(
+                "publication hold applied: published tier set to "
+                "'detected – screening only'; CI-gated result kept in "
+                "claim.screen_tier_internal"
+            )
+        prov.setdefault("revisions", []).append(
+            {
+                "date": run_date,
+                "tool": "ops/retier_packets.py",
+                "code_commit": head,
+                "change": "; ".join(what) or "claim re-derived",
+                "previous_tier": before["tier"],
+                "previous_statement": before["statement"],
+                "new_tier": after["tier"],
+                "new_statement": after["statement"],
+                "reason": (
+                    PUBLICATION_HOLD["reason"] if hold_now and not new_rule else change["reason"]
+                ),
+            }
+        )
     return packet, change
 
 
-def write_diff(changes: list[dict], tag: str, run_date: str, head: str | None,
-               owa_recheck: dict | None, lineage_meta: dict) -> None:
+def write_diff(
+    changes: list[dict],
+    tag: str,
+    run_date: str,
+    head: str | None,
+    owa_recheck: dict | None,
+    lineage_meta: dict,
+) -> None:
     """Public diff: v1 published tier -> current published tier, per site.
 
     While the publication hold is active the internal CI-gated tier is NOT
@@ -224,23 +271,53 @@ def write_diff(changes: list[dict], tag: str, run_date: str, head: str | None,
     out_csv = ROOT / "docs" / f"retier-{tag}.csv"
     with open(out_csv, "w", newline="") as f:
         w = csv.writer(f)
-        w.writerow(["site_id", "v1_tier", "v1_statement", "published_tier",
-                    "published_statement", "delta", "ci95_lo", "ci95_hi",
-                    "matched_months", "reason", "ci_rule_note"])
+        w.writerow(
+            [
+                "site_id",
+                "v1_tier",
+                "v1_statement",
+                "published_tier",
+                "published_statement",
+                "delta",
+                "ci95_lo",
+                "ci95_hi",
+                "matched_months",
+                "reason",
+                "ci_rule_note",
+            ]
+        )
         for c in changes:
             ci = c["ci95"] or [None, None]
             changed = c["old_tier"] != c["new_tier"]
-            reason = (PUBLICATION_HOLD["reason"] if hold and changed
-                      else ("" if not changed else c["reason"]))
-            note = (f"v1 call also fails {TIER_RULE}: {c['reason']}"
-                    if c["old_tier"] == "identified" and c["internal_tier"] != "identified"
-                    else "")
-            w.writerow([c["site_id"], c["old_tier"], c["old_statement"],
-                        c["new_tier"], c["new_statement"], c["delta"],
-                        ci[0], ci[1], c["matched_months"], reason, note])
+            reason = (
+                PUBLICATION_HOLD["reason"]
+                if hold and changed
+                else ("" if not changed else c["reason"])
+            )
+            note = (
+                f"v1 call also fails {TIER_RULE}: {c['reason']}"
+                if c["old_tier"] == "identified" and c["internal_tier"] != "identified"
+                else ""
+            )
+            w.writerow(
+                [
+                    c["site_id"],
+                    c["old_tier"],
+                    c["old_statement"],
+                    c["new_tier"],
+                    c["new_statement"],
+                    c["delta"],
+                    ci[0],
+                    ci[1],
+                    c["matched_months"],
+                    reason,
+                    note,
+                ]
+            )
 
     def count(key, val):
         return sum(1 for c in changes if c[key] == val)
+
     old_id = [c for c in changes if c["old_tier"] == "identified"]
     fails = [c for c in old_id if c["internal_tier"] != "identified"]
     n_noci = sum(1 for c in fails if c["ci95"] is None)
@@ -255,7 +332,8 @@ def write_diff(changes: list[dict], tag: str, run_date: str, head: str | None,
         "*detected – screening only*.",
         "",
         f"Run {run_date} (MT) with `ops/retier_packets.py`"
-        + (f" at commit `{head[:7]}`" if head else "") + ". "
+        + (f" at commit `{head[:7]}`" if head else "")
+        + ". "
         "No imagery was re-fetched: every packet's delta, CI, medians and "
         "observation counts were recomputed from the observations stored in "
         "the packet and matched the stored values exactly before any claim "
@@ -264,14 +342,17 @@ def write_diff(changes: list[dict], tag: str, run_date: str, head: str | None,
         "## What changed and why",
         "",
         "1. **The v1 tier rule ignored the confidence interval.** It called a "
-        "site `identified` (\"vegetation recovering\" or \"stalled or "
-        "regressing\") whenever |median NDVI delta| ≥ 0.08. The corrected "
+        'site `identified` ("vegetation recovering" or "stalled or '
+        'regressing") whenever |median NDVI delta| ≥ 0.08. The corrected '
         f"screen rule (`{TIER_RULE}`) is: {TIER_RULE_TEXT}. Of the "
         f"{len(old_id)} v1 `identified` sites, {len(fails)} fail it: "
         f"{n_noci} have no CI (fewer than {MIN_MATCHED_MONTHS_FOR_CI} matched "
         f"months) and {n_zero} have a CI that includes zero.",
-        "2. **Site-level calls are withheld" + (" (2026-10-10)." if hold else ".") +
-        "** " + PUBLICATION_HOLD["reason"] + " The corrected screen is "
+        "2. **Site-level calls are withheld"
+        + (" (2026-10-10)." if hold else ".")
+        + "** "
+        + PUBLICATION_HOLD["reason"]
+        + " The corrected screen is "
         "still computed and kept in each packet (`claim.screen_tier_internal`) "
         "for internal tracking, but it is not published as a site-level call.",
         "",
@@ -286,7 +367,8 @@ def write_diff(changes: list[dict], tag: str, run_date: str, head: str | None,
         "## What the screen does not show",
         "",
         "- Each delta describes NDVI in the ~1 km² analysis square around a "
-        "DLS centroid (±300 m), mostly land around the pad, not the pad.",
+        "DLS-derived centroid (coordinate accuracy withdrawn 2026-10-09; see "
+        "NEGATIVE-RESULT-2026-10-09.md), mostly land around the pad, not the pad.",
         "- The CI resamples matched months from the same two baseline and two "
         "current years: within-season consistency, not year-to-year "
         f"variability. The baseline includes the 2023 drought and {n_pos} of "
@@ -303,13 +385,17 @@ def write_diff(changes: list[dict], tag: str, run_date: str, head: str | None,
         f"{len(lineage_meta['anomalies'])} anomalies.",
         "- Every chip carries its scene_id and source_url (the Earth Search "
         "COG asset it was read from) next to its SHA-256.",
-        "- The \"human-reviewed before publish\" stamp is removed; no review "
+        '- The "human-reviewed before publish" stamp is removed; no review '
         "record exists. Each packet has an empty `provenance.review` log.",
         "- The OWA file used at assessment time (dated 2026-09-01) was never "
         "recorded by URL or checksum; packets now say so. Each site was "
         "re-checked against the current OWA file"
-        + (f" dated {owa_recheck['file_date']} (sha256 `{owa_recheck['sha256']}`)"
-           if owa_recheck else "") + ".",
+        + (
+            f" dated {owa_recheck['file_date']} (sha256 `{owa_recheck['sha256']}`)"
+            if owa_recheck
+            else ""
+        )
+        + ".",
         "",
         "## Per-site changes (published tier changed)",
         "",
@@ -318,12 +404,21 @@ def write_diff(changes: list[dict], tag: str, run_date: str, head: str | None,
     ]
     for c in sorted(changes, key=lambda c: c["site_id"]):
         if c["old_tier"] != c["new_tier"]:
-            note = (f"v1 call also fails the CI rule: {c['reason']}"
-                    if c["internal_tier"] != "identified" else "withheld (hold)")
-            lines.append(f"| {c['site_id']} | {c['old_tier']} / {c['old_statement']} "
-                         f"| {c['new_tier']} / {c['new_statement']} | {note} |")
-    lines += ["", f"All {len(changes)} rows, including unchanged ones, are in "
-              f"[`retier-{tag}.csv`](retier-{tag}.csv).", ""]
+            note = (
+                f"v1 call also fails the CI rule: {c['reason']}"
+                if c["internal_tier"] != "identified"
+                else "withheld (hold)"
+            )
+            lines.append(
+                f"| {c['site_id']} | {c['old_tier']} / {c['old_statement']} "
+                f"| {c['new_tier']} / {c['new_statement']} | {note} |"
+            )
+    lines += [
+        "",
+        f"All {len(changes)} rows, including unchanged ones, are in "
+        f"[`retier-{tag}.csv`](retier-{tag}.csv).",
+        "",
+    ]
     (ROOT / "docs" / f"retier-{tag}.md").write_text("\n".join(lines))
     print(f"wrote docs/retier-{tag}.md and .csv")
 
@@ -337,8 +432,11 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--tag", required=True, help="diff file tag, e.g. 2026-10")
     ap.add_argument("--date", default=date.today().isoformat())
-    ap.add_argument("--registry", default="data/sites.parquet",
-                    help="current registry for the OWA re-check (optional)")
+    ap.add_argument(
+        "--registry",
+        default="data/sites.parquet",
+        help="current registry for the OWA re-check (optional)",
+    )
     args = ap.parse_args()
 
     lin = json.loads(LINEAGE.read_text())
@@ -355,16 +453,19 @@ def main() -> None:
 
     changes = []
     for p in sorted((ROOT / "packets").glob("*.json")):
-        packet, change = retier(json.loads(p.read_text()), lineage, owa_recheck,
-                                registry, args.date, head)
+        packet, change = retier(
+            json.loads(p.read_text()), lineage, owa_recheck, registry, args.date, head
+        )
         jsonschema.validate(packet, SCHEMA)
         p.write_text(json.dumps(packet, indent=2))
         changes.append(change)
     write_diff(changes, args.tag, args.date, head, owa_recheck, lin)
     n_id = sum(1 for c in changes if c["new_tier"] == "identified")
     n_int = sum(1 for c in changes if c["internal_tier"] == "identified")
-    print(f"re-tiered {len(changes)} packets: published identified {n_id}, "
-          f"detected {len(changes) - n_id}; internal screen identified {n_int}")
+    print(
+        f"re-tiered {len(changes)} packets: published identified {n_id}, "
+        f"detected {len(changes) - n_id}; internal screen identified {n_int}"
+    )
 
 
 if __name__ == "__main__":

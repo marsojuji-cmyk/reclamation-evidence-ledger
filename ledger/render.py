@@ -8,6 +8,7 @@ Usage:
     python -m ledger.render --packets packets/ --out docs/
     python ops/render_dashboard.py   # then overwrite docs/index.html
 """
+
 from __future__ import annotations
 
 import argparse
@@ -16,8 +17,10 @@ import json
 import re
 from pathlib import Path
 
-ATTRIBUTION = ("Imagery: Copernicus Sentinel-2 (ESA), via AWS Open Data. "
-               "Contains modified Copernicus Sentinel data.")
+ATTRIBUTION = (
+    "Imagery: Copernicus Sentinel-2 (ESA), via AWS Open Data. "
+    "Contains modified Copernicus Sentinel data."
+)
 
 PAGE_TMPL = """<!doctype html>
 <html lang="en"><head><meta charset="utf-8">
@@ -52,12 +55,15 @@ def _esc(v) -> str:
 
 def _banner() -> str:
     from .change import PUBLICATION_HOLD
+
     if not PUBLICATION_HOLD.get("active"):
         return ""
-    return ('<div class="hold" role="status">Re-scoring in progress (Oct 2026): '
-            'site-level calls are withheld pending a surrounding-land baseline. '
-            'Every site is published as "detected – screening only". '
-            f'{_esc(PUBLICATION_HOLD["reason"])}</div>')
+    return (
+        '<div class="hold" role="status">Re-scoring in progress (Oct 2026): '
+        "site-level calls are withheld pending a surrounding-land baseline. "
+        'Every site is published as "detected – screening only". '
+        f"{_esc(PUBLICATION_HOLD['reason'])}</div>"
+    )
 
 
 def render_packet(packet: dict, chart_file: str | None = None) -> str:
@@ -77,46 +83,63 @@ def render_packet(packet: dict, chart_file: str | None = None) -> str:
     )
     srcs = "".join(
         f"<li>{_esc(s['name'])} — <a href='{_esc(s['url'])}'>{_esc(s['url'])}</a> "
-        f"(accessed {_esc(s['accessed'])})</li>" for s in packet["provenance"]["sources"]
+        f"(accessed {_esc(s['accessed'])})</li>"
+        for s in packet["provenance"]["sources"]
     )
     s = packet["site"]
     prov = packet["provenance"]
     review = prov.get("review") or {}
-    review_txt = ("no human review recorded" if not review.get("log")
-                  else f"{len(review['log'])} review(s) recorded")
+    review_txt = (
+        "no human review recorded"
+        if not review.get("log")
+        else f"{len(review['log'])} review(s) recorded"
+    )
     owa = prov.get("owa_inventory_file") or {}
-    owa_txt = (f"OWA file {_esc(owa.get('file_date'))}, sha256 "
-               f"<code>{_esc(owa.get('sha256'))}</code>" if owa.get("sha256")
-               else _esc(owa.get("note", "OWA inventory file not recorded")))
+    owa_txt = (
+        f"OWA file {_esc(owa.get('file_date'))}, sha256 <code>{_esc(owa.get('sha256'))}</code>"
+        if owa.get("sha256")
+        else _esc(owa.get("note", "OWA inventory file not recorded"))
+    )
     recheck = prov.get("owa_recheck")
     if recheck:
-        owa_txt += (f"<br>Re-checked against OWA file {_esc(recheck.get('file_date'))} "
-                    f"(sha256 <code>{_esc(recheck.get('sha256'))}</code>) on "
-                    f"{_esc(recheck.get('checked_on'))}: site "
-                    f"{'found' if recheck.get('site_found') else 'NOT found'}, stage "
-                    f"{_esc(recheck.get('owa_stage'))}")
+        owa_txt += (
+            f"<br>Re-checked against OWA file {_esc(recheck.get('file_date'))} "
+            f"(sha256 <code>{_esc(recheck.get('sha256'))}</code>) on "
+            f"{_esc(recheck.get('checked_on'))}: site "
+            f"{'found' if recheck.get('site_found') else 'NOT found'}, stage "
+            f"{_esc(recheck.get('owa_stage'))}"
+        )
     n_src = sum(1 for ch in packet.get("chips", []) if ch.get("source_url"))
     # Date and change only: while the publication hold is active, pages do
     # not restate intermediate (internal) tiers. The packet JSON keeps them.
     revisions = "".join(
         f"<li>{_esc(r.get('date'))}: {_esc(r.get('change'))}"
-        + (f" (previous packet archived at <code>{_esc(r['archived_packet'])}</code>)"
-           if r.get("archived_packet") else "") + "</li>"
-        for r in prov.get("revisions", []))
-    revisions_html = (f"<h3>Revisions</h3><ul>{revisions}</ul>" if revisions else "")
-    chart_html = (f'<h3>NDVI time series</h3><p><img src="assets/{_esc(chart_file)}" '
-                  f'alt="per-scene NDVI time series" style="max-width:100%"></p>'
-                  if chart_file else "")
+        + (
+            f" (previous packet archived at <code>{_esc(r['archived_packet'])}</code>)"
+            if r.get("archived_packet")
+            else ""
+        )
+        + "</li>"
+        for r in prov.get("revisions", [])
+    )
+    revisions_html = f"<h3>Revisions</h3><ul>{revisions}</ul>" if revisions else ""
+    chart_html = (
+        f'<h3>NDVI time series</h3><p><img src="assets/{_esc(chart_file)}" '
+        f'alt="per-scene NDVI time series" style="max-width:100%"></p>'
+        if chart_file
+        else ""
+    )
     return PAGE_TMPL.format(
         title=_esc(packet["packet_id"]),
-        attribution=ATTRIBUTION, banner=_banner(),
+        attribution=ATTRIBUTION,
+        banner=_banner(),
         body=f"""
-<h2>Site {_esc(s['site_id'])}</h2>
-<p>{_esc(s.get('name',''))} — {_esc(s['latitude'])}, {_esc(s['longitude'])}<br>
-OWA stage: <b>{_esc(s['owa_stage'])}</b> (inventory {_esc(s.get('owa_inventory_date',''))})</p>
-<h3>Claim <span class="tier {c['tier']}">{_esc(c['tier']).upper()}</span></h3>
-<p><b>{_esc(c['statement'])}</b> — {_esc(c['rationale'])}<br>
-Confidence: {_esc(c['confidence'])}
+<h2>Site {_esc(s["site_id"])}</h2>
+<p>{_esc(s.get("name", ""))} — {_esc(s["latitude"])}, {_esc(s["longitude"])}<br>
+OWA stage: <b>{_esc(s["owa_stage"])}</b> (inventory {_esc(s.get("owa_inventory_date", ""))})</p>
+<h3>Claim <span class="tier {c["tier"]}">{_esc(c["tier"]).upper()}</span></h3>
+<p><b>{_esc(c["statement"])}</b> — {_esc(c["rationale"])}<br>
+Confidence: {_esc(c["confidence"])}
 · Review: {review_txt}</p>
 {chart_html}
 {caveats}
@@ -128,7 +151,7 @@ Confidence: {_esc(c['confidence'])}
 <h3>Sources</h3>
 <ul>{srcs}</ul>
 <p>{owa_txt}</p>
-<p>{n_src} of {len(packet.get('chips', []))} chips cite their source COG URL and
+<p>{n_src} of {len(packet.get("chips", []))} chips cite their source COG URL and
 SHA-256 in the packet JSON.</p>
 {revisions_html}
 <p><a href="index.html">← ledger index</a></p>
@@ -141,24 +164,26 @@ def _marker_color(claim: dict) -> str:
     (While the publication hold is active nothing is identified.)"""
     if claim.get("tier") != "identified":
         return "grey"
-    return {"increase": "#1f6fb2", "decrease": "#b25f1f"}.get(
-        claim.get("direction"), "grey")
+    return {"increase": "#1f6fb2", "decrease": "#b25f1f"}.get(claim.get("direction"), "grey")
 
 
 def render_index_map(packets: list[dict], pages: list[str]) -> str:
     """Leaflet map of all sites, markers colored by outcome."""
     pts = []
-    for packet, page in zip(packets, pages):
+    for packet, page in zip(packets, pages, strict=True):
         s = packet["site"]
-        pts.append({
-            "lat": s["latitude"], "lon": s["longitude"],
-            "site_id": packet["packet_id"],
-            "page": page,
-            "tier": packet["claim"]["tier"],
-            "statement": packet["claim"]["statement"],
-            "confidence": packet["claim"]["confidence"],
-            "color": _marker_color(packet["claim"]),
-        })
+        pts.append(
+            {
+                "lat": s["latitude"],
+                "lon": s["longitude"],
+                "site_id": packet["packet_id"],
+                "page": page,
+                "tier": packet["claim"]["tier"],
+                "statement": packet["claim"]["statement"],
+                "confidence": packet["claim"]["confidence"],
+                "color": _marker_color(packet["claim"]),
+            }
+        )
     data_js = json.dumps(pts)
     return f"""
 <h2>Site map</h2>
@@ -189,7 +214,8 @@ if (bounds.length) map.fitBounds(bounds, {{padding: [20, 20]}});
 <p><span style="color:#1f6fb2">●</span> identified: NDVI higher than baseline
 <span style="color:#b25f1f">●</span> identified: NDVI lower than baseline
 <span style="color:grey">●</span> detected (no CI-supported change).
-Coordinates are DLS LSD centroids (±300 m) — markers show screening areas, not wellheads.</p>
+Coordinates are DLS-derived (accuracy withdrawn 2026-10-09 — see NEGATIVE-RESULT-2026-10-09.md).
+Markers show screening areas, not wellheads.</p>
 """
 
 
@@ -230,11 +256,14 @@ def main() -> None:
         objs.append(packet)
 
     index = PAGE_TMPL.format(
-        title="Index", attribution=ATTRIBUTION, banner=_banner(),
+        title="Index",
+        attribution=ATTRIBUTION,
+        banner=_banner(),
         body=f"<h2>{len(packets)} evidence packets</h2>"
-             + render_index_map(objs, pages) +
-             "<table><tr><th>Packet</th><th>Tier</th><th>Finding</th><th>Confidence</th></tr>"
-             + "".join(rows) + "</table>",
+        + render_index_map(objs, pages)
+        + "<table><tr><th>Packet</th><th>Tier</th><th>Finding</th><th>Confidence</th></tr>"
+        + "".join(rows)
+        + "</table>",
     )
     (out / "index.html").write_text(index)
     print(f"rendered {len(packets)} packets -> {out}")

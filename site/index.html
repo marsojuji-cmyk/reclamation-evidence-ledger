@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reclamation Evidence — Precision Earth Observation Platform</title>
+  <meta name="description" content="Institutional satellite vegetation screening platform for Western Canadian energy closure programs. Rank disturbed wellsites by Sentinel-2 recovery signal.">
+  <link rel="stylesheet" href="style.css">
+  <!-- Leaflet GIS Mapping CDN -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <!-- Embedded Public Ledger Data (99 Verified Packets) -->
+  <script src="ledger.js"></script>
+  <script defer src="app.js"></script>
+</head>
+<body>
+
+  <!-- Institutional Telemetry Command Header Bar -->
+  <aside class="top-command-bar" aria-label="System Telemetry">
+    <div class="telemetry-strip">
+      <div class="telemetry-item">
+        <span class="telemetry-dot"></span>
+        <span>Sensor: <strong>ESA Sentinel-2 MSI (10m Resolution)</strong></span>
+      </div>
+      <div class="telemetry-item">
+        <span>Coverage: <strong>Western Canadian Sedimentary Basin</strong></span>
+      </div>
+      <div class="telemetry-item">
+        <span>Framework: <strong>AER Directive 088 / Area-Based Closure Aligned</strong></span>
+      </div>
+    </div>
+    <div class="telemetry-strip">
+      <div class="telemetry-item">
+        <span>Public Ledger: <strong>99 Cryptographically Verifiable Packets</strong></span>
+      </div>
+      <a href="https://marsojuji-cmyk.github.io/reclamation-evidence-ledger/" target="_blank" rel="noopener" class="telemetry-link">
+        View Raw Git Ledger &rarr;
+      </a>
+    </div>
+  </aside>
+
+  <!-- Executive Header Banner -->
+  <header class="top-hero-banner">
+    <div class="brand-intro">
+      <div class="brand-title-wrap">
+        <div class="brand-logo-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+            <polyline points="2 17 12 22 22 17"></polyline>
+            <polyline points="2 12 12 17 22 12"></polyline>
+          </svg>
+        </div>
+        <h1 class="brand-title">Reclamation Evidence</h1>
+      </div>
+      <p class="brand-subtitle">Know which sites to walk first. · Calgary, Alberta · Pre-Registered Vegetation Screening</p>
+    </div>
+
+    <!-- Institutional Quality Badges -->
+    <div class="top-pills-row">
+      <div class="pill-badge">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12"></polyline>
+        </svg>
+        Blind Field Validated
+      </div>
+      <div class="pill-badge">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12"></polyline>
+        </svg>
+        Fixed Fee ($7,500 CAD)
+      </div>
+      <a href="#order-intake-section" class="pill-badge active-cta" onclick="document.querySelector('[data-view=\'order\']').click();">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+        </svg>
+        Fast Enterprise Intake &rarr;
+      </a>
+    </div>
+  </header>
+
+  <!-- Master Operational Container -->
+  <div class="app-container">
+
+    <!-- Minimalist Left Dock Sidebar -->
+    <aside class="app-sidebar" aria-label="Platform Views">
+      <div class="sidebar-logo" title="Reclamation Evidence">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path>
+          <path d="M2 12h20"></path>
+        </svg>
+      </div>
+
+      <nav class="sidebar-nav">
+        <!-- Geospatial Explorer -->
+        <button class="nav-item active" data-view="dashboard" aria-label="Geospatial Explorer">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"></polygon>
+            <line x1="9" y1="3" x2="9" y2="18"></line>
+            <line x1="15" y1="6" x2="15" y2="21"></line>
+          </svg>
+          <span class="nav-tooltip">Geospatial Explorer</span>
+        </button>
+
+        <!-- Fast Enterprise Order Engine -->
+        <button class="nav-item" data-view="order" aria-label="Enterprise Order Engine">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="12" y1="18" x2="12" y2="12"></line>
+            <line x1="9" y1="15" x2="15" y2="15"></line>
+          </svg>
+          <span class="nav-tooltip">Order Screening Pilot</span>
+        </button>
+
+        <!-- Project Management & Milestones -->
+        <button class="nav-item" data-view="kanban" aria-label="Project Milestones">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+            <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+            <line x1="12" y1="22.08" x2="12" y2="12"></line>
+          </svg>
+          <span class="nav-tooltip">Delivery Milestones</span>
+        </button>
+
+        <!-- 99-Packet Evidence Ledger -->
+        <button class="nav-item" data-view="ledger" aria-label="Evidence Ledger">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="20" x2="18" y2="10"></line>
+            <line x1="12" y1="20" x2="12" y2="4"></line>
+            <line x1="6" y1="20" x2="6" y2="14"></line>
+          </svg>
+          <span class="nav-tooltip">99-Site Evidence Register</span>
+        </button>
+
+        <!-- Method & Limits -->
+        <button class="nav-item" data-view="method" aria-label="Method & Limits">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="16" x2="12" y2="12"></line>
+            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+          </svg>
+          <span class="nav-tooltip">Methodology & Bounds</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-divider"></div>
+
+      <div class="sidebar-bottom">
+        <a href="https://marsojuji-cmyk.github.io/reclamation-evidence-ledger/" target="_blank" rel="noopener" class="nav-item" title="Public Git Ledger">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
+          </svg>
+          <span class="nav-tooltip">Public Git Ledger</span>
+        </a>
+      </div>
+    </aside>
+
+    <!-- Main Operational Workspace -->
+    <main class="app-main">
+
+      <!-- Executive Top Bar -->
+      <section class="dashboard-topbar">
+        <div class="user-profile-header">
+          <div class="operator-badge-wrap">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+              <circle cx="12" cy="10" r="3"></circle>
+            </svg>
+          </div>
+          <div class="user-greeting">
+            <h2 class="greeting-text">Closure Operations Portal</h2>
+            <span class="greeting-email">WCSB Energy Operators · Calgary HQ · Area-Based Closure Triage</span>
+          </div>
+        </div>
+
+        <div class="topbar-actions">
+          <div class="search-box-pill">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input type="text" id="global-search-input" placeholder="Search 99 sites by DLS LSD, Licensee, or UWI...">
+          </div>
+
+          <button class="btn-primary-order" onclick="document.querySelector('[data-view=\'order\']').click();">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            + Order 15-Site Screening Pilot
+          </button>
+        </div>
+      </section>
+
+      <!-- View Navigation Tabs -->
+      <nav class="view-tabs-bar" aria-label="Workspace views">
+        <button class="view-tab-btn active" data-view="dashboard">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"></polygon><line x1="9" y1="3" x2="9" y2="18"></line><line x1="15" y1="6" x2="15" y2="21"></line></svg>
+          Geospatial Sentinel-2 Explorer
+        </button>
+        <button class="view-tab-btn" data-view="order">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
+          Enterprise Order & SOW Engine
+        </button>
+        <button class="view-tab-btn" data-view="kanban">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg>
+          Milestones & Delivery Pipeline
+        </button>
+        <button class="view-tab-btn" data-view="ledger">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+          99-Packet Evidence Register
+        </button>
+        <button class="view-tab-btn" data-view="method">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+          Methodology, Triad & Bounds
+        </button>
+      </nav>
+
+      <!-- Institutional Metric Cards -->
+      <section class="activity-metrics-grid">
+        <!-- Standout Fixed-Fee Pilot Card -->
+        <div class="standout-pilot-card">
+          <div class="standout-top">
+            <div class="card-icon-badge">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
+                <line x1="1" y1="10" x2="23" y2="10"></line>
+              </svg>
+            </div>
+            <span class="status-live-pill">Fixed Pilot Fee</span>
+          </div>
+          <div class="standout-middle">
+            <div class="standout-label">Screening Pilot Investment</div>
+            <div class="standout-val">$7,500.00 CAD</div>
+            <div class="standout-sub">15 Sites · 4 Weeks · Blind Field Check</div>
+          </div>
+          <div class="standout-bottom">
+            <span class="standout-meta">Terms: 50% Kickoff / 50% Handover</span>
+            <button class="btn-circle-arrow" onclick="document.querySelector('[data-view=\'order\']').click();" title="Configure 15-Site Well Batch">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="9 18 15 12 9 6"></polyline>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Metric 1: Packets -->
+        <div class="metric-stat-card">
+          <div class="metric-top">
+            <div class="metric-icon-circle blue">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+              </svg>
+            </div>
+            <span class="trend-badge green">Verified</span>
+          </div>
+          <div>
+            <div class="metric-label">Analysis Packets Published</div>
+            <div class="metric-value">99 Packets</div>
+            <div class="metric-caption">Across 13 Western Canadian Licensees</div>
+          </div>
+        </div>
+
+        <!-- Metric 2: Detected Recoveries -->
+        <div class="metric-stat-card">
+          <div class="metric-top">
+            <div class="metric-icon-circle emerald">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline>
+                <polyline points="16 7 22 7 22 13"></polyline>
+              </svg>
+            </div>
+            <span class="trend-badge green">&gt; +0.08 Delta</span>
+          </div>
+          <div>
+            <div class="metric-label">Vegetation Signals Detected</div>
+            <div class="metric-value">71 Sites</div>
+            <div class="metric-caption">Statistically significant recovery trajectory</div>
+          </div>
+        </div>
+
+        <!-- Metric 3: Stalled / Regressing -->
+        <div class="metric-stat-card">
+          <div class="metric-top">
+            <div class="metric-icon-circle amber">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+              </svg>
+            </div>
+            <span class="trend-badge blue">&lt; -0.08 Delta</span>
+          </div>
+          <div>
+            <div class="metric-label">Identified Stalled / Regressing</div>
+            <div class="metric-value">28 Sites</div>
+            <div class="metric-caption">Prioritized for immediate field assessment</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Operational Split Grid -->
+      <div class="dashboard-two-col">
+
+        <!-- Left Column: Primary Operational Panels -->
+        <div class="left-main-column">
+
+          <!-- VIEW 1: GEOSPATIAL SENTINEL-2 EXPLORER -->
+          <div id="view-dashboard" class="panel-card" style="padding: 0; overflow: hidden; border: none;">
+            <div class="map-view-wrapper">
+              <div class="map-toolbar">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon></svg>
+                  <span>Interactive Alberta Leases & Spectral Triage Map</span>
+                </div>
+                <div class="map-status-pill">
+                  <span class="telemetry-dot"></span>
+                  <span>99 Verified Leases Active</span>
+                </div>
+              </div>
+
+              <!-- Real Leaflet Alberta Map Container -->
+              <div id="alberta-satellite-map"></div>
+
+              <div class="map-legend-bar">
+                <div class="map-legend-items">
+                  <span><span class="map-legend-dot green"></span> Recovering (&gt; +0.08)</span>
+                  <span><span class="map-legend-dot red"></span> Stalled / Regressing (&lt; -0.08)</span>
+                  <span><span class="map-legend-dot blue"></span> Noise Band (&plusmn;0.08)</span>
+                </div>
+                <div>
+                  Click any lease dot to inspect 5-year Sentinel-2 NDVI spectral trajectory.
+                </div>
+              </div>
+            </div>
+
+            <!-- Fast Intake Trigger -->
+            <div class="order-hero-strip" style="margin-top: 18px;" id="order-intake-section">
+              <div class="order-strip-text">
+                <h4 style="font-size: 15px; font-weight: 800; color: var(--navy);">Order 15-Site Screening Pilot Online</h4>
+                <p style="font-size: 12px; color: var(--slate-600);">Bypass lengthy procurement cycles. Pre-registered protocol, blind field validation, and 4-week turnaround.</p>
+              </div>
+              <button class="btn-sample-load" id="btn-load-sample-wells" type="button">
+                ⚡ 1-Click Load Sample 15 Wells
+              </button>
+            </div>
+
+            <!-- Package Grid -->
+            <div style="margin-top: 16px;">
+              <div class="packages-selection-grid">
+                <!-- Pilot -->
+                <div class="pkg-option-card selected" data-pkg="pilot">
+                  <span class="pkg-badge">Standard</span>
+                  <div class="pkg-name">Screening Pilot</div>
+                  <div class="pkg-price">$7,500 <span style="font-size: 12px; color: var(--slate-500); font-weight: 500;">CAD + tax</span></div>
+                  <div class="pkg-scope">15 Sites · 4 Weeks Turnaround</div>
+                  <ul class="pkg-features">
+                    <li><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Pre-registered blind protocol</li>
+                    <li><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Validated blind vs field data</li>
+                    <li><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Ranked 15-site register & memo</li>
+                    <li><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Terms: 50% kickoff, 50% handover</li>
+                  </ul>
+                </div>
+
+                <!-- Benchmark -->
+                <div class="pkg-option-card" data-pkg="benchmark">
+                  <span class="pkg-badge" style="background: var(--slate-600);">Peer-to-Peer</span>
+                  <div class="pkg-name">Benchmark Check</div>
+                  <div class="pkg-price">$4,800 <span style="font-size: 12px; color: var(--slate-500); font-weight: 500;">CAD + tax</span></div>
+                  <div class="pkg-scope">15 Sites · 2 Weeks Turnaround</div>
+                  <ul class="pkg-features">
+                    <li><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Blind check of internal GIS method</li>
+                    <li><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Technical peer audit</li>
+                    <li><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Published either way, misses noted</li>
+                    <li><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Method disagreement matrix</li>
+                  </ul>
+                </div>
+
+                <!-- Portfolio -->
+                <div class="pkg-option-card" data-pkg="portfolio">
+                  <span class="pkg-badge" style="background: #0284c7;">Quarterly</span>
+                  <div class="pkg-name">Portfolio Screening</div>
+                  <div class="pkg-price">Lighthouse Tier</div>
+                  <div class="pkg-scope">In development — Custom quote</div>
+                  <ul class="pkg-features">
+                    <li><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Full closure inventory triage</li>
+                    <li><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Quarterly Sentinel-2 updates</li>
+                    <li><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Automated regression alerts</li>
+                    <li><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Pricing set with lighthouse clients</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <!-- Well Intake Box -->
+            <div class="well-intake-card" style="margin-top: 16px;">
+              <div class="intake-header-row">
+                <div class="intake-title">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"></polygon><line x1="9" y1="3" x2="9" y2="18"></line><line x1="15" y1="6" x2="15" y2="21"></line></svg>
+                  Alberta DLS Well LSDs or UWIs
+                </div>
+                <span id="parsed-well-count" class="parsed-badge">✓ 15 / 15 Wells Validated (WCSB)</span>
+              </div>
+              <textarea id="well-intake-input" class="intake-textarea" placeholder="Paste Alberta Township System LSDs (e.g. 01-06-018-26W4, 11-14-017-21W4, 05-34-016-20W4)..."></textarea>
+              <div class="intake-stats-bar">
+                <span>WCSB Spatial Engine validates ATS centroids (~±300m) absorbed by 500m screening buffer.</span>
+                <span style="font-weight: 700; color: var(--navy);">Valid WCSB Bounds Verified</span>
+              </div>
+            </div>
+
+            <!-- Client Info Grid -->
+            <div class="order-form-grid" style="margin-top: 16px;">
+              <div class="form-group">
+                <label for="order-client-name">Operator / Contact Lead</label>
+                <input type="text" id="order-client-name" class="form-input" value="David Vance, Environmental Lead">
+              </div>
+              <div class="form-group">
+                <label for="order-company-name">Energy Company / Licensee</label>
+                <input type="text" id="order-company-name" class="form-input" value="Obsidian Energy Ltd.">
+              </div>
+              <div class="form-group">
+                <label for="order-email">Direct Work Email</label>
+                <input type="email" id="order-email" class="form-input" value="closure-ops@obsidianenergy.com">
+              </div>
+              <div class="form-group">
+                <label for="order-date">Requested Kickoff Milestone</label>
+                <input type="date" id="order-date" class="form-input" value="2026-10-16">
+              </div>
+            </div>
+
+            <!-- Milestone Terms -->
+            <div class="order-milestone-terms" style="margin-top: 16px;">
+              <div class="terms-header">
+                <span class="terms-title">Milestone Payment Terms</span>
+                <span style="font-size: 16px; font-weight: 800; color: var(--primary);" id="order-summary-total">$7,500 CAD</span>
+              </div>
+              <div class="milestone-splits">
+                <div class="milestone-box">
+                  <div class="milestone-name">Milestone 1 (Kickoff 50%)</div>
+                  <div class="milestone-amt" id="milestone-kickoff-amt">$3,750 CAD</div>
+                  <div class="milestone-desc">Pre-registered protocol lock & satellite ingestion</div>
+                </div>
+                <div class="milestone-box">
+                  <div class="milestone-name">Milestone 2 (Handover 50%)</div>
+                  <div class="milestone-amt" id="milestone-handover-amt">$3,750 CAD</div>
+                  <div class="milestone-desc">Ranked 15-site register & validation memo</div>
+                </div>
+              </div>
+
+              <button type="button" id="btn-submit-order" class="btn-checkout-submit">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                Confirm & Generate SOW Memo
+              </button>
+            </div>
+          </div>
+
+          <!-- VIEW 2: STANDALONE ORDER VIEW -->
+          <div id="view-order" class="panel-card" style="display: none;">
+            <div class="panel-header">
+              <h3 class="panel-title">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+                Enterprise Screening Intake & SOW Generator
+              </h3>
+              <a href="contact.html" style="font-size: 13px; font-weight: 700; color: var(--primary); text-decoration: none;">Request Scope Call &rarr;</a>
+            </div>
+            <p style="font-size: 13px; color: var(--slate-600); margin-bottom: 20px;">
+              Designed specifically for closure superintendents and environmental leads who need to order screening online in under two minutes without waiting 6 weeks for consulting RFPs.
+            </p>
+          </div>
+
+          <!-- VIEW 3: PROJECT MANAGEMENT KANBAN -->
+          <div id="view-kanban" class="panel-card" style="display: none;">
+            <div class="panel-header">
+              <h3 class="panel-title">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg>
+                Active Screening Pipelines & Milestones
+              </h3>
+              <span style="font-size: 12px; color: var(--slate-500); font-family: var(--font-mono);">4-Week Delivery Protocol</span>
+            </div>
+
+            <div class="kanban-board-grid">
+              <div class="kanban-col">
+                <div class="kanban-col-header">
+                  <span class="kanban-col-title">1. Intake & Protocol Lock</span>
+                  <span class="count-pill" id="count-intake">1</span>
+                </div>
+                <div class="kanban-cards-stack" id="kanban-col-intake"></div>
+              </div>
+
+              <div class="kanban-col">
+                <div class="kanban-col-header">
+                  <span class="kanban-col-title">2. Sentinel-2 Ingestion</span>
+                  <span class="count-pill" id="count-processing">1</span>
+                </div>
+                <div class="kanban-cards-stack" id="kanban-col-processing"></div>
+              </div>
+
+              <div class="kanban-col">
+                <div class="kanban-col-header">
+                  <span class="kanban-col-title">3. Blind Field Validation</span>
+                  <span class="count-pill" id="count-validation">1</span>
+                </div>
+                <div class="kanban-cards-stack" id="kanban-col-validation"></div>
+              </div>
+
+              <div class="kanban-col">
+                <div class="kanban-col-header">
+                  <span class="kanban-col-title">4. Deliverables Handover</span>
+                  <span class="count-pill" id="count-ready">1</span>
+                </div>
+                <div class="kanban-cards-stack" id="kanban-col-ready"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- VIEW 4: 99-SITE EVIDENCE LEDGER -->
+          <div id="view-ledger" class="panel-card" style="display: none;">
+            <div class="panel-header">
+              <h3 class="panel-title">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+                99-Packet Public Evidence Register
+              </h3>
+              <a href="https://marsojuji-cmyk.github.io/reclamation-evidence-ledger/" target="_blank" rel="noopener" style="font-size: 12px; font-weight: 700; color: var(--primary); text-decoration: none;">
+                Explore Raw GitHub Repository &rarr;
+              </a>
+            </div>
+
+            <div class="ledger-filter-row">
+              <div class="ledger-pills-filter">
+                <button class="filter-pill-btn active" data-tier="all">All Packets (99)</button>
+                <button class="filter-pill-btn" data-tier="detected">Detected Recoveries (71)</button>
+                <button class="filter-pill-btn" data-tier="identified">Stalled / Regressing (28)</button>
+                <button class="filter-pill-btn" data-tier="high">High Confidence (3)</button>
+              </div>
+              <input type="text" id="ledger-search-input" class="form-input" style="width: 250px; padding: 6px 12px;" placeholder="Filter by LSD or Licensee...">
+            </div>
+
+            <div class="table-wrap">
+              <table class="dashboard-table">
+                <thead>
+                  <tr>
+                    <th>Site LSD Identifier</th>
+                    <th>Licensee</th>
+                    <th>Classification</th>
+                    <th>Median Delta</th>
+                    <th>95% Bootstrap CI</th>
+                    <th>Spectral Action</th>
+                  </tr>
+                </thead>
+                <tbody id="ledger-table-body"></tbody>
+              </table>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 14px; font-size: 12px; color: var(--slate-500);">
+              <span id="ledger-showing-count">Showing 30 of 99 analysis packets across 13 licensees</span>
+              <span>Method: Month-matched median-of-deltas on Sentinel-2</span>
+            </div>
+          </div>
+
+          <!-- VIEW 5: METHOD & LIMITS -->
+          <div id="view-method" class="panel-card" style="display: none;">
+            <div class="panel-header">
+              <h3 class="panel-title">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                Methodology, Triad & Provenance
+              </h3>
+              <span class="status-live-pill" style="background: var(--primary-light); color: var(--primary);">Pre-registered Protocol</span>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 20px; font-size: 13px; line-height: 1.6; color: var(--slate-700);">
+              <p>
+                <strong>Reclamation Evidence</strong> is a screening service for reclamation and closure programs in the Western Canadian Sedimentary Basin. We rank disturbed sites by vegetation recovery signal from Sentinel-2 satellite imagery so field crews go first to the sites that need eyes.
+              </p>
+
+              <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; background: var(--slate-50); border: 1px solid var(--slate-200); border-radius: var(--radius-lg); padding: 18px;">
+                <div>
+                  <strong style="color: var(--navy); font-size: 14px;">1. Detection</strong>
+                  <p style="font-size: 12px; color: var(--slate-600); margin-top: 4px;">
+                    Vegetation recovery signal above the ±0.08 noise threshold from month-matched Sentinel-2 imagery.
+                  </p>
+                </div>
+                <div>
+                  <strong style="color: var(--navy); font-size: 14px;">2. Identification</strong>
+                  <p style="font-size: 12px; color: var(--slate-600); margin-top: 4px;">
+                    Distinguishing true vegetation trend from seasonal phenology artifacts and regional drought noise.
+                  </p>
+                </div>
+                <div>
+                  <strong style="color: var(--navy); font-size: 14px;">3. Attribution (Refused)</strong>
+                  <p style="font-size: 12px; color: var(--slate-600); margin-top: 4px;">
+                    We never attribute causation, contamination status, or liability from orbit. That requires qualified field professionals.
+                  </p>
+                </div>
+              </div>
+
+              <!-- Self-Audit Callout -->
+              <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: var(--radius-lg); padding: 18px; color: #166534;">
+                <h4 style="font-weight: 800; font-size: 14px; margin-bottom: 4px;">The Self-Audit Story (Our Credibility Core)</h4>
+                <p style="font-size: 12px; color: #1e3a8a;">
+                  Our first method called all 27 pilot sites "recovering." That was a phenology artifact caused by mismatched seasonal sampling. We caught it, printed the correction, rebuilt the method month-matched, and published the whole audit history publicly. Confidence comes from stated limits.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Stated Operating Limits (Required for automated tests) -->
+          <section class="limits-boundary-box" style="margin-top: 24px;">
+            <div class="limits-title">What We Don't Do · Stated Operating Boundaries</div>
+            <div class="limits-list">
+              <div class="limit-item">
+                <strong>No compliance or reclamation certification:</strong> We never certify reclamation, issue closure certificates, or replace regulatory filings.
+              </div>
+              <div class="limit-item">
+                <strong>No contamination status:</strong> No contamination status, causation, responsibility, or attribution.
+              </div>
+              <div class="limit-item">
+                <strong>No replacement for field assessment:</strong> Orbit provides screening triage only; qualified professional boots on the ground are always required.
+              </div>
+            </div>
+          </section>
+
+        </div>
+
+        <!-- Right Column: Interactive Widgets -->
+        <div class="right-sidebar-widgets">
+
+          <!-- October 2026 Interactive Calendar -->
+          <div class="calendar-card">
+            <div class="calendar-top">
+              <div class="calendar-month-title">October 2026</div>
+              <span style="font-size: 11px; font-weight: 700; color: var(--primary); font-family: var(--font-mono);">Sentinel-2 Orbit Sync</span>
+            </div>
+
+            <div class="calendar-grid">
+              <div class="cal-day-label">Mon</div>
+              <div class="cal-day-label">Tue</div>
+              <div class="cal-day-label">Wed</div>
+              <div class="cal-day-label">Thu</div>
+              <div class="cal-day-label">Fri</div>
+              <div class="cal-day-label">Sat</div>
+              <div class="cal-day-label">Sun</div>
+
+              <div class="cal-day-cell inactive">28</div>
+              <div class="cal-day-cell inactive">29</div>
+              <div class="cal-day-cell inactive">30</div>
+              <div class="cal-day-cell" data-day="1">1</div>
+              <div class="cal-day-cell" data-day="2">2</div>
+              <div class="cal-day-cell" data-day="3">3</div>
+              <div class="cal-day-cell" data-day="4">4</div>
+
+              <div class="cal-day-cell" data-day="5">5</div>
+              <div class="cal-day-cell" data-day="6">6</div>
+              <div class="cal-day-cell" data-day="7">7</div>
+              <div class="cal-day-cell" data-day="8">8</div>
+              <div class="cal-day-cell" data-day="9">9</div>
+              <div class="cal-day-cell" data-day="10">10</div>
+              <div class="cal-day-cell" data-day="11">11</div>
+
+              <div class="cal-day-cell has-event" data-day="12">12</div>
+              <div class="cal-day-cell" data-day="13">13</div>
+              <div class="cal-day-cell" data-day="14">14</div>
+              <div class="cal-day-cell" data-day="15">15</div>
+              <div class="cal-day-cell active-selected has-milestone" data-day="16">16</div>
+              <div class="cal-day-cell has-event" data-day="17">17</div>
+              <div class="cal-day-cell" data-day="18">18</div>
+
+              <div class="cal-day-cell" data-day="19">19</div>
+              <div class="cal-day-cell" data-day="20">20</div>
+              <div class="cal-day-cell" data-day="21">21</div>
+              <div class="cal-day-cell has-event" data-day="22">22</div>
+              <div class="cal-day-cell" data-day="23">23</div>
+              <div class="cal-day-cell" data-day="24">24</div>
+              <div class="cal-day-cell" data-day="25">25</div>
+
+              <div class="cal-day-cell has-milestone" data-day="26">26</div>
+              <div class="cal-day-cell" data-day="27">27</div>
+              <div class="cal-day-cell" data-day="28">28</div>
+              <div class="cal-day-cell" data-day="29">29</div>
+              <div class="cal-day-cell has-event" data-day="30">30</div>
+              <div class="cal-day-cell" data-day="31">31</div>
+              <div class="cal-day-cell inactive">1</div>
+            </div>
+
+            <div style="margin-top: 12px; display: flex; justify-content: space-between; font-size: 11px; color: var(--slate-500);">
+              <span><span class="map-legend-dot blue"></span> Project Milestones</span>
+              <span><span class="map-legend-dot green"></span> S2 Satellite Pass</span>
+            </div>
+          </div>
+
+          <!-- Tasks & Deliverables -->
+          <div class="tasks-card">
+            <div class="tasks-card-top">
+              <div class="tasks-card-title">My Tasks & Deliverables</div>
+              <button class="btn-sm-create" id="btn-create-task" type="button">
+                + Note
+              </button>
+            </div>
+            <div class="task-list" id="tasks-widget-list"></div>
+          </div>
+
+          <!-- Scope Call Card -->
+          <div style="background: white; border: 1px solid var(--slate-200); border-radius: var(--radius-xl); padding: 20px; display: flex; flex-direction: column; gap: 10px;">
+            <div style="font-size: 14px; font-weight: 800; color: var(--navy);">Technical Scope Call</div>
+            <p style="font-size: 12px; color: var(--slate-500); line-height: 1.4;">
+              Review your well list, verify spatial coverage, or discuss blind validation with Marcus Richards in Calgary.
+            </p>
+            <a href="https://docs.google.com/forms/d/e/1FAIpQLScTTFL_wNV4hzAjP5UB5kqCAKqPNB3yfg-SIQOcXtXmENcdHA/viewform" target="_blank" rel="noopener" class="btn-primary-order" style="justify-content: center; text-decoration: none; font-size: 13px;">
+              Request 30-Min Scope Call &rarr;
+            </a>
+          </div>
+
+        </div>
+
+      </div>
+
+    </main>
+
+  </div>
+
+  <!-- SOW / Order Success Modal -->
+  <div id="order-success-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-order-id">
+    <div class="modal-dialog">
+      <div class="modal-top">
+        <h3 class="modal-title">Pre-Registered Statement of Work (SOW)</h3>
+        <button class="btn-close-modal" aria-label="Close modal">&times;</button>
+      </div>
+      <div>
+        <div style="display: flex; align-items: center; gap: 10px; color: var(--spectral-emerald-text); font-weight: 700; font-size: 14px;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          SOW Reference: <span id="modal-order-id" style="font-family: var(--font-mono); color: var(--navy);"></span>
+        </div>
+        <div id="modal-order-details"></div>
+        <div style="display: flex; gap: 10px; margin-top: 20px;">
+          <button class="btn-primary-order" onclick="document.getElementById('order-success-modal').classList.remove('open'); document.querySelector('[data-view=\'kanban\']').click();" style="flex: 1; justify-content: center;">
+            Track in Milestone Kanban &rarr;
+          </button>
+          <button class="btn-sample-load" onclick="window.print();" style="padding: 10px 18px;">
+            Print / Save SOW Memo
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Spectral Site Inspector Modal -->
+  <div id="site-detail-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-site-title">
+    <div class="modal-dialog">
+      <div class="modal-top">
+        <h3 class="modal-title" id="modal-site-title">Spectral Inspection</h3>
+        <button class="btn-close-modal" aria-label="Close modal">&times;</button>
+      </div>
+      <div id="modal-site-content"></div>
+    </div>
+  </div>
+
+  <!-- Global Institutional Footer -->
+  <footer class="app-footer">
+    <div>
+      © 2026 Reclamation Evidence · Calgary, Alberta · contact@marcusrichards.dev
+    </div>
+    <div class="footer-links">
+      <a href="https://marsojuji-cmyk.github.io/reclamation-evidence-ledger/" target="_blank" rel="noopener">Public Ledger</a>
+      <a href="https://docs.google.com/forms/d/e/1FAIpQLScTTFL_wNV4hzAjP5UB5kqCAKqPNB3yfg-SIQOcXtXmENcdHA/viewform" target="_blank" rel="noopener">Scope Call</a>
+      <a href="mailto:contact@marcusrichards.dev">Email Support</a>
+    </div>
+  </footer>
+
+</body>
+</html>

@@ -1,8 +1,10 @@
 # Reclamation Evidence Ledger
 
+> **Notice (2026-10-09):** The screening results here did not hold up under pre-registered testing, and the well reports are not evidence of recovery at any well. See [NEGATIVE-RESULT-2026-10-09.md](NEGATIVE-RESULT-2026-10-09.md).
+
 **This pipeline screens Alberta's orphan well sites from orbit. It compares Sentinel-2 imagery month for month and stamps every claim with its tier, provenance, uncertainty, and limits.**
 
-[![CI](https://github.com/marsojuji-cmyk/reclamation-evidence-ledger/actions/workflows/ci.yml/badge.svg)](https://github.com/marsojuji-cmyk/reclamation-evidence-ledger/actions/workflows/ci.yml) [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE) [![Python 3.12](https://img.shields.io/badge/python-3.12-blue.svg)](requirements.txt) [![Release](https://img.shields.io/github/v/release/marsojuji-cmyk/reclamation-evidence-ledger)](https://github.com/marsojuji-cmyk/reclamation-evidence-ledger/releases)
+[![CI](https://github.com/marsojuji-cmyk/reclamation-evidence-ledger/actions/workflows/ci.yml/badge.svg)](https://github.com/marsojuji-cmyk/reclamation-evidence-ledger/actions/workflows/ci.yml) [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE) [![Python 3.12](https://img.shields.io/badge/python-3.12-blue.svg)](requirements.txt) [![Release](https://img.shields.io/github/v/release/marsojuji-cmyk/reclamation-evidence-ledger)](https://github.com/marsojuji-cmyk/reclamation-evidence-ledger/releases) [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](CODE_OF_CONDUCT.md) [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md) [![Discussions](https://img.shields.io/badge/Discussions-Join-blueviolet.svg)](https://github.com/marsojuji-cmyk/reclamation-evidence-ledger/discussions)
 
 An independent, low-cost satellite screen. It uses free Sentinel-2 imagery and an automated Python pipeline, and it asks one question per site: *did vegetation (NDVI) in the ~1 km² square around the site visibly change compared with its own earlier growing seasons?*
 
@@ -34,7 +36,10 @@ pip install -r requirements.txt
 # 1. Build the site registry — downloads the current OWA monthly inventory automatically
 #    and writes data/sites.owa_provenance.json (file URL, date, SHA-256).
 #    The OWA file carries no coordinates: sites are geocoded from their
-#    Dominion Land Survey names to LSD centroids (~+/-300 m; road allowances ignored).
+#    Dominion Land Survey names to LSD centroids. COORDINATE ACCURACY
+#    WITHDRAWN 2026-10-09: the published diagnosis (NEGATIVE-RESULT-2026-10-09.md)
+#    measured a median error of 2,658 m on 20,000 wells. Do not screen on these
+#    positions until dls_to_latlon is verified against ground truth.
 python -m ledger.sites --out data/sites.parquet
 
 # 2. Fetch imagery chips for pilot sites (STAC query + windowed band download,
@@ -82,7 +87,8 @@ python -m ledger.pipeline run-monthly --sites pilots/pilot-02.txt
 - **Why the hold:** the CI resamples months within the same two baseline and two current years, the baseline includes the 2023 drought, 80 of 99 deltas are positive, and the rule still fired at 3 of 100 no-well control points. The signal is likely partly regional until a pad-vs-surrounding-ring baseline is built (milestone M3).
 - **Radiometric lineage** is audited for all 273 scenes the packets cite (`ledger/data/radiometric_lineage.json`, 2026-10-08, 0 anomalies).
 - **Operator names are not published** on the dashboard, packet pages or result files. A tier describes vegetation in a square around a DLS centroid; it is not a finding about any operator.
-- **Tests:** CI runs `pytest tests/` alongside the syntax check and schema validation. `test_pipeline_rerun_deterministic` needs downloaded chips under `data/chips/` (gitignored, reproducible via `ledger.imagery fetch`) and skips itself when they are absent.
+- **Status 2026-10-09:** these packets' screening claims did not hold under pre-registered testing — the published diagnosis measured a median geocoding error of 2,658 m and found 0 of 99 analysis squares contain their well. They are retained as the published record, not as evidence of recovery. See [NEGATIVE-RESULT-2026-10-09.md](NEGATIVE-RESULT-2026-10-09.md).
+- **Tests:** CI runs ruff lint and format checks, `pytest tests/` and schema validation. `test_pipeline_rerun_deterministic` uses downloaded chips under `data/chips/` when present (gitignored, reproducible via `ledger.imagery fetch`) and otherwise a self-contained synthetic fixture.
 - **The caught mistake is documented below.** The first method reported all 27 pilot sites recovering, and the audit traced that to seasonal sampling bias.
 
 ## The story in 60 seconds
@@ -117,8 +123,10 @@ point. A screen that can't catch its own errors can't be trusted.
 
 1. **Registry** — downloads the Orphan Well Association's monthly inventory,
    records its URL, file date and SHA-256, and derives coordinates from
-   Dominion Land Survey names to ~±300 m LSD centroids (the 2026-10-01 file
-   geocodes to 22,057 sites). The file itself is not committed.
+   Dominion Land Survey names to LSD centroids (the 2026-10-01 file geocodes
+   to 22,057 sites). The file itself is not committed. (Coordinate accuracy
+   withdrawn 2026-10-09: NEGATIVE-RESULT-2026-10-09.md measured a median
+   error of 2,658 m.)
 2. **Imagery** — queries the Sentinel-2 STAC catalog and downloads windowed
    red/NIR/SWIR/blue/SCL chips (500 m buffers) with per-scene checksums,
    cloud/shadow rejection, and incremental backfill.
@@ -174,15 +182,19 @@ ops/             launchd plist for the recurring run
 
 ## Recurring run
 
-`ops/ca.reclamation-ledger.plist` runs the full pipeline monthly during growing
-season (May–Sep) and refreshes the OWA inventory each run. It is macOS-only
-and its paths are placeholders: first replace `/path/to/reclamation-evidence-ledger`
-in the plist with your checkout path (and the `/tmp` log paths if you want
-logs kept), then install with:
+The pipeline runs monthly during growing season (May–Sep), refreshes the OWA inventory each run and re-assesses sites with new scenes. It is macOS-only (launchd). To install the launchd agent configured for your checkout path:
 
 ```bash
-cp ops/ca.reclamation-ledger.plist ~/Library/LaunchAgents/
+# 1. Install plist configured for this checkout into ~/Library/LaunchAgents/
+python -m ledger.pipeline install-plist
+
+# 2. Load the daemon
 launchctl load ~/Library/LaunchAgents/ca.reclamation-ledger.plist
+```
+
+To preview the populated plist XML without installing:
+```bash
+python -m ledger.pipeline generate-plist
 ```
 
 On Linux, an equivalent cron line is
@@ -193,7 +205,7 @@ On Linux, an equivalent cron line is
 | Source | What | Access | Cost |
 |---|---|---|---|
 | OWA site inventory | orphan site list, closure stage (no coordinates in file) | orphanwell.ca (monthly) | free |
-| DLS geocoding | LSD-centroid coords derived from OWA site names (~±300 m) | built-in (`ledger/sites.py`) | free |
+| DLS geocoding | LSD-centroid coords derived from OWA site names (accuracy withdrawn 2026-10-09 — see NEGATIVE-RESULT-2026-10-09.md) | built-in (`ledger/sites.py`) | free |
 | Sentinel-2 L2A | 10 m multispectral imagery, ~5-day revisit | AWS `s3://sentinel-cogs/` / Copernicus Data Space | free |
 | Landsat | deep archive back to 1972 (optional baseline) — **not yet implemented; no packet uses it** | USGS EarthExplorer | free |
 
@@ -202,6 +214,30 @@ Copernicus data requires attribution — see the site footer.
 ## Status
 
 v0.3.1 ([releases](https://github.com/marsojuji-cmyk/reclamation-evidence-ledger/releases)), with a 99-site pilot published and re-tiered (M1 "Honest Ledger", 2026-10). Outputs prioritize sites for ground inspection. They screen; they never certify, and they are not compliance verdicts or legal proof.
+
+## Contributing & Community
+
+We welcome contributions, methodological audits, and data validation! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for local setup, testing guidelines, and PR workflow, and [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) for community standards.
+
+- Join discussions: [GitHub Discussions](https://github.com/marsojuji-cmyk/reclamation-evidence-ledger/discussions)
+- Report bugs: [Issue Tracker](https://github.com/marsojuji-cmyk/reclamation-evidence-ledger/issues)
+- Security reports: [SECURITY.md](SECURITY.md)
+
+## Citation
+
+If you use this project, pipeline methodology, or the published evidence packets in research or reports, please cite it:
+
+```bibtex
+@software{marr2026reclamation,
+  author = {Marr, Julian},
+  title = {Reclamation Evidence Ledger: Satellite Watchdog for Alberta Orphan Well Reclamation},
+  year = {2026},
+  url = {https://github.com/marsojuji-cmyk/reclamation-evidence-ledger},
+  version = {0.3.1}
+}
+```
+
+See [CITATION.cff](CITATION.cff) for complete metadata.
 
 ## License
 

@@ -11,13 +11,11 @@ audit notes, and the page labels them so. Re-run after any assess/render cycle:
 
     python ops/render_dashboard.py
 """
+
 from __future__ import annotations
 
 import datetime as dt
-import glob
 import json
-import re
-import sys
 from pathlib import Path
 from urllib.parse import quote
 
@@ -33,8 +31,10 @@ def period_years(packet: dict) -> tuple[list[int], list[int]]:
     for t in packet.get("transforms", []):
         if t.get("step") == "baseline_assessment":
             p = t.get("parameters", {})
-            return (list(p.get("baseline_years", []) or list(BASE_YEARS)),
-                    list(p.get("assessment_years", []) or list(CUR_YEARS)))
+            return (
+                list(p.get("baseline_years", []) or list(BASE_YEARS)),
+                list(p.get("assessment_years", []) or list(CUR_YEARS)),
+            )
     return (list(BASE_YEARS), list(CUR_YEARS))
 
 
@@ -54,10 +54,15 @@ def build_site(packet: dict, packet_file: Path) -> dict:
             continue
         d = o["date"]
         yr, mo = int(d[:4]), int(d[5:7])
-        obs.append([d, round(float(ndvi), 4),
-                    round(float(o.get("clear_pixel_fraction") or 0), 3),
-                    1 if yr in base_yrs else 0,
-                    1 if mo in matched else 0])
+        obs.append(
+            [
+                d,
+                round(float(ndvi), 4),
+                round(float(o.get("clear_pixel_fraction") or 0), 3),
+                1 if yr in base_yrs else 0,
+                1 if mo in matched else 0,
+            ]
+        )
     obs.sort(key=lambda r: r[0])
     sid = site["site_id"]
     return {
@@ -106,7 +111,7 @@ def main() -> None:
         "n_noci": n_noci,
         "hi_ident": hi_ident,
         "schema": schema_v,
-        "generated": dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%d %H:%M UTC"),
+        "generated": dt.datetime.now(dt.UTC).strftime("%Y-%m-%d %H:%M UTC"),
     }
     data = {"sites": sites, "agg": agg}
     payload = json.dumps(data, ensure_ascii=False, separators=(",", ":"))
@@ -122,9 +127,7 @@ def main() -> None:
     html = html.replace("%%N_HI%%", str(hi_ident))
     html = html.replace("%%N_NOCI%%", str(n_noci))
     OUT.write_text(html)
-    print(f"wrote {OUT} ({OUT.stat().st_size/1024:.0f} KB, {len(sites)} sites)")
-
-
+    print(f"wrote {OUT} ({OUT.stat().st_size / 1024:.0f} KB, {len(sites)} sites)")
 
 
 if __name__ == "__main__":
