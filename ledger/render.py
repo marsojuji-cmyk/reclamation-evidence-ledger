@@ -7,6 +7,7 @@ needs is in the HTML; the JSON packets sit alongside for verification.
 Usage:
     python -m ledger.render --packets packets/ --out public/
 """
+
 from __future__ import annotations
 
 import argparse
@@ -15,8 +16,10 @@ import json
 import re
 from pathlib import Path
 
-ATTRIBUTION = ("Imagery: Copernicus Sentinel-2 (ESA), via AWS Open Data. "
-               "Contains modified Copernicus Sentinel data.")
+ATTRIBUTION = (
+    "Imagery: Copernicus Sentinel-2 (ESA), via AWS Open Data. "
+    "Contains modified Copernicus Sentinel data."
+)
 
 PAGE_TMPL = """<!doctype html>
 <html lang="en"><head><meta charset="utf-8">
@@ -61,22 +64,26 @@ def render_packet(packet: dict, chart_file: str | None = None) -> str:
     )
     srcs = "".join(
         f"<li>{_esc(s['name'])} — <a href='{_esc(s['url'])}'>{_esc(s['url'])}</a> "
-        f"(accessed {_esc(s['accessed'])})</li>" for s in packet["provenance"]["sources"]
+        f"(accessed {_esc(s['accessed'])})</li>"
+        for s in packet["provenance"]["sources"]
     )
     s = packet["site"]
-    chart_html = (f'<h3>NDVI time series</h3><p><img src="assets/{_esc(chart_file)}" '
-                  f'alt="per-scene NDVI time series" style="max-width:100%"></p>'
-                  if chart_file else "")
+    chart_html = (
+        f'<h3>NDVI time series</h3><p><img src="assets/{_esc(chart_file)}" '
+        f'alt="per-scene NDVI time series" style="max-width:100%"></p>'
+        if chart_file
+        else ""
+    )
     return PAGE_TMPL.format(
         title=_esc(packet["packet_id"]),
         attribution=ATTRIBUTION,
         body=f"""
-<h2>Site {_esc(s['site_id'])}</h2>
-<p>{_esc(s.get('name',''))} — {_esc(s['latitude'])}, {_esc(s['longitude'])}<br>
-OWA stage: <b>{_esc(s['owa_stage'])}</b> (inventory {_esc(s.get('owa_inventory_date',''))})</p>
-<h3>Claim <span class="tier {c['tier']}">{_esc(c['tier']).upper()}</span></h3>
-<p><b>{_esc(c['statement'])}</b> — {_esc(c['rationale'])}<br>
-Confidence: {_esc(c['confidence'])}</p>
+<h2>Site {_esc(s["site_id"])}</h2>
+<p>{_esc(s.get("name", ""))} — {_esc(s["latitude"])}, {_esc(s["longitude"])}<br>
+OWA stage: <b>{_esc(s["owa_stage"])}</b> (inventory {_esc(s.get("owa_inventory_date", ""))})</p>
+<h3>Claim <span class="tier {c["tier"]}">{_esc(c["tier"]).upper()}</span></h3>
+<p><b>{_esc(c["statement"])}</b> — {_esc(c["rationale"])}<br>
+Confidence: {_esc(c["confidence"])}</p>
 {chart_html}
 {caveats}
 <h3>Observations</h3>
@@ -103,17 +110,20 @@ def _marker_color(statement: str) -> str:
 def render_index_map(packets: list[dict], pages: list[str]) -> str:
     """Leaflet map of all sites, markers colored by outcome."""
     pts = []
-    for packet, page in zip(packets, pages):
+    for packet, page in zip(packets, pages, strict=True):
         s = packet["site"]
-        pts.append({
-            "lat": s["latitude"], "lon": s["longitude"],
-            "site_id": packet["packet_id"],
-            "page": page,
-            "tier": packet["claim"]["tier"],
-            "statement": packet["claim"]["statement"],
-            "confidence": packet["claim"]["confidence"],
-            "color": _marker_color(packet["claim"]["statement"]),
-        })
+        pts.append(
+            {
+                "lat": s["latitude"],
+                "lon": s["longitude"],
+                "site_id": packet["packet_id"],
+                "page": page,
+                "tier": packet["claim"]["tier"],
+                "statement": packet["claim"]["statement"],
+                "confidence": packet["claim"]["confidence"],
+                "color": _marker_color(packet["claim"]["statement"]),
+            }
+        )
     data_js = json.dumps(pts)
     return f"""
 <h2>Site map</h2>
@@ -144,7 +154,8 @@ if (bounds.length) map.fitBounds(bounds, {{padding: [20, 20]}});
 <p><span style="color:green">●</span> recovering
 <span style="color:orange">●</span> stalled / regressing
 <span style="color:grey">●</span> no significant change.
-Coordinates are DLS LSD centroids (±300 m) — markers show screening areas, not wellheads.</p>
+Coordinates are DLS-derived (accuracy withdrawn 2026-10-09 — see NEGATIVE-RESULT-2026-10-09.md).
+Markers show screening areas, not wellheads.</p>
 """
 
 
@@ -185,11 +196,13 @@ def main() -> None:
         objs.append(packet)
 
     index = PAGE_TMPL.format(
-        title="Index", attribution=ATTRIBUTION,
+        title="Index",
+        attribution=ATTRIBUTION,
         body=f"<h2>{len(packets)} evidence packets</h2>"
-             + render_index_map(objs, pages) +
-             "<table><tr><th>Packet</th><th>Tier</th><th>Finding</th><th>Confidence</th></tr>"
-             + "".join(rows) + "</table>",
+        + render_index_map(objs, pages)
+        + "<table><tr><th>Packet</th><th>Tier</th><th>Finding</th><th>Confidence</th></tr>"
+        + "".join(rows)
+        + "</table>",
     )
     (out / "index.html").write_text(index)
     print(f"rendered {len(packets)} packets -> {out}")

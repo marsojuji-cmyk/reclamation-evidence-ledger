@@ -14,6 +14,7 @@ Growing-season discipline lives in config.growing_months; months outside it
 are never fetched or assessed. Nothing is published here — the operator
 reviews out/ledger/ before any upload.
 """
+
 from __future__ import annotations
 
 import argparse
@@ -37,25 +38,42 @@ def cmd_run_monthly(args) -> None:
     today = date.today()
     # Growing season only; outside it there is nothing honest to add.
     from .config import DEFAULT
+
     if today.month not in DEFAULT.growing_months:
-        print(f"{today.isoformat()}: outside growing season "
-              f"{sorted(DEFAULT.growing_months)} — nothing to do.")
+        print(
+            f"{today.isoformat()}: outside growing season "
+            f"{sorted(DEFAULT.growing_months)} — nothing to do."
+        )
         return
 
     season_start = date(today.year, 5, 1)
-    _run(VENV_PY, "-m", "ledger.imagery", "fetch",
-         "--sites", args.sites, "--registry", args.registry,
-         "--start", season_start.isoformat(), "--end", today.isoformat(),
-         "--out", args.chips, "--max-scenes", str(args.max_scenes))
+    _run(
+        VENV_PY,
+        "-m",
+        "ledger.imagery",
+        "fetch",
+        "--sites",
+        args.sites,
+        "--registry",
+        args.registry,
+        "--start",
+        season_start.isoformat(),
+        "--end",
+        today.isoformat(),
+        "--out",
+        args.chips,
+        "--max-scenes",
+        str(args.max_scenes),
+    )
     _run(VENV_PY, str(ROOT / "ops" / "assess_all.py"))
-    _run(VENV_PY, "-m", "ledger.render",
-         "--packets", args.packets, "--out", args.out)
+    _run(VENV_PY, "-m", "ledger.render", "--packets", args.packets, "--out", args.out)
     print("monthly run complete: review out/ledger/ before publishing.")
 
 
 def generate_plist(repo_root: Path, python_bin: Path | None = None) -> str:
     """Generate launchd plist XML pinned to the specified checkout and python."""
     import plistlib
+
     from .config import DEFAULT
 
     root = Path(repo_root).resolve()
@@ -72,8 +90,7 @@ def generate_plist(repo_root: Path, python_bin: Path | None = None) -> str:
     cmd = f"cd {root} && {py} -m ledger.pipeline run-monthly"
 
     calendar_intervals = [
-        {"Month": m, "Day": 15, "Hour": 2, "Minute": 0}
-        for m in sorted(DEFAULT.growing_months)
+        {"Month": m, "Day": 15, "Hour": 2, "Minute": 0} for m in sorted(DEFAULT.growing_months)
     ]
 
     plist_data = {
@@ -140,15 +157,21 @@ def main() -> None:
     r.add_argument("--max-scenes", type=int, default=10)
 
     gp = sub.add_parser("generate-plist", help="generate launchd plist XML for current checkout")
-    gp.add_argument("--python", default=None, help="python binary path to use (defaults to sys.executable)")
+    gp.add_argument(
+        "--python", default=None, help="python binary path to use (defaults to sys.executable)"
+    )
     gp.add_argument("--out", default=None, help="output path for plist file (defaults to stdout)")
 
     ip = sub.add_parser("install-plist", help="install launchd plist into ~/Library/LaunchAgents")
     ip.add_argument("--python", default=None, help="python binary path to use")
-    ip.add_argument("--load", action="store_true", help="immediately run launchctl load after install")
+    ip.add_argument(
+        "--load", action="store_true", help="immediately run launchctl load after install"
+    )
 
     up = sub.add_parser("uninstall-plist", help="remove launchd plist from ~/Library/LaunchAgents")
-    up.add_argument("--unload", action="store_true", help="run launchctl unload before removing file")
+    up.add_argument(
+        "--unload", action="store_true", help="run launchctl unload before removing file"
+    )
 
     args = ap.parse_args()
     if args.cmd == "run-monthly":

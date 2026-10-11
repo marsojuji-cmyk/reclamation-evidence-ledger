@@ -28,7 +28,10 @@ pip install -r requirements.txt
 
 # 1. Build the site registry — downloads the current OWA monthly inventory automatically.
 #    The OWA file carries no coordinates: sites are geocoded from their
-#    Dominion Land Survey names to LSD centroids (~+/-300 m; road allowances ignored).
+#    Dominion Land Survey names to LSD centroids. COORDINATE ACCURACY
+#    WITHDRAWN 2026-10-09: the published diagnosis (NEGATIVE-RESULT-2026-10-09.md)
+#    measured a median error of 2,658 m on 20,000 wells. Do not screen on these
+#    positions until dls_to_latlon is verified against ground truth.
 python -m ledger.sites --out data/sites.parquet
 
 # 2. Fetch imagery chips for pilot sites (STAC query + windowed band download,
@@ -67,9 +70,9 @@ python -m ledger.pipeline run-monthly --sites pilots/pilot-01.txt
 
 ## Evidence
 
-- **99 evidence packets** are committed in `packets/`: 71 `detected` and 28 `identified`. CI validates all of them against schema v1.1.0 (`validate.yml`, passing on main).
+- **99 evidence packets** are committed in `packets/`: 71 `detected` and 28 `identified`. CI validates all of them against schema v1.1.0 (`validate.yml`, passing on main). **Status 2026-10-09:** these packets' screening claims did not hold under pre-registered testing — the published diagnosis measured a median geocoding error of 2,658 m and found 0 of 99 analysis squares contain their well. They are retained as the published record, not as evidence of recovery. See [NEGATIVE-RESULT-2026-10-09.md](NEGATIVE-RESULT-2026-10-09.md).
 - **13 licensees** across the 99 pilot sites (`ops/pilot02-results.csv`).
-- **Tests:** `pytest tests/` gives 11 of 11 passing locally (all tests pass out of the box using self-contained fixtures for pipeline determinism, falling back to local `data/chips/` if present). CI runs a syntax check and schema validation.
+- **Tests:** `pytest tests/` gives 17 of 17 passing locally (all tests pass out of the box using self-contained fixtures for pipeline determinism, falling back to local `data/chips/` if present). CI runs lint, format check, tests, and schema validation.
 - **The caught mistake is documented below.** The first method reported all 27 pilot sites recovering, and the audit traced that to seasonal sampling bias.
 
 ## The story in 60 seconds
@@ -97,7 +100,8 @@ anyone else.
 
 1. **Registry** — downloads the Orphan Well Association's monthly inventory
    (21,892 geocoded sites in the 2026-09-01 file used for the pilot; that file is not committed. The 2026-10-01 file geocodes to 22,057 sites, re-run 2026-10-07) and derives coordinates from Dominion Land Survey
-   names to ~±300 m LSD centroids.
+   names to LSD centroids. (Coordinate accuracy withdrawn 2026-10-09:
+   NEGATIVE-RESULT-2026-10-09.md measured a median error of 2,658 m.)
 2. **Imagery** — queries the Sentinel-2 STAC catalog and downloads windowed
    red/NIR/SWIR/blue/SCL chips (500 m buffers) with per-scene checksums,
    cloud/shadow rejection, and incremental backfill.
@@ -166,7 +170,7 @@ python -m ledger.pipeline generate-plist
 | Source | What | Access | Cost |
 |---|---|---|---|
 | OWA site inventory | orphan site list, closure stage (no coordinates in file) | orphanwell.ca (monthly) | free |
-| DLS geocoding | LSD-centroid coords derived from OWA site names (~±300 m) | built-in (`ledger/sites.py`) | free |
+| DLS geocoding | LSD-centroid coords derived from OWA site names (accuracy withdrawn 2026-10-09 — see NEGATIVE-RESULT-2026-10-09.md) | built-in (`ledger/sites.py`) | free |
 | Sentinel-2 L2A | 10 m multispectral imagery, ~5-day revisit | AWS `s3://sentinel-cogs/` / Copernicus Data Space | free |
 | Landsat | deep archive back to 1972 (optional baseline) | USGS EarthExplorer | free |
 
