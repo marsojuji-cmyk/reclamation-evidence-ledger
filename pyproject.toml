@@ -9,7 +9,6 @@ description = "Provenance-first Sentinel-2 screening pipeline for Alberta orphan
 readme = "README.md"
 requires-python = ">=3.12"
 license = { text = "MIT" }
-authors = [{ name = "Marcus Richards" }]
 # Canonical dependency floors. requirements.txt stays as the pip-installable
 # deploy file (dependabot watches it); keep the two in sync.
 dependencies = [
