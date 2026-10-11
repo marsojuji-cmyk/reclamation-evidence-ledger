@@ -61,6 +61,56 @@ SCREENING_CAVEATS = [
 ]
 
 
+# --- Publication hold (decision 2026-10-10) ---------------------------------
+# The CI-gated screen tier is still computed and kept in every packet as
+# claim.screen_tier_internal, but while the hold is active every PUBLISHED
+# claim is "detected – screening only". Lift the hold only when a
+# surrounding-land (pad-vs-ring) baseline exists and passes its own
+# pre-registered no-well test.
+PUBLICATION_HOLD = {
+    "active": True,
+    "since": "2026-10-10",
+    "published_statement": "detected – screening only",
+    "reason": ("Site-level 'identified' calls are withheld pending a "
+               "surrounding-land (pad-vs-ring) baseline: no-well control "
+               "points still produced 3/100 'identified' under the current "
+               "rule (Seedling Lab no-well test, 2026-10-08)."),
+}
+
+
+def _numbers_text(a) -> str:
+    """The measured numbers only, with no tier verdict."""
+    ci = (f"95% CI [{a.delta_ci95[0]:+.3f}, {a.delta_ci95[1]:+.3f}]"
+          if a.delta_ci95 is not None else
+          f"no CI (fewer than {MIN_MATCHED_MONTHS_FOR_CI} matched months)")
+    return (f"Median matched-month NDVI delta {a.delta:+.3f} in the analysis "
+            f"square (median of {len(a.matched_months)} matched-month deltas; "
+            f"baseline median {a.baseline_ndvi:.2f}, current median "
+            f"{a.current_ndvi:.2f}; {ci}).")
+
+
+def published_claim(a, caveats: list, hold: dict = PUBLICATION_HOLD) -> dict:
+    """Public claim for an Assessment. With the hold active the published
+    tier is always 'detected'; the CI-gated result is kept internally."""
+    internal = {"tier": a.tier, "direction": a.direction,
+                "statement": a.statement, "rationale": a.rationale,
+                "rule": TIER_RULE}
+    claim = {"tier": a.tier, "direction": a.direction,
+             "statement": a.statement, "rationale": a.rationale,
+             "confidence": a.confidence, "tier_rule": TIER_RULE,
+             "caveats": list(caveats)}
+    if hold and hold.get("active"):
+        claim.update({
+            "tier": "detected",
+            "statement": hold["published_statement"],
+            "rationale": f"{_numbers_text(a)} {hold['reason']}",
+            "publication_hold": {k: hold[k] for k in ("active", "since", "reason")},
+        })
+        claim["caveats"] = [hold["reason"]] + claim["caveats"]
+    claim["screen_tier_internal"] = internal
+    return claim
+
+
 def assign_tier(delta: float, ci: list | None, cfg: Config = DEFAULT
                 ) -> tuple[str, str, str]:
     """(tier, direction, statement_key) under TIER_RULE.
@@ -426,9 +476,7 @@ def cmd_assess(args):
         observations=observations, chips=chips,
         transforms=transforms, sources=sources,
     )
-    packet["claim"]["caveats"] = caveats
-    packet["claim"]["direction"] = a.direction
-    packet["claim"]["tier_rule"] = TIER_RULE
+    packet["claim"] = published_claim(a, caveats)
     packet["provenance"]["owa_inventory_file"] = {
         k: owa_prov.get(k) for k in ("url", "file_name", "file_date", "sha256",
                                      "retrieved_at")}
@@ -454,7 +502,9 @@ def cmd_assess(args):
         packet["assessment_detail"]["delta_ci95"] = a.delta_ci95
 
     out = write_packet(packet, args.out)
-    print(f"{args.site}: {a.tier.upper()} — {a.statement} "
+    pub = packet["claim"]
+    print(f"{args.site}: published {pub['tier'].upper()} — {pub['statement']}; "
+          f"internal screen {a.tier} — {a.statement} "
           f"(delta {a.delta:+.3f} = median of {len(a.matched_months)} matched-month deltas; "
           f"baseline median {a.baseline_ndvi:.3f}, current median {a.current_ndvi:.3f}, "
           f"confidence {a.confidence})")
