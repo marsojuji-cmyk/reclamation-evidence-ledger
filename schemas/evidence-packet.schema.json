@@ -42,6 +42,14 @@
           },
           "sha256": {
             "type": "string"
+          },
+          "scene_id": {
+            "type": "string",
+            "description": "Sentinel-2 scene the chip was cut from."
+          },
+          "source_url": {
+            "type": "string",
+            "description": "The source COG asset the chip window was read from, so the chip's SHA-256 can be checked against the source."
           }
         },
         "required": [
@@ -76,20 +84,115 @@
           "type": "string"
         },
         "tier": {
-          "description": "Pipeline output is never 'attributed'. Attribution requires human review.",
+          "description": "PUBLISHED tier. Pipeline output is never 'attributed'. While claim.publication_hold.active is true the published tier must be 'detected'; the CI-gated screen result is kept in screen_tier_internal.",
           "enum": [
             "detected",
             "identified"
           ],
           "type": "string"
+        },
+        "direction": {
+          "type": "string",
+          "enum": [
+            "increase",
+            "decrease",
+            "none"
+          ],
+          "description": "Direction of the median delta relative to the threshold, reported for every tier."
+        },
+        "tier_rule": {
+          "type": "string",
+          "description": "Identifier of the tier rule that produced this claim."
+        },
+        "publication_hold": {
+          "type": "object",
+          "description": "Publication hold on site-level calls (decision 2026-10-10).",
+          "properties": {
+            "active": {
+              "type": "boolean"
+            },
+            "since": {
+              "type": "string",
+              "format": "date"
+            },
+            "reason": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "active",
+            "since",
+            "reason"
+          ]
+        },
+        "screen_tier_internal": {
+          "type": "object",
+          "description": "The CI-gated screen result (tier rule in 'rule'), kept for internal tracking. Not a published claim while a publication hold is active.",
+          "properties": {
+            "tier": {
+              "enum": [
+                "detected",
+                "identified"
+              ]
+            },
+            "direction": {
+              "enum": [
+                "increase",
+                "decrease",
+                "none"
+              ]
+            },
+            "statement": {
+              "type": "string"
+            },
+            "rationale": {
+              "type": "string"
+            },
+            "rule": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "tier",
+            "direction",
+            "statement",
+            "rule"
+          ]
         }
       },
       "required": [
         "tier",
+        "direction",
         "statement",
-        "rationale"
+        "rationale",
+        "tier_rule",
+        "screen_tier_internal"
       ],
-      "type": "object"
+      "type": "object",
+      "if": {
+        "properties": {
+          "publication_hold": {
+            "properties": {
+              "active": {
+                "const": true
+              }
+            },
+            "required": [
+              "active"
+            ]
+          }
+        },
+        "required": [
+          "publication_hold"
+        ]
+      },
+      "then": {
+        "properties": {
+          "tier": {
+            "const": "detected"
+          }
+        }
+      }
     },
     "observations": {
       "items": {
@@ -159,7 +262,11 @@
           "type": "string"
         },
         "generated_by": {
-          "type": "string"
+          "type": "string",
+          "not": {
+            "pattern": "human-reviewed"
+          },
+          "description": "Never claims a human review; reviews are recorded only in provenance.review.log."
         },
         "sources": {
           "items": {
@@ -186,17 +293,211 @@
             "type": "object"
           },
           "type": "array"
+        },
+        "review": {
+          "type": "object",
+          "description": "Human review record. status is 'reviewed' only when log holds at least one entry.",
+          "properties": {
+            "status": {
+              "enum": [
+                "not_reviewed",
+                "reviewed"
+              ]
+            },
+            "log": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": [
+                  "reviewer",
+                  "date",
+                  "scope",
+                  "outcome"
+                ],
+                "properties": {
+                  "reviewer": {
+                    "type": "string"
+                  },
+                  "date": {
+                    "type": "string",
+                    "format": "date"
+                  },
+                  "scope": {
+                    "type": "string"
+                  },
+                  "outcome": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "required": [
+            "status",
+            "log"
+          ],
+          "if": {
+            "properties": {
+              "status": {
+                "const": "reviewed"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "log": {
+                "minItems": 1
+              }
+            }
+          }
+        },
+        "owa_inventory_file": {
+          "type": "object",
+          "properties": {
+            "url": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "file_name": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "file_date": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "sha256": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "retrieved_at": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "note": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "url",
+            "file_date",
+            "sha256"
+          ],
+          "description": "The OWA inventory file used at assessment time. Null url/sha256 means it was not recorded (pre-M1 packets), stated in note."
+        },
+        "owa_recheck": {
+          "type": "object",
+          "description": "Re-check of the site against a later OWA inventory file.",
+          "properties": {
+            "url": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "file_name": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "file_date": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "sha256": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "checked_on": {
+              "type": "string",
+              "format": "date"
+            },
+            "site_found": {
+              "type": "boolean"
+            },
+            "owa_stage": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "coordinates_match": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "url",
+            "file_date",
+            "sha256",
+            "checked_on",
+            "site_found"
+          ]
+        },
+        "lineage_audit": {
+          "type": "object",
+          "description": "Coverage of this packet's scenes by the radiometric lineage audit.",
+          "properties": {
+            "record": {
+              "type": "string"
+            },
+            "audit_date": {
+              "type": "string"
+            },
+            "scenes_in_packet": {
+              "type": "integer"
+            },
+            "scenes_audited": {
+              "type": "integer"
+            }
+          }
+        },
+        "revisions": {
+          "type": "array",
+          "description": "Append-only log of post-assessment changes to this packet.",
+          "items": {
+            "type": "object",
+            "required": [
+              "date",
+              "change"
+            ],
+            "properties": {
+              "date": {
+                "type": "string",
+                "format": "date"
+              },
+              "change": {
+                "type": "string"
+              }
+            }
+          }
         }
       },
       "required": [
         "sources",
         "generated_at",
-        "generated_by"
+        "generated_by",
+        "review",
+        "owa_inventory_file"
       ],
       "type": "object"
     },
     "schema_version": {
-      "const": "1.1.0",
+      "const": "1.3.0",
       "type": "string"
     },
     "site": {
@@ -287,7 +588,7 @@
         },
         "delta_std": {
           "type": "number",
-          "description": "Standard deviation of the matched-month deltas — the spread of the month-for-month differences the delta summarizes. NOT baseline NDVI variation; named for what it is."
+          "description": "Standard deviation of the matched-month deltas \u2014 the spread of the month-for-month differences the delta summarizes. NOT baseline NDVI variation; named for what it is."
         },
         "delta_method_note": {
           "type": "string",
