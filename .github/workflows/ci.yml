@@ -25,7 +25,7 @@ jobs:
         with:
           python-version: "3.12"
       - name: Install
-        run: pip install -q -e .
+        run: pip install -q -e ".[test]"
       - name: Syntax check
         run: python -m compileall -q ledger schemas ops tests
       - name: Run tests
