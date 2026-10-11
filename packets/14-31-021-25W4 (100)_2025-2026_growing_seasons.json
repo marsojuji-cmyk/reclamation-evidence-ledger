@@ -1,6 +1,6 @@
 {
   "packet_id": "14-31-021-25W4 (100)_2025-2026_growing_seasons",
-  "schema_version": "1.2.0",
+  "schema_version": "1.3.0",
   "site": {
     "site_id": "14-31-021-25W4 (100)",
     "name": "14-31-021-25W4 (100)",
@@ -13,11 +13,12 @@
   "claim": {
     "tier": "detected",
     "direction": "none",
-    "statement": "no change beyond threshold vs baseline",
-    "rationale": "The median matched-month NDVI delta +0.03 (median of 5 matched-month deltas; baseline median 0.47, current median 0.57; 95% CI [-0.115, +0.148]) is within the \u00b10.08 threshold.",
+    "statement": "detected \u2013 screening only",
+    "rationale": "Median matched-month NDVI delta +0.032 in the analysis square (median of 5 matched-month deltas; baseline median 0.47, current median 0.57; 95% CI [-0.115, +0.148]). Site-level 'identified' calls are withheld pending a surrounding-land (pad-vs-ring) baseline: no-well control points still produced 3/100 'identified' under the current rule (Seedling Lab no-well test, 2026-10-08).",
     "confidence": "medium",
     "tier_rule": "ci-gated-v2",
     "caveats": [
+      "Site-level 'identified' calls are withheld pending a surrounding-land (pad-vs-ring) baseline: no-well control points still produced 3/100 'identified' under the current rule (Seedling Lab no-well test, 2026-10-08).",
       "10 m pixels cannot resolve wellheads; this is a vegetation screen, not a compliance verdict.",
       "Drought years depress NDVI independent of reclamation progress.",
       "Baseline and current periods are compared month-for-month (matched months: [5, 6, 7, 8, 9]) to avoid seasonal sampling bias.",
@@ -28,7 +29,19 @@
       "Site coordinates are DLS LSD centroids (~\u00b1300 m; DLS LSD centroid (~+/-300 m; road allowances ignored)). The 500 m analysis buffer absorbs this uncertainty; this is not a survey of the wellhead.",
       "Sentinel-2's 10 m pixels cannot resolve individual wellheads.",
       "Chips for this packet were downloaded with GDAL_HTTP_UNSAFESSL (TLS verification off) on a TLS-intercepting egress proxy; integrity rests on the recorded per-chip SHA-256 and the cited source_url, not TLS."
-    ]
+    ],
+    "publication_hold": {
+      "active": true,
+      "since": "2026-10-10",
+      "reason": "Site-level 'identified' calls are withheld pending a surrounding-land (pad-vs-ring) baseline: no-well control points still produced 3/100 'identified' under the current rule (Seedling Lab no-well test, 2026-10-08)."
+    },
+    "screen_tier_internal": {
+      "tier": "detected",
+      "direction": "none",
+      "statement": "no change beyond threshold vs baseline",
+      "rationale": "The median matched-month NDVI delta +0.03 (median of 5 matched-month deltas; baseline median 0.47, current median 0.57; 95% CI [-0.115, +0.148]) is within the \u00b10.08 threshold.",
+      "rule": "ci-gated-v2"
+    }
   },
   "observations": [
     {
@@ -313,7 +326,7 @@
       "step": "packet_build",
       "tool": "ledger.packet.build_packet",
       "parameters": {
-        "schema_version": "1.2.0"
+        "schema_version": "1.3.0"
       },
       "at": "2026-09-28T01:59:21.219631+00:00"
     }
@@ -1165,7 +1178,7 @@
       "file_name": "6abec5fc76d30264647ccc54_Reporting - Full Inventory - 2026-10-01 13.41.42.xlsx",
       "file_date": "2026-10-01",
       "sha256": "4e877df60c20b086ed9742abd0f3fc23e074e28a240c8577a4170f975e07bbd0",
-      "checked_on": "2026-10-08",
+      "checked_on": "2026-10-10",
       "site_found": true,
       "owa_stage": "reclamation",
       "coordinates_match": true
@@ -1181,6 +1194,17 @@
         "new_tier": "detected",
         "new_statement": "no change beyond threshold vs baseline",
         "reason": "|delta| +0.032 below \u00b10.08"
+      },
+      {
+        "date": "2026-10-10",
+        "tool": "ops/retier_packets.py",
+        "code_commit": "4a15cda2871d7662317a41258095f9e694a00374",
+        "change": "publication hold applied: published tier set to 'detected \u2013 screening only'; CI-gated result kept in claim.screen_tier_internal",
+        "previous_tier": "detected",
+        "previous_statement": "no change beyond threshold vs baseline",
+        "new_tier": "detected",
+        "new_statement": "detected \u2013 screening only",
+        "reason": "Site-level 'identified' calls are withheld pending a surrounding-land (pad-vs-ring) baseline: no-well control points still produced 3/100 'identified' under the current rule (Seedling Lab no-well test, 2026-10-08)."
       }
     ]
   },

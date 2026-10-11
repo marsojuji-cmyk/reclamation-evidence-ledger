@@ -224,7 +224,7 @@ def test_packets_validate_against_schema():
 
 def test_schema_version_pinned():
     want = SCHEMA["properties"]["schema_version"]["const"]
-    assert want == "1.2.0"
+    assert want == "1.3.0"
     for p in PACKETS:
         d = json.loads(p.read_text())
         assert d["schema_version"] == want, p.name
@@ -232,15 +232,84 @@ def test_schema_version_pinned():
 
 # --- M1 Honest Ledger invariants over the committed packets -------------------
 
-def test_every_identified_packet_meets_ci_rule():
+def test_internal_screen_tier_meets_ci_rule():
+    """The CI-gated result is kept internally in every packet."""
+    n_internal = 0
     for p in PACKETS:
         d = json.loads(p.read_text())
-        det, claim = d["assessment_detail"], d["claim"]
-        tier, _, _ = assign_tier(det["delta_vs_baseline"], det.get("delta_ci95"))
-        assert claim["tier"] == tier, p.name
-        if tier == "identified":
-            lo, hi = det["delta_ci95"]
-            assert abs(det["delta_vs_baseline"]) >= 0.08 and not (lo <= 0 <= hi)
+        det, internal = d["assessment_detail"], d["claim"]["screen_tier_internal"]
+        tier, direction, _ = assign_tier(det["delta_vs_baseline"], det.get("delta_ci95"))
+        assert (internal["tier"], internal["direction"]) == (tier, direction), p.name
+        n_internal += tier == "identified"
+    assert n_internal == 10
+
+
+def test_publication_hold_publishes_detected_only():
+    """Decision 2026-10-10: no site-level 'identified' is published until a
+    surrounding-land baseline exists."""
+    from ledger.change import PUBLICATION_HOLD
+    assert PUBLICATION_HOLD["active"]
+    for p in PACKETS:
+        claim = json.loads(p.read_text())["claim"]
+        assert claim["tier"] == "detected", p.name
+        assert claim["statement"] == "detected – screening only", p.name
+        assert claim["publication_hold"]["active"] is True, p.name
+        assert "3/100" in claim["publication_hold"]["reason"], p.name
+
+
+def test_schema_rejects_identified_under_hold():
+    import copy
+    import jsonschema
+    d = copy.deepcopy(json.loads(PACKETS[0].read_text()))
+    d["claim"]["tier"] = "identified"
+    with pytest.raises(jsonschema.ValidationError):
+        jsonschema.validate(d, SCHEMA)
+
+
+def test_published_claim_unit():
+    from ledger.change import published_claim
+    b, c = _synth([5, 6, 7, 8], [0.30] * 4, [0.40, 0.42, 0.41, 0.39])
+    a = assess("TEST", b, c, "test period")
+    assert a.tier == "identified"
+    claim = published_claim(a, ["cav"])
+    assert claim["tier"] == "detected"
+    assert claim["screen_tier_internal"]["tier"] == "identified"
+    assert claim["caveats"][-1] == "cav"
+
+
+def test_rewrite_archives_previous_packet(tmp_path):
+    """A re-assessment must archive the old packet and carry its revisions."""
+    from ledger.packet import packet_filename, write_packet
+    first = json.loads(PACKETS[0].read_text())
+    write_packet(json.loads(json.dumps(first)), tmp_path)
+    second = json.loads(json.dumps(first))
+    second["assessment_date"] = "2027-06-15"
+    out = write_packet(second, tmp_path)
+    assert out.name == packet_filename(first["packet_id"])
+    site_dir = tmp_path / "history" / re.sub(r"[\\/]", "_", first["site"]["site_id"])
+    archived = site_dir / f"{first['assessment_date']}.json"
+    assert archived.exists()
+    assert json.loads(archived.read_text()) == first
+    revs = json.loads(out.read_text())["provenance"]["revisions"]
+    assert revs[:-1] == first["provenance"].get("revisions", [])
+    assert revs[-1]["archived_packet"] == archived.relative_to(tmp_path).as_posix()
+    # a third write never overwrites history
+    write_packet(json.loads(json.dumps(second)), tmp_path)
+    assert (site_dir / "2027-06-15.json").exists() and archived.exists()
+
+
+def test_no_licensee_names_in_public_pages():
+    sys.path.insert(0, str(ROOT / "ops"))
+    from select_pilot02 import LICENSEES
+    names = [n.lower() for n in LICENSEES] + ["lexin"]
+    public = [ROOT / "README.md", ROOT / "ops" / "pilot02-results.csv",
+              *sorted((ROOT / "docs").glob("*.html")),
+              *sorted((ROOT / "docs").glob("*.md")),
+              *sorted((ROOT / "docs").glob("*.csv")), *PACKETS]
+    for f in public:
+        text = f.read_text().lower()
+        hit = [n for n in names if n in text]
+        assert not hit, (f.name, hit)
 
 
 def test_no_packet_claims_unrecorded_human_review():
