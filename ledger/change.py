@@ -69,6 +69,24 @@ SCREENING_CAVEATS = [
 # claim is "detected – screening only". Lift the hold only when a
 # surrounding-land (pad-vs-ring) baseline exists and passes its own
 # pre-registered no-well test.
+# Coordinate caveat. The former "~±300 m, absorbed by the 500 m buffer"
+# wording was withdrawn on 2026-10-09: NEGATIVE-RESULT-2026-10-09.md measured
+# a median geocoding error of 2,658 m. One string, used by new assessments and
+# by ops/withdraw_coord_caveat.py for committed packets.
+COORDINATE_CAVEAT = (
+    "Site coordinates are DLS LSD centroids derived from the site name (road "
+    "allowances ignored). Their accuracy was withdrawn on 2026-10-09: the "
+    "published diagnosis (NEGATIVE-RESULT-2026-10-09.md) measured a median "
+    "geocoding error of 2,658 m across 20,000 wells, and at the 99 pilot sites "
+    "0 of 99 analysis squares contain their well. Do not screen on these "
+    "positions; this is not a survey of the wellhead."
+)
+
+
+def coordinate_caveat() -> str:
+    return COORDINATE_CAVEAT
+
+
 PUBLICATION_HOLD = {
     "active": True,
     "since": "2026-10-10",
@@ -540,10 +558,7 @@ def cmd_assess(args):
         },
     ]
     caveats = list(a.caveats) + [
-        f"Site coordinates: {r['geo_method']}. Coordinate accuracy was "
-        "withdrawn 2026-10-09 after a published diagnosis measured a median "
-        "error of 2,658 m (NEGATIVE-RESULT-2026-10-09.md). Do not screen on "
-        "these positions.",
+        coordinate_caveat(),
         "Sentinel-2's 10 m pixels cannot resolve individual wellheads.",
     ]
     if DEFAULT.trust_egress_proxy_tls:
