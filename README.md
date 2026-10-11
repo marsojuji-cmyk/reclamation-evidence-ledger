@@ -8,13 +8,16 @@ An independent, low-cost satellite screen. It uses free Sentinel-2 imagery and a
 
 > **Screening only.** Outputs prioritize sites for a closer look. They are not legal proof, not a reclamation certification or compliance verdict, and not a methane, soil, contamination or subsurface measurement. The analysis square is mostly land *around* the pad, so a change describes that square, not the pad. No packet has been human-reviewed yet; each says so.
 
-**[Live evidence dashboard](https://marsojuji-cmyk.github.io/reclamation-evidence-ledger/)** · 99-site pilot · 13 licensees · Alberta, Canada
+**[Live evidence dashboard](https://marsojuji-cmyk.github.io/reclamation-evidence-ledger/)** · 99-site pilot · Alberta, Canada
 
-The dashboard (`docs/index.html`) renders from the packets themselves with `python ops/render_dashboard.py`. It shows the audit story, the 99-site findings register, per-site dossiers with NDVI time series, the method, and the ongoing self-audit. It computes every packet-derived number (sites, licensees, tiers, deltas, CIs, render stamp) at render time. The figures in Plates I and V (the 2026-09-27 verification traces and the BACI probe notes) are typed from those audit notes, and the dashboard labels them that way.
+> **Re-scoring in progress (Oct 2026): site-level calls are withheld pending a surrounding-land baseline.** Every site is published as *detected – screening only*. No-well control points still produced 3/100 "identified" under the current rule (Seedling Lab, 2026-10-08), so no site-level "identified" call is published until a pad-vs-surrounding-land baseline exists.
+
+The dashboard (`docs/index.html`) renders from the packets themselves with `python ops/render_dashboard.py`. It shows the audit story, the 99-site findings register, per-site dossiers with NDVI time series, the method, and the ongoing self-audit. It computes every packet-derived number (sites, published tiers, deltas, CIs, render stamp) at render time. The figures in Plates I and V (the 2026-09-27 verification traces and the BACI probe notes) are typed from those audit notes, and the dashboard labels them that way.
 
 ## What it guarantees
 
-- **A tier is earned, not assumed.** `identified` requires |median matched-month NDVI delta| ≥ 0.08 **and** a bootstrap 95% CI (≥ 4 matched months) **and** a CI that excludes zero (tier rule `ci-gated-v2`). Anything less is `detected`, and the packet says why. Increases and decreases are worded neutrally: "NDVI higher/lower than baseline in the analysis square".
+- **A tier is earned, not assumed.** The screen rule (`ci-gated-v2`) allows `identified` only when |median matched-month NDVI delta| ≥ 0.08 **and** a bootstrap 95% CI (≥ 4 matched months) **and** a CI that excludes zero. **While the publication hold is active (since 2026-10-10) the published tier is `detected – screening only` for every site**; the screen result is kept in each packet as `claim.screen_tier_internal` for internal tracking, and the schema rejects a published `identified` while the hold is on.
+- **Nothing is silently overwritten.** Re-assessing a site archives the previous packet under `packets/history/<site>/<date>.json` and carries its revision log forward.
 - **No attribution, ever.** The packet schema allows only `detected` or `identified` claim tiers. `attributed` is not a valid value, so the pipeline cannot name a responsible party (`schemas/evidence-packet.schema.json`).
 - **Month-matched or nothing.** The assessment compares each calendar month only with itself. With fewer than 2 matched months it refuses to assess (`ledger/change.py` raises).
 - **No interval without data.** It reports a bootstrap 95% CI on the median delta only with at least 4 matched months. Otherwise the interval is `None`, never guessed (`MIN_MATCHED_MONTHS_FOR_CI`).
@@ -74,11 +77,11 @@ python -m ledger.pipeline run-monthly --sites pilots/pilot-02.txt
 
 ## Evidence
 
-- **99 evidence packets** are committed in `packets/`: 89 `detected` and 10 `identified` (all 10 are NDVI increases). CI validates all of them against schema v1.2.0 (`validate.yml`).
-- **Re-tiered 2026-10-08.** Under the first rule, which ignored the CI, 28 packets were `identified`. Re-scoring offline from each packet's own observations moved 18 to `detected` (6 had no CI, 12 had a CI that includes zero). The full before/after diff is public: [`docs/retier-2026-10.md`](docs/retier-2026-10.md).
-- **What `identified` still means:** NDVI in the analysis square moved consistently across matched months. The CI resamples months within the same two baseline and two current years, the baseline includes the 2023 drought, and 80 of 99 deltas are positive, so the signal is likely partly regional. A pad-vs-surrounding-ring correction is planned and may change these results again.
+- **99 evidence packets** are committed in `packets/`, all published as `detected – screening only`. CI validates all of them against schema v1.3.0 (`validate.yml`).
+- **Re-tiered 2026-10.** Under the first rule, which ignored the CI, 28 packets were published as `identified`. 18 of those had no CI (6) or a CI that includes zero (12). Then, on 2026-10-10, all site-level calls were withheld pending a surrounding-land baseline. The full before/after diff is public: [`docs/retier-2026-10.md`](docs/retier-2026-10.md).
+- **Why the hold:** the CI resamples months within the same two baseline and two current years, the baseline includes the 2023 drought, 80 of 99 deltas are positive, and the rule still fired at 3 of 100 no-well control points. The signal is likely partly regional until a pad-vs-surrounding-ring baseline is built (milestone M3).
 - **Radiometric lineage** is audited for all 273 scenes the packets cite (`ledger/data/radiometric_lineage.json`, 2026-10-08, 0 anomalies).
-- **13 licensees** across the 99 pilot sites (`ops/pilot02-results.csv`). Licensee names are shown for lookup only. A tier describes vegetation in a square around a DLS centroid; it is not a finding about any licensee.
+- **Operator names are not published** on the dashboard, packet pages or result files. A tier describes vegetation in a square around a DLS centroid; it is not a finding about any operator.
 - **Tests:** CI runs `pytest tests/` alongside the syntax check and schema validation. `test_pipeline_rerun_deterministic` needs downloaded chips under `data/chips/` (gitignored, reproducible via `ledger.imagery fetch`) and skips itself when they are absent.
 - **The caught mistake is documented below.** The first method reported all 27 pilot sites recovering, and the audit traced that to seasonal sampling bias.
 
@@ -101,8 +104,11 @@ change beyond the threshold. (No site in the 99-site pilot fell below the
 2-matched-month minimum, so no refusals were published.)
 
 The second caught mistake came in October 2026: the tier rule ignored the
-confidence interval, so 28 sites were called `identified` when only 10 had a
-CI that excludes zero. All 99 packets were re-tiered and the diff published.
+confidence interval, so 28 sites were called `identified` although 18 had no
+CI or a CI including zero. A no-well control test then showed even the
+corrected rule fires at 3 of 100 points with no well, so every site-level
+call is now withheld until a surrounding-land baseline exists. All 99 packets
+were re-tiered and the diff published.
 
 That arc — build, audit, catch the error, fix it, say so publicly — is the
 point. A screen that can't catch its own errors can't be trusted.
@@ -130,7 +136,7 @@ Borrowed from imagery interpretation tradecraft:
 - **Detection ≠ identification ≠ attribution.** The pipeline may report that
   a delta was measured (detected) and that NDVI in the analysis square moved
   beyond the threshold with a 95% CI that excludes zero (identified, a
-  screening hypothesis). It does not say the pad is reclaimed, and it never
+  screening hypothesis; currently withheld from publication). It does not say the pad is reclaimed, and it never
   names a responsible party (attributed) — attribution requires human review
   and ground truth.
 - **Keep the raw evidence.** Every chip is stored untouched with a checksum.
