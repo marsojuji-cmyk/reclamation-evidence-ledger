@@ -558,3 +558,23 @@ def test_generate_plist_valid():
     assert len(intervals) == 5
     months = [item["Month"] for item in intervals]
     assert months == [5, 6, 7, 8, 9]
+
+
+# --- coordinate caveat (±300 m claim withdrawn 2026-10-09) --------------------
+
+
+def test_no_packet_or_page_claims_withdrawn_coordinate_accuracy():
+    from ledger.change import COORDINATE_CAVEAT
+
+    for p in PACKETS:
+        d = json.loads(p.read_text())
+        assert COORDINATE_CAVEAT in d["claim"]["caveats"], p.name
+    public = [
+        *PACKETS,
+        *sorted((ROOT / "docs").glob("*.html")),
+        ROOT / "ops" / "dashboard_template.html",
+    ]
+    for f in public:
+        text = f.read_text()
+        for bad in ("\u00b1300", "±300", "&plusmn;300", "+/-300 m;"):
+            assert bad not in text, (f.name, bad)
